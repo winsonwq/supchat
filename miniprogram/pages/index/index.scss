@@ -1,0 +1,174 @@
+/**index.scss**/
+page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+}
+
+/* 聊天滚动区域 */
+.chat-scroll-view {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* 消息卡片基础样式 */
+.message-card {
+  margin-bottom: 8rpx;
+  margin-left: 20rpx;
+  margin-right: 20rpx;
+}
+
+/* 用户卡片样式 */
+.user-card {
+  background: white;
+  color: #333;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+/* AI卡片样式 */
+.ai-card {
+  color: #333;
+}
+
+/* 卡片头部 */
+.card-header {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 20rpx 8rpx 20rpx;
+}
+
+.card-title {
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #666;
+}
+
+/* 卡片内容 */
+.card-content {
+  padding: 16rpx 20rpx 20rpx 20rpx;
+}
+
+.card-text {
+  font-size: 28rpx;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* 欢迎卡片 */
+.welcome-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  max-width: 80%;
+}
+
+.welcome-text {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 加载动画 */
+.loading-dot {
+  animation: loading 1.4s infinite ease-in-out;
+}
+
+.loading-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes loading {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 输入区域 */
+.input-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1rpx solid #e5e7eb;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  /* iOS安全区域适配 */
+  padding-bottom: env(safe-area-inset-bottom);
+  /* 兼容不支持env()的设备 */
+  padding-bottom: 34rpx;
+}
+
+/* 输入框样式 */
+.message-textarea {
+  transition: all 0.3s ease;
+  resize: none;
+  line-height: 1.5;
+  word-wrap: break-word;
+  overflow-y: auto;
+}
+
+.message-textarea:focus {
+  border-color: #667eea;
+  background: white;
+}
+
+/* 输入框占位符样式 */
+.message-textarea::placeholder {
+  color: #999;
+  line-height: 1.5;
+}
+
+/* 发送按钮 */
+.send-button {
+  background: #e0e0e0;
+  color: #999;
+  transition: all 0.3s ease;
+}
+
+.send-button-active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+}
+
+/* 底部操作按钮 */
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 8rpx;
+  min-width: 80rpx;
+  transition: all 0.3s ease;
+}
+
+.action-btn:active {
+  opacity: 0.7;
+}
+
+.action-icon {
+  font-size: 24rpx;
+  margin-bottom: 4rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.action-text {
+  font-size: 20rpx;
+  color: #666;
+}

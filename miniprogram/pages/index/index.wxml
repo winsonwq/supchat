@@ -1,0 +1,99 @@
+<!--index.wxml-->
+<navigation-bar
+  title="AI助手"
+  back="{{ false }}"
+  color="black"
+  background="#FFF"
+>
+  <view slot="right" class="flex items-center">
+    <button
+      class="bg-transparent border-none p-2 mr-5"
+      bindtap="clearChat"
+      wx:if="{{ messages.length > 0 }}"
+    >
+      <text class="text-2xl">清空</text>
+    </button>
+  </view>
+</navigation-bar>
+
+<!-- 聊天历史区域 -->
+<scroll-view
+  class="chat-scroll-view"
+  scroll-y="true"
+  scroll-into-view="{{ scrollToMessage }}"
+  scroll-with-animation="true"
+  enhanced="true"
+  show-scrollbar="false"
+>
+  <view class="flex flex-col gap-4 p-4 pb-60">
+    <!-- 欢迎消息 -->
+    <view wx:if="{{ messages.length === 0 }}" class="flex justify-center py-10">
+      <view class="p-10 rounded-2xl text-center shadow-lg welcome-card">
+        <text class="block text-lg font-bold text-white mb-5"
+          >欢迎使用AI助手</text
+        >
+        <text class="block text-sm leading-normal welcome-text"
+          >我是你的AI助手，有什么可以帮助你的吗？</text
+        >
+      </view>
+    </view>
+
+    <!-- 消息列表 -->
+    <view
+      wx:for="{{ messages }}"
+      wx:key="index"
+      id="message-{{ index }}"
+      class="message-card {{ item.role === 'user' ? 'user-card' : 'ai-card' }}"
+    >
+      <!-- 卡片头部 -->
+      <view class="card-header">
+        <text class="card-title">{{ item.role === 'user' ? '用户' : 'AI助手' }}</text>
+      </view>
+      <!-- 卡片内容 -->
+      <view class="card-content">
+        <text class="card-text">{{ item.content }}</text>
+      </view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view wx:if="{{ isLoading }}" class="message-card ai-card">
+      <view class="card-header">
+        <text class="card-title">AI助手</text>
+      </view>
+      <view class="card-content">
+        <view class="flex gap-2 items-center loading-dots">
+          <view class="w-3 h-3 rounded-full bg-gray-400 loading-dot"></view>
+          <view class="w-3 h-3 rounded-full bg-gray-400 loading-dot"></view>
+          <view class="w-3 h-3 rounded-full bg-gray-400 loading-dot"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+</scroll-view>
+
+<!-- 输入区域 -->
+<view class="input-container">
+  <!-- 输入框和发送按钮 -->
+  <view class="flex items-end gap-3 p-4">
+    <textarea
+      class="flex-1 min-h-14 max-h-28 px-4 py-3 border-2 border-gray-200 rounded-2xl text-sm bg-gray-50 message-textarea"
+      placeholder="输入消息..."
+      value="{{ inputMessage }}"
+      bindinput="onInputChange"
+      bindconfirm="sendMessage"
+      confirm-type="send"
+      disabled="{{ isLoading }}"
+      auto-height="true"
+      maxlength="1000"
+      show-confirm-bar="false"
+      cursor-spacing="20"
+    />
+    <button
+      class="w-16 h-16 rounded-full text-sm border-none send-button {{ inputMessage.trim() ? 'send-button-active' : '' }} flex-shrink-0"
+      bindtap="sendMessage"
+      disabled="{{ !inputMessage.trim() || isLoading }}"
+    >
+      发送
+    </button>
+  </view>
+</view>
