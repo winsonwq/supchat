@@ -1,123 +1,38 @@
 // markdown.ts
 
 /**
- * 将Markdown文本转换为富文本格式
- * @param markdown Markdown文本
- * @returns 富文本节点数组
- */
-export function parseMarkdown(markdown: string): any[] {
-  if (!markdown) return []
-  
-  const nodes: any[] = []
-  const lines = markdown.split('\n')
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]
-    
-    // 空行
-    if (!line.trim()) {
-      nodes.push({
-        type: 'text',
-        text: '\n'
-      })
-      continue
-    }
-    
-    // 标题
-    if (line.match(/^#{1,6}\s/)) {
-      const level = line.match(/^(#{1,6})\s/)?.[1]?.length || 1
-      const text = line.replace(/^#{1,6}\s/, '')
-      nodes.push({
-        type: 'heading',
-        level,
-        text: text.trim()
-      })
-      continue
-    }
-    
-    // 代码块
-    if (line.startsWith('```')) {
-      const language = line.replace('```', '').trim()
-      const codeLines: string[] = []
-      i++
-      while (i < lines.length && !lines[i].startsWith('```')) {
-        codeLines.push(lines[i])
-        i++
-      }
-      nodes.push({
-        type: 'code-block',
-        language,
-        code: codeLines.join('\n')
-      })
-      continue
-    }
-    
-    // 引用
-    if (line.startsWith('> ')) {
-      const text = line.replace('> ', '')
-      nodes.push({
-        type: 'quote',
-        text: text.trim()
-      })
-      continue
-    }
-    
-    // 无序列表
-    if (line.match(/^[-*+]\s/)) {
-      const text = line.replace(/^[-*+]\s/, '')
-      nodes.push({
-        type: 'list-item',
-        ordered: false,
-        text: text.trim()
-      })
-      continue
-    }
-    
-    // 有序列表
-    if (line.match(/^\d+\.\s/)) {
-      const text = line.replace(/^\d+\.\s/, '')
-      nodes.push({
-        type: 'list-item',
-        ordered: true,
-        text: text.trim()
-      })
-      continue
-    }
-    
-    // 分割线
-    if (line.match(/^[-*_]{3,}$/)) {
-      nodes.push({
-        type: 'hr'
-      })
-      continue
-    }
-    
-    // 普通文本（处理行内格式）
-    const processedText = processInlineFormatting(line)
-    nodes.push({
-      type: 'text',
-      text: processedText
-    })
-  }
-  
-  return nodes
-}
-
-/**
- * 处理行内格式（粗体、斜体、代码、链接等）
- * @param text 文本内容
+ * 简单的 Markdown 文本处理
+ * @param markdown Markdown 文本
  * @returns 处理后的文本
  */
-function processInlineFormatting(text: string): string {
-  // 这里可以添加行内格式处理逻辑
-  // 由于小程序富文本组件限制，暂时返回原文本
-  return text
+export function parseMarkdown(markdown: string): string {
+  if (!markdown) {
+    return ''
+  }
+  
+  // 简单的 Markdown 处理，转换为纯文本
+  // 移除 Markdown 语法标记
+  let text = markdown
+    .replace(/#{1,6}\s+/g, '') // 移除标题标记
+    .replace(/\*\*(.*?)\*\*/g, '$1') // 移除粗体标记
+    .replace(/\*(.*?)\*/g, '$1') // 移除斜体标记
+    .replace(/`(.*?)`/g, '$1') // 移除行内代码标记
+    .replace(/```[\s\S]*?```/g, '') // 移除代码块
+    .replace(/\[.*?\]\(.*?\)/g, '') // 移除链接
+    .replace(/!\[.*?\]\(.*?\)/g, '') // 移除图片
+    .replace(/^[-*+]\s+/gm, '') // 移除列表标记
+    .replace(/^\d+\.\s+/gm, '') // 移除有序列表标记
+    .replace(/^>\s+/gm, '') // 移除引用标记
+    .replace(/^\|.*\|$/gm, '') // 移除表格
+    .replace(/^[-*_]{3,}$/gm, '') // 移除分割线
+  
+  return text.trim()
 }
 
 /**
- * 检查文本是否包含Markdown语法
+ * 检查文本是否包含 Markdown 语法
  * @param text 文本内容
- * @returns 是否包含Markdown语法
+ * @returns 是否包含 Markdown 语法
  */
 export function hasMarkdown(text: string): boolean {
   if (!text) return false
@@ -138,33 +53,4 @@ export function hasMarkdown(text: string): boolean {
   ]
   
   return markdownPatterns.some(pattern => pattern.test(text))
-}
-
-/**
- * 将Markdown节点转换为富文本格式
- * @param nodes Markdown节点数组
- * @returns 富文本格式字符串
- */
-export function nodesToRichText(nodes: any[]): string {
-  return nodes.map(node => {
-    switch (node.type) {
-      case 'heading':
-        return `<view class="markdown-h${node.level}">${node.text}</view>`
-      case 'code-block':
-        return `<view class="code-block">
-          <view class="code-header">${node.language || 'code'}</view>
-          <view class="code-content">${node.code}</view>
-        </view>`
-      case 'quote':
-        return `<view class="markdown-quote">${node.text}</view>`
-      case 'list-item':
-        const listType = node.ordered ? 'ol' : 'ul'
-        return `<view class="markdown-${listType}-item">${node.text}</view>`
-      case 'hr':
-        return `<view class="markdown-hr"></view>`
-      case 'text':
-      default:
-        return node.text
-    }
-  }).join('\n')
 }

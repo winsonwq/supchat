@@ -58,6 +58,67 @@ page {
   word-wrap: break-word;
 }
 
+/* Markdown 内容样式 */
+.markdown-content {
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+
+
+/* 代码块样式 */
+.markdown-content .code-block {
+  background: #f6f8fa;
+  border: 1rpx solid #e1e4e8;
+  border-radius: 8rpx;
+  margin: 12rpx 0;
+  overflow: hidden;
+}
+
+.markdown-content .code-header {
+  background: #f1f3f4;
+  padding: 8rpx 12rpx;
+  font-size: 22rpx;
+  color: #666;
+  border-bottom: 1rpx solid #e1e4e8;
+}
+
+.markdown-content .code-content {
+  padding: 12rpx;
+  font-size: 24rpx;
+  color: #24292e;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+/* 引用样式 */
+.markdown-content .quote {
+  border-left: 4rpx solid #dfe2e5;
+  padding-left: 16rpx;
+  margin: 12rpx 0;
+  color: #6a737d;
+  font-style: italic;
+}
+
+/* 列表样式 */
+.markdown-content .list {
+  margin: 8rpx 0;
+  padding-left: 20rpx;
+}
+
+.markdown-content .list-item {
+  margin: 4rpx 0;
+}
+
+/* 分割线样式 */
+.markdown-content .hr {
+  height: 1rpx;
+  background: #e1e4e8;
+  margin: 16rpx 0;
+  border: none;
+}
+
 /* 欢迎卡片 */
 .welcome-card {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

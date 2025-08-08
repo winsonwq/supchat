@@ -51,7 +51,10 @@
       </view>
       <!-- 卡片内容 -->
       <view class="card-content">
-        <text class="card-text">{{ item.content }}</text>
+        <!-- 使用 towxml 渲染 Markdown 内容 -->
+        <towxml wx:if="{{ item.towxmlNodes }}" nodes="{{ item.towxmlNodes }}" />
+        <!-- 如果没有 towxml 节点，显示原始文本 -->
+        <text wx:else class="card-text">{{ item.content }}</text>
       </view>
     </view>
 

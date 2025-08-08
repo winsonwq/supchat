@@ -1,0 +1,65 @@
+# 微信小程序项目 .gitignore
+
+# 依赖包
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 微信开发者工具生成的文件
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 微信小程序特有文件
+miniprogram_npm/
+node_modules/
+
+# 编译输出
+dist/
+build/
+
+# 日志文件
+logs/
+*.log
+
+# 运行时数据
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# 覆盖率目录
+coverage/
+.nyc_output/
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 操作系统生成的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.temp
+
+# 微信开发者工具项目配置（可选，根据团队需求决定）
+# project.private.config.json
+
+# 其他
+*.tgz
+*.tar.gz
+
+miniprogram/towxml

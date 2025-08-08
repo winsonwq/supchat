@@ -1,6 +1,7 @@
 // app.ts
 App<IAppOption>({
   globalData: {},
+  towxml: require('/towxml/index'),
   onLaunch() {
     // 展示本地存储能力
     const logs = wx.getStorageSync('logs') || []

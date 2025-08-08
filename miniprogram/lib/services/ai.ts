@@ -4,6 +4,7 @@ import { API_CONFIG } from '../config/api'
 export interface Message {
   role: 'user' | 'assistant' | 'system'
   content: string
+  towxmlNodes?: any  // 存储 towxml 解析后的节点
 }
 
 // AI服务类
