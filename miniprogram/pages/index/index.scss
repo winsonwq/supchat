@@ -4,6 +4,7 @@ page {
   display: flex;
   flex-direction: column;
   background-color: #f5f5f5;
+  overflow: hidden;
 }
 
 /* 聊天滚动区域 */
@@ -31,6 +32,46 @@ page {
 /* AI卡片样式 */
 .ai-card {
   color: #333;
+}
+
+/* 工具卡片样式 */
+.tool-card {
+  background: #f0f8ff;
+  color: #333;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  border-left: 4rpx solid #3b82f6;
+}
+
+/* 工具调用信息样式 */
+.tool-calls-info {
+  padding: 12rpx 20rpx 8rpx 20rpx;
+  background: rgba(59, 130, 246, 0.1);
+  border-bottom: 1rpx solid rgba(59, 130, 246, 0.2);
+}
+
+.tool-calls-header {
+  margin-bottom: 8rpx;
+}
+
+.tool-call-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8rpx;
+  padding: 8rpx 12rpx;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8rpx;
+  border: 1rpx solid rgba(59, 130, 246, 0.2);
+}
+
+.tool-call-name {
+  margin-bottom: 4rpx;
+}
+
+.tool-call-args {
+  word-break: break-all;
+  line-height: 1.4;
 }
 
 /* 卡片头部 */

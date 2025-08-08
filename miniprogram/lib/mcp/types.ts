@@ -1,0 +1,130 @@
+// MCP Tools 类型定义
+
+// 工具基础配置接口
+export interface ToolBaseConfig {
+  name: string
+  description: string
+  inputSchema: Record<string, unknown>
+  chineseName?: string
+  annotations?: Record<string, unknown>
+  needUserConfirm?: boolean
+  handler: (args: Record<string, unknown>) => Promise<ToolCallResult>
+}
+
+// OpenRouter 工具格式
+export interface OpenRouterTool {
+  type: 'function'
+  function: {
+    name: string
+    description: string
+    parameters: Record<string, unknown>
+  }
+}
+
+// 工具调用结果
+export interface ToolCallResult {
+  success: boolean
+  data?: unknown
+  error?: string
+}
+
+// 工具调用请求
+export interface ToolCallRequest {
+  name: string
+  arguments: Record<string, unknown>
+}
+
+// 工具调用对象
+export interface ToolCall {
+  id: string
+  type: 'function'
+  function: {
+    name: string
+    arguments: string
+  }
+}
+
+// 工具调用增量
+export interface ToolCallDelta {
+  index?: number
+  id?: string
+  function?: {
+    name?: string
+    arguments?: string
+  }
+}
+
+// 工具调用响应
+export interface ToolCallResponse {
+  tool_calls?: ToolCall[]
+}
+
+// AI响应选择
+export interface AIChoice {
+  delta?: {
+    content?: string
+    tool_calls?: ToolCallDelta[]
+  }
+  message?: {
+    content?: string
+    tool_calls?: ToolCall[]
+  }
+}
+
+// AI响应
+export interface AIResponse {
+  choices?: AIChoice[]
+}
+
+// 工具调用响应消息
+export interface ToolResponseMessage {
+  tool_call_id: string
+  role: 'tool'
+  content: string
+}
+
+// HTTP请求响应
+export interface HttpResponse {
+  statusCode: number
+  data: string | AIResponse
+  errMsg?: string
+}
+
+// 微信请求任务
+export interface WxRequestTask {
+  abort(): void
+}
+
+// Towxml节点类型
+export interface TowxmlNode {
+  tag?: string
+  attr?: Record<string, string>
+  children?: TowxmlNode[]
+  text?: string
+  [key: string]: unknown
+}
+
+// 事件对象
+export interface WxEvent {
+  detail: {
+    value?: string
+    [key: string]: unknown
+  }
+  [key: string]: unknown
+}
+
+// 工具调用信息
+export interface ToolCallInfo {
+  name: string
+  arguments: Record<string, unknown>
+  result: ToolCallResult
+  success: boolean
+  error?: string
+}
+
+// 解析后的工具调用消息
+export interface ParsedToolCallMessage {
+  toolName: string
+  result?: unknown
+  error?: string
+}

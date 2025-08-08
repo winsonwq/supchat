@@ -1,5 +1,7 @@
 // index.ts
-import { AIService, Message, StreamCallback } from '../../lib/services/ai'
+import { AIService, Message, StreamCallback } from '../../lib/services/ai.js'
+import { isToolCallMessage } from '../../lib/utils/util.js'
+import { ToolCall, TowxmlNode, WxEvent } from '../../lib/mcp/types.js'
 const app = getApp()
 
 Component({
@@ -48,14 +50,14 @@ Component({
     },
 
     // 处理消息内容，使用 towxml 解析 Markdown
-    processMessageContent(content: string) {
-      if (!content) return null
+    processMessageContent(content: string): TowxmlNode | undefined {
+      if (!content) return undefined
 
       try {
         // 使用 towxml 解析 Markdown 内容
         const towxmlNodes = app.towxml(content, 'markdown', {
           events: {
-            tap: (e: any) => {
+            tap: (e: WxEvent) => {
               console.log('tap', e)
             },
           },
@@ -69,9 +71,9 @@ Component({
     },
 
     // 输入框变化
-    onInputChange(e: any) {
+    onInputChange(e: WxEvent) {
       this.setData({
-        inputMessage: e.detail.value,
+        inputMessage: e.detail.value || '',
       })
     },
 
@@ -101,7 +103,7 @@ Component({
         const assistantMessage: Message = {
           role: 'assistant',
           content: '',
-          towxmlNodes: null,
+          towxmlNodes: undefined,
         }
 
         const newMessages = [
@@ -120,28 +122,30 @@ Component({
         const onStream: StreamCallback = (
           content: string,
           isComplete: boolean,
+          toolCalls?: ToolCall[]
         ) => {
-          // 更新助手消息内容
-          const updatedMessages = [...this.data.messages]
-          const lastMessageIndex = updatedMessages.length - 1
-
-          if (
-            updatedMessages[lastMessageIndex] &&
-            updatedMessages[lastMessageIndex].role === 'assistant'
-          ) {
-            updatedMessages[lastMessageIndex] = {
-              ...updatedMessages[lastMessageIndex],
+          // 检查是否是工具调用消息（通过内容前缀判断）
+          const isToolMessage = this.isToolCallMessage(content)
+          
+          if (isToolMessage) {
+            // 添加工具调用消息作为独立消息
+            const toolMessage: Message = {
+              role: 'tool',
               content: content,
               towxmlNodes: this.processMessageContent(content),
             }
 
+            const updatedMessages = [...this.data.messages, toolMessage]
             this.setData({
               messages: updatedMessages,
             })
-
-            // 实时滚动到最新消息
-            this.scrollToLatestMessage()
+          } else {
+            // 更新助手消息内容
+            this.updateAssistantMessage(content, toolCalls)
           }
+
+          // 实时滚动到最新消息
+          this.scrollToLatestMessage()
 
           // 如果流式响应完成
           if (isComplete) {
@@ -149,6 +153,9 @@ Component({
               isLoading: false,
               isStreaming: false,
             })
+            
+            // 重新加载消息历史以确保所有消息正确显示
+            this.loadMessageHistory()
           }
         }
 
@@ -164,6 +171,33 @@ Component({
         this.setData({
           isLoading: false,
           isStreaming: false,
+        })
+      }
+    },
+
+    // 判断是否为工具调用消息
+    isToolCallMessage(content: string): boolean {
+      return isToolCallMessage(content)
+    },
+
+    // 更新助手消息内容
+    updateAssistantMessage(content: string, toolCalls?: ToolCall[]) {
+      const updatedMessages = [...this.data.messages]
+      const lastMessageIndex = updatedMessages.length - 1
+
+      if (
+        updatedMessages[lastMessageIndex] &&
+        updatedMessages[lastMessageIndex].role === 'assistant'
+      ) {
+        updatedMessages[lastMessageIndex] = {
+          ...updatedMessages[lastMessageIndex],
+          content: content,
+          towxmlNodes: this.processMessageContent(content),
+          tool_calls: toolCalls
+        }
+
+        this.setData({
+          messages: updatedMessages,
         })
       }
     },
@@ -207,7 +241,7 @@ Component({
     },
 
     // 查找最新用户消息的索引
-    findLatestUserMessageIndex() {
+    findLatestUserMessageIndex(): number {
       for (let i = this.data.messages.length - 1; i >= 0; i--) {
         if (this.data.messages[i].role === 'user') {
           return i
@@ -234,6 +268,46 @@ Component({
             })
           }
         },
+      })
+    },
+
+    // 测试工具调用
+    testToolCall() {
+      const testMessage = "请帮我打开相册选择一张照片"
+      this.setData({
+        inputMessage: testMessage
+      })
+      this.sendMessage()
+    },
+
+    // 测试天气查询
+    testWeatherQuery() {
+      const testMessage = "请帮我查询北京的天气"
+      this.setData({
+        inputMessage: testMessage
+      })
+      this.sendMessage()
+    },
+
+    // 测试工具调用消息显示
+    testToolMessageDisplay() {
+      // 模拟添加工具调用消息
+      const toolMessage: Message = {
+        role: 'tool',
+        content: '执行工具: openPhoto\n结果: {"success": true, "tempFiles": [{"tempFilePath": "test.jpg"}]}',
+        towxmlNodes: this.processMessageContent('执行工具: openPhoto\n结果: {"success": true, "tempFiles": [{"tempFilePath": "test.jpg"}]}'),
+      }
+
+      const updatedMessages = [...this.data.messages, toolMessage]
+      this.setData({
+        messages: updatedMessages,
+      })
+
+      this.scrollToLatestMessage()
+      
+      wx.showToast({
+        title: '已添加测试工具消息',
+        icon: 'success',
       })
     },
   },

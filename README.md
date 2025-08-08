@@ -1,137 +1,183 @@
-# SupChat - AI 助手小程序
+# SupChat - 智能AI助手小程序
 
-一个基于微信小程序的 AI 助手应用，支持流式响应和 Markdown 渲染。
+一个基于微信小程序的智能AI助手，支持MCP（Model Context Protocol）工具调用功能。
 
 ## 功能特性
 
-- 🤖 AI 对话：基于 OpenRouter API 的智能对话
-- 📝 流式响应：实时显示 AI 回复，提供更好的用户体验
-- 📄 Markdown 支持：使用 towxml 渲染 Markdown 内容
-- 💬 聊天历史：保存和管理对话记录
-- 🎨 现代化 UI：美观的界面设计
-- 📱 微信小程序：原生小程序体验
+- 🤖 智能AI对话
+- 🔧 MCP工具调用支持
+- 📱 微信小程序原生体验
+- 📸 照片选择工具
+- 🌤️ 天气查询工具
+- 🔄 流式响应
+- 📝 Markdown渲染
 
-## 流式响应实现
+## MCP工具调用功能
 
-### 技术方案
+### 什么是MCP工具调用？
 
-由于微信小程序的限制，我们采用了以下技术方案来实现流式响应：
+MCP（Model Context Protocol）工具调用允许AI助手在对话过程中自动调用各种工具来完成任务，比如：
+- 打开相册选择照片
+- 查询天气信息
+- 执行文件操作
+- 调用外部API
 
-1. **主要方案**：尝试使用 `wx.request` 发送流式请求到 OpenRouter API
-2. **回退方案**：如果流式请求失败，自动回退到非流式模式并模拟流式效果
-3. **用户体验**：提供流畅的打字机效果和实时滚动
+### 当前支持的工具
+
+1. **照片选择工具** (`openPhoto`)
+   - 功能：打开相册或相机选择照片
+   - 参数：
+     - `sourceType`: 'album' | 'camera' (图片来源)
+     - `count`: 最多选择的图片张数 (1-9)
+     - `sizeType`: 'original' | 'compressed' (图片尺寸)
+
+2. **天气查询工具** (`getWeather`)
+   - 功能：获取指定城市的天气信息
+   - 参数：
+     - `city`: 城市名称
+     - `date`: 查询日期 (可选，默认为今天)
+
+### 如何使用
+
+1. **直接对话**：在聊天中输入自然语言，AI会自动判断是否需要调用工具
+   ```
+   用户：请帮我打开相册选择一张照片
+   AI：好的，我来帮您打开相册选择照片
+   [自动调用 openPhoto 工具]
+   ```
+
+2. **测试工具调用**：在欢迎页面点击"测试工具调用"按钮
+
+### 工具调用流程
+
+1. **AI分析**：AI分析用户请求，判断是否需要调用工具
+2. **工具调用**：如果需要，AI会自动调用相应的工具
+3. **用户确认**：某些工具（如照片选择）需要用户确认
+4. **执行操作**：工具执行具体操作
+5. **返回结果**：工具执行结果返回给AI
+6. **最终回复**：AI根据工具执行结果给出最终回复
+
+### 开发新工具
+
+要添加新的MCP工具，请按以下步骤：
+
+1. 在 `miniprogram/lib/mcp/tools/` 目录下创建新的工具文件
+2. 定义工具配置：
+
+```typescript
+import { ToolBaseConfig } from '../types.js'
+
+// 工具参数定义
+const myToolInputSchema = {
+  type: 'object',
+  properties: {
+    param1: {
+      type: 'string',
+      description: '参数描述'
+    }
+  },
+  required: ['param1']
+}
+
+// 工具处理函数
+async function myToolHandler(args: any): Promise<any> {
+  // 实现工具逻辑
+  return {
+    success: true,
+    data: { /* 结果数据 */ }
+  }
+}
+
+// 工具配置
+export const myTool: ToolBaseConfig = {
+  name: 'myTool',
+  description: '工具描述',
+  inputSchema: myToolInputSchema,
+  chineseName: '中文名称',
+  needUserConfirm: false, // 是否需要用户确认
+  handler: myToolHandler
+}
+```
+
+3. 在 `miniprogram/lib/mcp/tools/index.ts` 中注册工具：
+
+```typescript
+export { myTool } from './myTool.js'
+
+export const allTools: ToolBaseConfig[] = [
+  // ... 其他工具
+  myTool,
+]
+```
+
+## 技术架构
 
 ### 核心组件
 
-- `AIService.sendMessageStream()`: 流式消息发送
-- `StreamCallback`: 流式响应回调接口
-- 页面组件中的流式状态管理
+- **AIService**: AI服务管理，处理流式响应和工具调用
+- **MCP模块**: 工具调用协议实现
+- **工具系统**: 可扩展的工具框架
 
-### 视觉反馈
+### 文件结构
 
-- 流式响应指示器：显示"正在思考..."状态
-- 流式输入光标：模拟打字机效果
-- 取消按钮：允许用户中断当前请求
-- 实时滚动：自动滚动到最新消息
-
-## 安装和配置
-
-### 1. 克隆项目
-
-```bash
-git clone <repository-url>
-cd supchat
+```
+miniprogram/
+├── lib/
+│   ├── services/
+│   │   └── ai.ts              # AI服务核心
+│   └── mcp/
+│       ├── index.ts           # MCP模块入口
+│       ├── utils.ts           # 工具调用工具函数
+│       ├── types.ts           # 类型定义
+│       └── tools/
+│           ├── index.ts       # 工具注册
+│           ├── photo.ts       # 照片选择工具
+│           └── weather.ts     # 天气查询工具
+└── pages/
+    └── index/                 # 主页面
 ```
 
-### 2. 安装依赖
+## 开发环境
+
+### 环境要求
+
+- 微信开发者工具
+- Node.js 16+
+- TypeScript
+
+### 安装依赖
 
 ```bash
 npm install
 ```
 
-### 3. 配置 API
+### 开发调试
 
-编辑 `miniprogram/lib/config/api.ts` 文件，配置你的 OpenRouter API 密钥：
+1. 打开微信开发者工具
+2. 导入项目
+3. 配置API密钥（在 `miniprogram/lib/config/api.ts` 中）
+4. 开始开发
+
+## API配置
+
+在 `miniprogram/lib/config/api.ts` 中配置您的API密钥：
 
 ```typescript
 export const API_CONFIG = {
   OPENROUTER: {
     HOST: 'https://openrouter.ai/api/v1',
     API_KEY: 'your-api-key-here',
-    MODEL: 'google/gemini-2.5-flash-lite'
+    MODEL: 'anthropic/claude-3.5-sonnet'
   }
 }
 ```
 
-### 4. 在微信开发者工具中打开项目
-
-1. 打开微信开发者工具
-2. 选择"导入项目"
-3. 选择项目目录
-4. 填入你的小程序 AppID
-
-## 使用说明
-
-### 发送消息
-
-1. 在输入框中输入你的问题
-2. 点击"发送"按钮或按回车键
-3. AI 将以流式方式回复，你可以看到实时的打字效果
-
-### 取消请求
-
-- 在 AI 回复过程中，点击"取消"按钮可以中断当前请求
-
-### 清空聊天
-
-- 点击右上角的"清空"按钮可以清除所有聊天记录
-
-## 技术架构
-
-```
-miniprogram/
-├── lib/
-│   ├── config/
-│   │   └── api.ts          # API 配置
-│   ├── services/
-│   │   ├── ai.ts           # AI 服务（流式响应核心）
-│   │   └── http.ts         # HTTP 工具
-│   └── utils/
-│       ├── markdown.ts     # Markdown 处理
-│       └── util.ts         # 工具函数
-├── pages/
-│   └── index/              # 主页面
-│       ├── index.ts        # 页面逻辑
-│       ├── index.wxml      # 页面模板
-│       └── index.scss      # 页面样式
-└── components/
-    └── navigation-bar/     # 导航栏组件
-```
-
-## 流式响应工作原理
-
-1. **请求发送**：使用 `wx.request` 发送 `stream: true` 的请求
-2. **响应处理**：解析 SSE (Server-Sent Events) 格式的响应数据
-3. **实时更新**：通过回调函数实时更新界面内容
-4. **回退机制**：如果流式请求失败，自动切换到模拟流式模式
-
 ## 注意事项
 
-- 确保你的 OpenRouter API 密钥有效且有足够的配额
-- 流式响应需要网络连接稳定
-- 微信小程序对某些网络请求有限制，可能需要配置域名白名单
-
-## 开发计划
-
-- [ ] 支持更多 AI 模型
-- [ ] 添加语音输入功能
-- [ ] 支持图片上传和识别
-- [ ] 添加对话导出功能
-- [ ] 优化流式响应性能
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
+1. **用户确认**：某些工具（如照片选择）需要用户确认才能执行
+2. **错误处理**：工具调用失败时会显示错误信息
+3. **流式响应**：支持实时显示AI回复和工具调用过程
+4. **网络请求**：确保网络连接正常，工具调用需要网络支持
 
 ## 许可证
 

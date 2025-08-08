@@ -1,3 +1,5 @@
+import { ToolCallResult, ParsedToolCallMessage } from '../mcp/types.js'
+
 export const formatTime = (date: Date) => {
   const year = date.getFullYear()
   const month = date.getMonth() + 1
@@ -16,4 +18,43 @@ export const formatTime = (date: Date) => {
 const formatNumber = (n: number) => {
   const s = n.toString()
   return s[1] ? s : '0' + s
+}
+
+// 工具调用消息格式化函数
+export function formatToolCallMessage(toolName: string, result: ToolCallResult): string {
+  const resultStr = JSON.stringify(result.data, null, 2)
+  return `执行工具: ${toolName}\n结果: ${resultStr}`
+}
+
+// 工具调用错误消息格式化函数
+export function formatToolCallErrorMessage(toolName: string, error: string): string {
+  return `工具调用失败: ${toolName}\n错误: ${error}`
+}
+
+// 解析工具调用消息
+export function parseToolCallMessage(content: string): ParsedToolCallMessage | null {
+  if (content.startsWith('执行工具:')) {
+    const lines = content.split('\n')
+    const toolName = lines[0].replace('执行工具:', '').trim()
+    const resultStr = lines.slice(1).join('\n').replace('结果:', '').trim()
+    
+    try {
+      const result = JSON.parse(resultStr)
+      return { toolName, result }
+    } catch {
+      return { toolName, result: resultStr }
+    }
+  } else if (content.startsWith('工具调用失败:')) {
+    const lines = content.split('\n')
+    const toolName = lines[0].replace('工具调用失败:', '').trim()
+    const error = lines[1].replace('错误:', '').trim()
+    return { toolName, error }
+  }
+  
+  return null
+}
+
+// 判断是否为工具调用消息
+export function isToolCallMessage(content: string): boolean {
+  return content.startsWith('执行工具:') || content.startsWith('工具调用失败:')
 }

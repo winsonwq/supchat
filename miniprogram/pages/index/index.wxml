@@ -5,15 +5,6 @@
   color="black"
   background="#FFF"
 >
-  <view slot="right" class="flex items-center">
-    <button
-      class="bg-transparent border-none p-2 mr-5"
-      bindtap="clearChat"
-      wx:if="{{ messages.length > 0 }}"
-    >
-      <text class="text-2xl">清空</text>
-    </button>
-  </view>
 </navigation-bar>
 
 <!-- 聊天历史区域 -->
@@ -35,6 +26,27 @@
         <text class="block text-sm leading-normal welcome-text"
           >我是你的AI助手，有什么可以帮助你的吗？</text
         >
+        <!-- 测试工具调用按钮 -->
+        <view class="mt-4 flex flex-col gap-2">
+          <button 
+            class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm"
+            bindtap="testToolCall"
+          >
+            测试照片选择
+          </button>
+          <button 
+            class="px-4 py-2 bg-green-500 text-white rounded-lg text-sm"
+            bindtap="testWeatherQuery"
+          >
+            测试天气查询
+          </button>
+          <button 
+            class="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm"
+            bindtap="testToolMessageDisplay"
+          >
+            测试工具消息显示
+          </button>
+        </view>
       </view>
     </view>
 
@@ -43,11 +55,13 @@
       wx:for="{{ messages }}"
       wx:key="index"
       id="message-{{ index }}"
-      class="message-card {{ item.role === 'user' ? 'user-card' : 'ai-card' }}"
+      class="message-card {{ item.role === 'user' ? 'user-card' : item.role === 'tool' ? 'tool-card' : 'ai-card' }}"
     >
       <!-- 卡片头部 -->
       <view class="card-header">
-        <text class="card-title">{{ item.role === 'user' ? '用户' : 'AI助手' }}</text>
+        <text class="card-title">
+          {{ item.role === 'user' ? '用户' : item.role === 'tool' ? '工具' : 'AI助手' }}
+        </text>
         <!-- 流式响应指示器 -->
         <view wx:if="{{ item.role === 'assistant' && isStreaming && index === messages.length - 1 && !item.content }}" class="streaming-indicator">
           <view class="flex gap-1 items-center">
@@ -58,6 +72,22 @@
           </view>
         </view>
       </view>
+      
+      <!-- 工具调用信息 -->
+      <view wx:if="{{ item.tool_calls && item.tool_calls.length > 0 }}" class="tool-calls-info">
+        <view class="tool-calls-header">
+          <text class="text-sm font-medium text-blue-600">正在调用工具:</text>
+        </view>
+        <view wx:for="{{ item.tool_calls }}" wx:key="id" wx:for-item="toolCall" class="tool-call-item">
+          <view class="tool-call-name">
+            <text class="text-xs font-medium text-gray-700">{{ toolCall.function.name }}</text>
+          </view>
+          <view class="tool-call-args">
+            <text class="text-xs text-gray-500">参数: {{ toolCall.function.arguments }}</text>
+          </view>
+        </view>
+      </view>
+      
       <!-- 卡片内容 -->
       <view class="card-content">
         <!-- 使用 towxml 渲染 Markdown 内容 -->
