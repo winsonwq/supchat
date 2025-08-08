@@ -37,6 +37,7 @@ page {
 .card-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 12rpx 20rpx 8rpx 20rpx;
 }
 
@@ -44,6 +45,54 @@ page {
   font-size: 24rpx;
   font-weight: 500;
   color: #666;
+}
+
+/* 流式响应指示器 */
+.streaming-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.streaming-dot {
+  animation: streaming-pulse 1.5s infinite ease-in-out;
+}
+
+.streaming-dot:nth-child(1) {
+  animation-delay: -0.3s;
+}
+
+.streaming-dot:nth-child(2) {
+  animation-delay: -0.15s;
+}
+
+.streaming-dot:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes streaming-pulse {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 流式输入光标 */
+.streaming-cursor {
+  display: inline-block;
+  animation: cursor-blink 1s infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
 }
 
 /* 卡片内容 */
@@ -63,8 +112,6 @@ page {
   font-size: 28rpx;
   line-height: 1.6;
 }
-
-
 
 /* 代码块样式 */
 .markdown-content .code-block {
@@ -203,6 +250,18 @@ page {
 
 .send-button:disabled {
   opacity: 0.5;
+}
+
+/* 取消按钮 */
+.cancel-button {
+  background: #ff4757;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.cancel-button:active {
+  background: #ff3742;
+  transform: scale(0.95);
 }
 
 /* 底部操作按钮 */

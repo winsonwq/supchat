@@ -25,7 +25,7 @@
   enhanced="true"
   show-scrollbar="false"
 >
-  <view class="flex flex-col gap-4 p-4 pb-60">
+  <view class="flex flex-col gap-4 p-4" style="padding-bottom: 100px">
     <!-- 欢迎消息 -->
     <view wx:if="{{ messages.length === 0 }}" class="flex justify-center py-10">
       <view class="p-10 rounded-2xl text-center shadow-lg welcome-card">
@@ -48,6 +48,15 @@
       <!-- 卡片头部 -->
       <view class="card-header">
         <text class="card-title">{{ item.role === 'user' ? '用户' : 'AI助手' }}</text>
+        <!-- 流式响应指示器 -->
+        <view wx:if="{{ item.role === 'assistant' && isStreaming && index === messages.length - 1 && !item.content }}" class="streaming-indicator">
+          <view class="flex gap-1 items-center">
+            <view class="w-2 h-2 rounded-full bg-blue-500 streaming-dot"></view>
+            <view class="w-2 h-2 rounded-full bg-blue-500 streaming-dot"></view>
+            <view class="w-2 h-2 rounded-full bg-blue-500 streaming-dot"></view>
+            <text class="text-xs text-gray-500 ml-2">正在思考...</text>
+          </view>
+        </view>
       </view>
       <!-- 卡片内容 -->
       <view class="card-content">
@@ -55,11 +64,15 @@
         <towxml wx:if="{{ item.towxmlNodes }}" nodes="{{ item.towxmlNodes }}" />
         <!-- 如果没有 towxml 节点，显示原始文本 -->
         <text wx:else class="card-text">{{ item.content }}</text>
+        <!-- 流式输入光标 -->
+        <view wx:if="{{ item.role === 'assistant' && isStreaming && index === messages.length - 1 && item.content }}" class="streaming-cursor">
+          <text class="text-blue-500">|</text>
+        </view>
       </view>
     </view>
 
-    <!-- 加载状态 -->
-    <view wx:if="{{ isLoading }}" class="message-card ai-card">
+    <!-- 加载状态（仅在非流式模式下显示） -->
+    <view wx:if="{{ isLoading && !isStreaming }}" class="message-card ai-card">
       <view class="card-header">
         <text class="card-title">AI助手</text>
       </view>
@@ -80,7 +93,7 @@
   <view class="flex items-end gap-3 p-4">
     <textarea
       class="flex-1 min-h-14 max-h-28 px-4 py-3 border-2 border-gray-200 rounded-2xl text-sm bg-gray-50 message-textarea"
-      placeholder="输入消息..."
+      placeholder="{{ isStreaming ? 'AI正在回复中...' : '输入消息...' }}"
       value="{{ inputMessage }}"
       bindinput="onInputChange"
       bindconfirm="sendMessage"
@@ -91,7 +104,17 @@
       show-confirm-bar="false"
       cursor-spacing="20"
     />
+    <!-- 取消按钮（流式响应时显示） -->
     <button
+      wx:if="{{ isStreaming }}"
+      class="w-16 h-16 rounded-full text-sm border-none cancel-button flex-shrink-0"
+      bindtap="cancelRequest"
+    >
+      取消
+    </button>
+    <!-- 发送按钮 -->
+    <button
+      wx:else
       class="w-16 h-16 rounded-full text-sm border-none send-button {{ inputMessage.trim() ? 'send-button-active' : '' }} flex-shrink-0"
       bindtap="sendMessage"
       disabled="{{ !inputMessage.trim() || isLoading }}"
