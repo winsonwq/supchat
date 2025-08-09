@@ -31,30 +31,7 @@ export function formatToolCallErrorMessage(toolName: string, error: string): str
   return `工具调用失败: ${toolName}\n错误: ${error}`
 }
 
-// 解析工具调用消息
-export function parseToolCallMessage(content: string): ParsedToolCallMessage | null {
-  if (content.startsWith('执行工具:')) {
-    const lines = content.split('\n')
-    const toolName = lines[0].replace('执行工具:', '').trim()
-    const resultStr = lines.slice(1).join('\n').replace('结果:', '').trim()
-    
-    try {
-      const result = JSON.parse(resultStr)
-      return { toolName, result }
-    } catch {
-      return { toolName, result: resultStr }
-    }
-  } else if (content.startsWith('工具调用失败:')) {
-    const lines = content.split('\n')
-    const toolName = lines[0].replace('工具调用失败:', '').trim()
-    const error = lines[1].replace('错误:', '').trim()
-    return { toolName, error }
-  }
-  
-  return null
-}
-
 // 判断是否为工具调用消息
 export function isToolCallMessage(content: string): boolean {
-  return content.startsWith('执行工具:') || content.startsWith('工具调用失败:')
+  return content.startsWith('执行工具:') || content.startsWith('工具调用失败:') || content.startsWith('正在调用工具:')
 }

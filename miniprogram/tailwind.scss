@@ -505,6 +505,14 @@
 .space-y-8 .space-item { margin-top: 32rpx; }
 .space-y-8 .space-item:first-child { margin-top: 0; }
 
+/* 垂直间距 - 标准 Tailwind 实现 */
+.space-y-1 > view + view { margin-top: 4rpx; }
+.space-y-2 > view + view { margin-top: 8rpx; }
+.space-y-3 > view + view { margin-top: 12rpx; }
+.space-y-4 > view + view { margin-top: 16rpx; }
+.space-y-6 > view + view { margin-top: 24rpx; }
+.space-y-8 > view + view { margin-top: 32rpx; }
+
 /* 水平间距 - 使用更兼容的选择器 */
 .space-x-1 .space-item { margin-left: 4rpx; }
 .space-x-1 .space-item:first-child { margin-left: 0; }
@@ -518,6 +526,14 @@
 .space-x-6 .space-item:first-child { margin-left: 0; }
 .space-x-8 .space-item { margin-left: 32rpx; }
 .space-x-8 .space-item:first-child { margin-left: 0; }
+
+/* 水平间距 - 标准 Tailwind 实现 */
+.space-x-1 > view + view { margin-left: 4rpx; }
+.space-x-2 > view + view { margin-left: 8rpx; }
+.space-x-3 > view + view { margin-left: 12rpx; }
+.space-x-4 > view + view { margin-left: 16rpx; }
+.space-x-6 > view + view { margin-left: 24rpx; }
+.space-x-8 > view + view { margin-left: 32rpx; }
 
 /* Gap 间距 (用于 Grid 和 Flex) - 增强版本 */
 .gap-1 { gap: 4rpx; }

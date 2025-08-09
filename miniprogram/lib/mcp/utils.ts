@@ -20,50 +20,32 @@ export async function executeToolCall(
   arguments_: Record<string, unknown>,
   tools: ToolBaseConfig[]
 ): Promise<ToolCallResult> {
-  try {
-    console.log(`开始执行工具: ${toolName}`, arguments_)
-    
-    const tool = tools.find(t => t.name === toolName)
-    if (!tool) {
-      console.error(`工具 ${toolName} 未找到，可用工具:`, tools.map(t => t.name))
-      return {
-        success: false,
-        error: `工具 ${toolName} 未找到。可用工具: ${tools.map(t => t.name).join(', ')}`
-      }
-    }
+  console.log(`开始执行工具: ${toolName}`, arguments_)
+  
+  const tool = tools.find(t => t.name === toolName)
+  if (!tool) {
+    console.error(`工具 ${toolName} 未找到，可用工具:`, tools.map(t => t.name))
+    throw new Error(`工具 ${toolName} 未找到。可用工具: ${tools.map(t => t.name).join(', ')}`)
+  }
 
-    console.log(`找到工具: ${tool.name} (${tool.chineseName})`)
+  console.log(`找到工具: ${tool.name} (${tool.chineseName})`)
 
-    // 如果需要用户确认
-    if (tool.needUserConfirm) {
-      console.log(`工具 ${toolName} 需要用户确认`)
-      const confirmed = await showToolConfirmDialog(tool.chineseName || tool.name, arguments_)
-      if (!confirmed) {
-        console.log(`用户取消了工具 ${toolName} 的执行`)
-        return {
-          success: false,
-          error: '用户取消了操作'
-        }
-      }
-    }
-
-    // 执行工具处理函数
-    console.log(`执行工具 ${toolName} 的处理函数`)
-    const result = await tool.handler(arguments_)
-    
-    console.log(`工具 ${toolName} 执行成功:`, result)
-    
-    return {
-      success: true,
-      data: result
-    }
-  } catch (error) {
-    console.error(`工具调用 ${toolName} 失败:`, error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : '工具调用失败'
+  // 如果需要用户确认
+  if (tool.needUserConfirm) {
+    console.log(`工具 ${toolName} 需要用户确认`)
+    const confirmed = await showToolConfirmDialog(tool.chineseName || tool.name, arguments_)
+    if (!confirmed) {
+      console.log(`用户取消了工具 ${toolName} 的执行`)
+      throw new Error('用户取消了操作')
     }
   }
+
+  // 执行工具处理函数
+  console.log(`执行工具 ${toolName} 的处理函数`)
+  const result = await tool.handler(arguments_)
+  console.log(`工具 ${toolName} 执行成功:`, result)
+  
+  return result
 }
 
 // 显示工具确认对话框
@@ -85,8 +67,7 @@ function showToolConfirmDialog(toolName: string, arguments_: Record<string, unkn
 
 // 处理 AI 响应中的工具调用
 export function processToolCalls(
-  response: AIResponse,
-  tools: ToolBaseConfig[]
+  response: AIResponse
 ): { hasToolCalls: boolean; toolCalls: ToolCall[] | null } {
   const toolCalls = response.choices?.[0]?.message?.tool_calls || []
   
@@ -102,7 +83,7 @@ export function processToolCalls(
 // 构建工具调用响应消息
 export function buildToolCallResponse(
   toolCalls: ToolCall[],
-  results: ToolCallResult[]
+  results: (ToolCallResult | Error)[]
 ): Array<{
   tool_call_id: string
   role: 'tool'
@@ -112,9 +93,9 @@ export function buildToolCallResponse(
   
   const toolResults = toolCalls.map((call, index) => {
     const result = results[index]
-    const content = result.success 
-      ? JSON.stringify(result.data, null, 2)
-      : `错误: ${result.error}`
+    const content = result instanceof Error
+      ? `错误: ${result.message}`
+      : JSON.stringify(result.data, null, 2)
     
     console.log(`工具调用 ${call.function.name} 响应:`, content)
     

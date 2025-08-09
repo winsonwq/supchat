@@ -38,7 +38,6 @@
       isLast="{{ index === messages.length - 1 }}"
       isStreaming="{{ isStreaming }}"
       scrollViewHeight="{{ scrollViewHeight }}"
-      isNewAIResponse="{{ item.role === 'assistant' && !item.content && isStreaming }}"
     />
 
     <!-- 加载状态（仅在非流式模式下显示） -->

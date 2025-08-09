@@ -35,6 +35,7 @@ export type StreamCallback = (
   content: string,
   isComplete: boolean,
   toolCalls?: ToolCall[],
+  currentToolCall?: ToolCall, // 当前正在调用的工具
 ) => void
 
 // 请求配置类型
@@ -61,11 +62,16 @@ export class AIService {
   // 添加消息到历史记录
   addMessage(
     role: 'user' | 'assistant' | 'tool',
-    content: string,
+    content?: string,
     tool_call_id?: string,
     tool_calls?: ToolCall[],
   ) {
-    this.messages.push({ role, content, tool_call_id, tool_calls })
+    this.messages.push({
+      role,
+      content: content || '',
+      tool_call_id,
+      tool_calls,
+    })
   }
 
   // 获取所有消息（包括系统消息）
@@ -143,13 +149,10 @@ export class AIService {
   ): Promise<void> {
     // 检查API配置是否有效
     if (!isConfigValid) {
-      const errorMessage = '❌ API配置无效，请先配置API密钥\n\n💡 请查看控制台获取配置指南'
+      const errorMessage =
+        '❌ API配置无效，请先配置API密钥\n\n💡 请查看控制台获取配置指南'
       this.addMessage('assistant', errorMessage)
-      onStream({
-        data: errorMessage,
-        isComplete: true,
-        toolCalls: []
-      })
+      onStream(errorMessage, true, [])
       return
     }
 
@@ -157,10 +160,7 @@ export class AIService {
     this.addMessage('user', userMessage)
 
     try {
-      console.log(
-        '发送流式请求到:',
-        `${API_CONFIG.AI.HOST}/chat/completions`,
-      )
+      console.log('发送流式请求到:', `${API_CONFIG.AI.HOST}/chat/completions`)
 
       // 取消之前的请求
       this.cancelPreviousRequest()
@@ -318,9 +318,9 @@ export class AIService {
     resolve: () => void,
   ) {
     if (hasToolCalls && toolCalls.length > 0) {
-      // 添加助手消息（包含工具调用）
+      // 添加助手消息（保存工具调用信息，以便显示）
       this.addMessage('assistant', assistantContent, undefined, toolCalls)
-      onStream(assistantContent, false, toolCalls)
+      onStream(assistantContent, false, toolCalls) // 传递 toolCalls 以便显示工具调用信息
 
       // 处理工具调用
       await this.handleToolCalls(toolCalls, onStream)
@@ -357,8 +357,8 @@ export class AIService {
   private async executeAllToolCalls(
     toolCalls: ToolCall[],
     onStream: StreamCallback,
-  ): Promise<ToolCallResult[]> {
-    const toolResults: ToolCallResult[] = []
+  ): Promise<(ToolCallResult | Error)[]> {
+    const toolResults: (ToolCallResult | Error)[] = []
     for (const call of toolCalls) {
       try {
         const args = JSON.parse(call.function.arguments) as Record<
@@ -367,52 +367,32 @@ export class AIService {
         >
         console.log(`执行工具 ${call.function.name}:`, args)
 
+        // 通知页面显示正在调用的工具，传递当前工具信息
+        onStream('', false, undefined, call)
+
         const result = await executeToolCall(call.function.name, args, allTools)
         toolResults.push(result)
 
-        // 添加工具调用结果到消息历史
-        const toolContent = result.success
-          ? JSON.stringify(result.data, null, 2)
-          : `错误: ${result.error}`
+        this.addMessage('tool', result.data, call.id)
 
-        this.addMessage('tool', toolContent, call.id)
-
-        // 通知页面添加工具调用消息
-        const toolMessage = this.formatToolCallMessage(
-          call.function.name,
-          result,
-        )
-        onStream(toolMessage, false, undefined)
+        // 通知页面添加工具调用结果消息
+        // const toolMessage = formatToolCallMessage(call.function.name, result)
+        onStream(result.data || '', false, undefined, undefined) // 清除当前工具显示，但保持 toolCalls 显示
       } catch (error) {
         console.error(`工具调用 ${call.function.name} 失败:`, error)
-        const errorResult: ToolCallResult = {
-          success: false,
-          error: error instanceof Error ? error.message : '工具调用失败',
-        }
-        toolResults.push(errorResult)
+        const errorObj =
+          error instanceof Error ? error : new Error('工具调用失败')
+        toolResults.push(errorObj)
 
-        this.addMessage('tool', `错误: ${errorResult.error}`, call.id)
-        const errorMessage = this.formatToolCallErrorMessage(
+        this.addMessage('tool', `错误: ${errorObj.message}`, call.id)
+        const errorMessage = formatToolCallErrorMessage(
           call.function.name,
-          errorResult.error || '',
+          errorObj.message,
         )
-        onStream(errorMessage, false, undefined)
+        onStream(errorMessage, false, undefined, undefined) // 清除当前工具显示
       }
     }
     return toolResults
-  }
-
-  // 格式化工具调用消息
-  private formatToolCallMessage(
-    toolName: string,
-    result: ToolCallResult,
-  ): string {
-    return formatToolCallMessage(toolName, result)
-  }
-
-  // 格式化工具调用错误消息
-  private formatToolCallErrorMessage(toolName: string, error: string): string {
-    return formatToolCallErrorMessage(toolName, error)
   }
 
   // 发送工具调用结果给AI
@@ -431,10 +411,7 @@ export class AIService {
         const message = aiResponse.choices?.[0]?.message
 
         // 检查是否有新的工具调用
-        const { hasToolCalls, toolCalls } = processToolCalls(
-          aiResponse,
-          allTools,
-        )
+        const { hasToolCalls, toolCalls } = processToolCalls(aiResponse)
 
         if (hasToolCalls && toolCalls && toolCalls.length > 0) {
           // 处理新的工具调用
@@ -476,7 +453,7 @@ export class AIService {
 
   // 回退到非流式模式
   private async fallbackToNonStream(
-    userMessage: string,
+    _userMessage: string,
     onStream: StreamCallback,
     resolve: () => void,
     reject: (error: unknown) => void,
@@ -492,20 +469,17 @@ export class AIService {
         const message = aiResponse.choices?.[0]?.message
 
         // 检查是否有工具调用
-        const { hasToolCalls, toolCalls } = processToolCalls(
-          aiResponse,
-          allTools,
-        )
+        const { hasToolCalls, toolCalls } = processToolCalls(aiResponse)
 
         if (hasToolCalls && toolCalls && toolCalls.length > 0) {
-          // 添加助手消息（包含工具调用）
+          // 添加助手消息（保存工具调用信息，以便显示）
           this.addMessage(
             'assistant',
             message?.content || '',
             undefined,
             toolCalls,
           )
-          onStream(message?.content || '', false, toolCalls)
+          onStream(message?.content || '', false, toolCalls) // 传递 toolCalls 以便显示工具调用信息
 
           // 处理工具调用
           await this.handleToolCalls(toolCalls, onStream)
@@ -532,7 +506,8 @@ export class AIService {
   async sendMessageNonStream(userMessage: string): Promise<string> {
     // 检查API配置是否有效
     if (!isConfigValid) {
-      const errorMessage = '❌ API配置无效，请先配置API密钥\n\n💡 请查看控制台获取配置指南'
+      const errorMessage =
+        '❌ API配置无效，请先配置API密钥\n\n💡 请查看控制台获取配置指南'
       this.addMessage('assistant', errorMessage)
       return errorMessage
     }
@@ -541,10 +516,7 @@ export class AIService {
     this.addMessage('user', userMessage)
 
     try {
-      console.log(
-        '发送请求到:',
-        `${API_CONFIG.AI.HOST}/chat/completions`,
-      )
+      console.log('发送请求到:', `${API_CONFIG.AI.HOST}/chat/completions`)
 
       const config = this.buildRequestConfig({})
       console.log('请求数据:', config.data)
@@ -558,10 +530,7 @@ export class AIService {
         const message = aiResponse.choices?.[0]?.message
 
         // 检查是否有工具调用
-        const { hasToolCalls, toolCalls } = processToolCalls(
-          aiResponse,
-          allTools,
-        )
+        const { hasToolCalls, toolCalls } = processToolCalls(aiResponse)
 
         if (hasToolCalls && toolCalls && toolCalls.length > 0) {
           // 添加助手消息（包含工具调用）
@@ -623,12 +592,7 @@ export class AIService {
             allTools,
           )
 
-          // 添加工具调用结果到消息历史
-          const toolContent = result.success
-            ? JSON.stringify(result.data, null, 2)
-            : `错误: ${result.error}`
-
-          this.addMessage('tool', toolContent, call.id)
+          this.addMessage('tool', result.data as string, call.id)
         } catch (error) {
           console.error(`工具调用 ${call.function.name} 失败:`, error)
           const errorMessage =

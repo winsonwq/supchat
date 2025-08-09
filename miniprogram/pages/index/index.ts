@@ -33,8 +33,7 @@ Component({
 
     detached() {
       // 页面卸载时取消当前请求
-      const aiService = AIService.getInstance()
-      aiService.cancelCurrentRequest()
+      AIService.getInstance().cancelCurrentRequest()
     },
   },
 
@@ -48,25 +47,26 @@ Component({
     calculateViewportHeight() {
       const systemInfo = wx.getSystemInfoSync()
       const viewportHeight = systemInfo.windowHeight
-      
-      // 使用查询节点信息获取导航栏和输入框的高度
+
       wx.nextTick(() => {
         const query = wx.createSelectorQuery().in(this)
-        query.select('.chat-scroll-view').boundingClientRect((rect: any) => {
-          if (rect) {
-            this.setData({
-              viewportHeight: viewportHeight,
-              scrollViewHeight: rect.height
-            })
-          }
-        }).exec()
+        query
+          .select('.chat-scroll-view')
+          .boundingClientRect((rect: any) => {
+            if (rect) {
+              this.setData({
+                viewportHeight: viewportHeight,
+                scrollViewHeight: rect.height,
+              })
+            }
+          })
+          .exec()
       })
     },
 
     // 加载消息历史
     loadMessageHistory() {
-      const aiService = this.getAIService()
-      const history = aiService.getMessageHistory()
+      const history = this.getAIService().getMessageHistory()
       // 处理消息内容，使用 towxml 解析 Markdown
       const processedHistory = history.map((msg: Message) => ({
         ...msg,
@@ -147,8 +147,7 @@ Component({
           userMessage,
           assistantMessage,
         ]
-        
-        
+
         this.setData({
           messages: newMessages,
         })
@@ -160,11 +159,20 @@ Component({
         const onStream: StreamCallback = (
           content: string,
           isComplete: boolean,
-          toolCalls?: ToolCall[]
+          toolCalls?: ToolCall[],
+          currentToolCall?: ToolCall,
         ) => {
+          // 处理当前工具调用显示
+          if (currentToolCall) {
+            // 更新助手消息，显示当前正在调用的工具
+            this.updateAssistantMessage(content, toolCalls, currentToolCall)
+            this.scrollToLatestMessage()
+            return
+          }
+
           // 检查是否是工具调用消息（通过内容前缀判断）
-          const isToolMessage = this.isToolCallMessage(content)
-          
+          const isToolMessage = isToolCallMessage(content)
+
           if (isToolMessage) {
             // 添加工具调用消息作为独立消息
             const toolMessage: Message = {
@@ -178,8 +186,8 @@ Component({
               messages: updatedMessages,
             })
           } else {
-            // 更新助手消息内容
-            this.updateAssistantMessage(content, toolCalls)
+            // 更新助手消息内容，保持工具调用信息
+            this.updateAssistantMessage(content, toolCalls, undefined)
           }
 
           // 实时滚动到最新消息
@@ -191,15 +199,14 @@ Component({
               isLoading: false,
               isStreaming: false,
             })
-            
+
             // 重新加载消息历史以确保所有消息正确显示
             this.loadMessageHistory()
           }
         }
 
         // 发送流式消息
-        const aiService = this.getAIService()
-        await aiService.sendMessageStream(message, onStream)
+        await this.getAIService().sendMessageStream(message, onStream)
       } catch (error) {
         console.error('发送消息失败:', error)
         wx.showToast({
@@ -213,13 +220,12 @@ Component({
       }
     },
 
-    // 判断是否为工具调用消息
-    isToolCallMessage(content: string): boolean {
-      return isToolCallMessage(content)
-    },
-
     // 更新助手消息内容
-    updateAssistantMessage(content: string, toolCalls?: ToolCall[]) {
+    updateAssistantMessage(
+      content: string,
+      toolCalls?: ToolCall[],
+      currentToolCall?: ToolCall,
+    ) {
       const updatedMessages = [...this.data.messages]
       const lastMessageIndex = updatedMessages.length - 1
 
@@ -227,11 +233,22 @@ Component({
         updatedMessages[lastMessageIndex] &&
         updatedMessages[lastMessageIndex].role === 'assistant'
       ) {
+        // 确定要显示的工具调用：优先显示 currentToolCall，其次显示 toolCalls，最后保持原有的工具调用
+        let displayToolCalls = undefined
+        if (currentToolCall) {
+          displayToolCalls = [currentToolCall]
+        } else if (toolCalls) {
+          displayToolCalls = toolCalls
+        } else {
+          // 保持原有的工具调用信息
+          displayToolCalls = updatedMessages[lastMessageIndex].tool_calls
+        }
+
         updatedMessages[lastMessageIndex] = {
           ...updatedMessages[lastMessageIndex],
           content: content,
           towxmlNodes: this.processMessageContent(content),
-          tool_calls: toolCalls
+          tool_calls: displayToolCalls,
         }
 
         this.setData({
@@ -242,8 +259,7 @@ Component({
 
     // 取消当前请求
     cancelRequest() {
-      const aiService = this.getAIService()
-      aiService.cancelCurrentRequest()
+      this.getAIService().cancelCurrentRequest()
       this.setData({
         isLoading: false,
         isStreaming: false,
@@ -308,8 +324,7 @@ Component({
         content: '确定要清空所有聊天记录吗？',
         success: (res) => {
           if (res.confirm) {
-            const aiService = this.getAIService()
-            aiService.clearMessages()
+            this.getAIService().clearMessages()
             this.setData({
               messages: [],
             })
@@ -321,47 +336,5 @@ Component({
         },
       })
     },
-
-    // 测试工具调用
-    testToolCall() {
-      const testMessage = "请帮我打开相册选择一张照片"
-      this.setData({
-        inputMessage: testMessage
-      })
-      this.sendMessage()
-    },
-
-    // 测试天气查询
-    testWeatherQuery() {
-      const testMessage = "请帮我查询北京的天气"
-      this.setData({
-        inputMessage: testMessage
-      })
-      this.sendMessage()
-    },
-
-    // 测试工具调用消息显示
-    testToolMessageDisplay() {
-      // 模拟添加工具调用消息
-      const toolMessage: Message = {
-        role: 'tool',
-        content: '执行工具: openPhoto\n结果: {"success": true, "tempFiles": [{"tempFilePath": "test.jpg"}]}',
-        towxmlNodes: this.processMessageContent('执行工具: openPhoto\n结果: {"success": true, "tempFiles": [{"tempFilePath": "test.jpg"}]}'),
-      }
-
-      const updatedMessages = [...this.data.messages, toolMessage]
-      this.setData({
-        messages: updatedMessages,
-      })
-
-      this.scrollToLatestMessage()
-      
-      wx.showToast({
-        title: '已添加测试工具消息',
-        icon: 'success',
-      })
-    },
-
-
   },
 })

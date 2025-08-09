@@ -23,9 +23,7 @@ export interface OpenRouterTool {
 
 // 工具调用结果
 export interface ToolCallResult {
-  success: boolean
-  data?: unknown
-  error?: string
+  data?: string
 }
 
 // 工具调用请求
@@ -127,4 +125,5 @@ export interface ParsedToolCallMessage {
   toolName: string
   result?: unknown
   error?: string
+  isCalling?: boolean  // 标识是否正在调用工具
 }
