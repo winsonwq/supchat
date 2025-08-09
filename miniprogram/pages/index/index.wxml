@@ -16,7 +16,7 @@
   enhanced="true"
   show-scrollbar="false"
 >
-  <view class="flex flex-col gap-4 p-6" style="padding-bottom: 100px">
+  <view class="flex flex-col gap-4 p-6" style="padding-bottom: 120px">
     <!-- 欢迎消息 -->
     <view wx:if="{{ messages.length === 0 }}" class="flex justify-center py-10">
       <view class="p-10 rounded-2xl text-center">
@@ -26,7 +26,6 @@
         <text class="block text-sm leading-normal"
           >我是你的AI助手，有什么可以帮助你的吗？</text
         >
-
       </view>
     </view>
 
@@ -38,6 +37,8 @@
       messageIndex="{{ index }}"
       isLast="{{ index === messages.length - 1 }}"
       isStreaming="{{ isStreaming }}"
+      scrollViewHeight="{{ scrollViewHeight }}"
+      isNewAIResponse="{{ item.role === 'assistant' && !item.content && isStreaming }}"
     />
 
     <!-- 加载状态（仅在非流式模式下显示） -->

@@ -12,12 +12,23 @@ Component({
     scrollToMessage: '',
     isStreaming: false, // 新增：标记是否正在流式响应
     emptyMessage: {} as Message, // 空消息对象，用于加载状态
+    viewportHeight: 0, // viewport 高度
+    scrollViewHeight: 0, // 聊天区域高度
   },
 
   lifetimes: {
     attached() {
       // 页面加载时初始化并加载消息历史
       this.loadMessageHistory()
+      // 计算 viewport 高度
+      this.calculateViewportHeight()
+    },
+
+    ready() {
+      // 组件布局完成后重新计算高度
+      setTimeout(() => {
+        this.calculateViewportHeight()
+      }, 300)
     },
 
     detached() {
@@ -31,6 +42,25 @@ Component({
     // 获取 AI 服务实例
     getAIService(): AIService {
       return AIService.getInstance()
+    },
+
+    // 计算 viewport 高度
+    calculateViewportHeight() {
+      const systemInfo = wx.getSystemInfoSync()
+      const viewportHeight = systemInfo.windowHeight
+      
+      // 使用查询节点信息获取导航栏和输入框的高度
+      wx.nextTick(() => {
+        const query = wx.createSelectorQuery().in(this)
+        query.select('.chat-scroll-view').boundingClientRect((rect: any) => {
+          if (rect) {
+            this.setData({
+              viewportHeight: viewportHeight,
+              scrollViewHeight: rect.height
+            })
+          }
+        }).exec()
+      })
     },
 
     // 加载消息历史
@@ -117,12 +147,14 @@ Component({
           userMessage,
           assistantMessage,
         ]
+        
+        
         this.setData({
           messages: newMessages,
         })
 
-        // 滚动到用户消息
-        this.scrollToUserMessage()
+        // 滚动到用户消息（智能滚动到顶部）
+        this.scrollToUserMessageTop()
 
         // 定义流式响应回调
         const onStream: StreamCallback = (
@@ -233,6 +265,19 @@ Component({
       }, 100)
     },
 
+    // 滚动到用户消息的顶部（智能滚动）
+    scrollToUserMessageTop() {
+      setTimeout(() => {
+        // 找到最新的用户消息
+        const userMessageIndex = this.findLatestUserMessageIndex()
+        if (userMessageIndex !== -1) {
+          this.setData({
+            scrollToMessage: `message-${userMessageIndex}`,
+          })
+        }
+      }, 150) // 稍微延长时间，确保占位符高度计算完成
+    },
+
     // 滚动到用户消息的顶部
     scrollToUserMessage() {
       setTimeout(() => {
@@ -316,5 +361,7 @@ Component({
         icon: 'success',
       })
     },
+
+
   },
 })

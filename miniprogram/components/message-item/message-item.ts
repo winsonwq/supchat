@@ -30,6 +30,16 @@ Component({
     isLoading: {
       type: Boolean,
       value: false
+    },
+    // 聊天区域高度
+    scrollViewHeight: {
+      type: Number,
+      value: 0
+    },
+    // 是否为新的AI回复（用于占位符计算）
+    isNewAIResponse: {
+      type: Boolean,
+      value: false
     }
   },
 
@@ -37,13 +47,48 @@ Component({
    * 组件的初始数据
    */
   data: {
+    placeholderHeight: 0, // 占位符高度
+  },
 
+  lifetimes: {
+    attached() {
+      // 组件初始化时计算占位符高度
+      this.calculatePlaceholderHeight()
+    }
+  },
+
+  observers: {
+    'scrollViewHeight, isNewAIResponse': function() {
+      // 当高度或状态变化时重新计算
+      this.calculatePlaceholderHeight()
+    }
   },
 
   /**
    * 组件的方法列表
    */
   methods: {
+    /**
+     * 计算占位符高度
+     */
+    calculatePlaceholderHeight() {
+      const { message, isNewAIResponse, scrollViewHeight } = this.data
+      
+      // 为新的空AI回复设置占位符高度
+      if (message.role === 'assistant' && isNewAIResponse && !message.content && scrollViewHeight > 0) {
+        // 直接使用整个 viewport 高度作为占位符，确保用户消息滚动到顶部
+        const placeholderHeight = Math.max(scrollViewHeight - 100, 300) // 预留一点空间给消息头部
+        
+        this.setData({
+          placeholderHeight: placeholderHeight
+        })
+      } else {
+        this.setData({
+          placeholderHeight: 0
+        })
+      }
+    },
+
     /**
      * 获取消息角色显示文本
      */
@@ -100,6 +145,8 @@ Component({
     hasToolCalls(): boolean {
       const { message } = this.data
       return !!(message.tool_calls && message.tool_calls.length > 0)
-    }
+    },
+
+
   }
 })
