@@ -127,3 +127,19 @@ export interface ParsedToolCallMessage {
   error?: string
   isCalling?: boolean  // 标识是否正在调用工具
 }
+
+// 流式内容类型枚举
+export enum StreamContentType {
+  NORMAL = 'normal',        // 普通内容
+  TOOL = 'tool',            // 工具调用消息
+  ERROR = 'error'           // 错误消息
+}
+
+// 流式内容对象
+export interface StreamContent {
+  content: string
+  type: StreamContentType
+  isComplete: boolean
+  toolCalls?: ToolCall[]
+  currentToolCall?: ToolCall
+}

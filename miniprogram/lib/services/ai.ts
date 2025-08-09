@@ -9,6 +9,10 @@ import {
 import {
   formatToolCallMessage,
   formatToolCallErrorMessage,
+  createNormalContent,
+  createToolContent,
+  createErrorContent,
+  createStreamContent,
 } from '../utils/util.js'
 import {
   ToolCall,
@@ -19,6 +23,8 @@ import {
   ToolResponseMessage,
   ToolCallResult,
   TowxmlNode,
+  StreamContent,
+  StreamContentType,
 } from '../mcp/types.js'
 
 // 消息类型定义
@@ -31,12 +37,7 @@ export interface Message {
 }
 
 // 流式响应回调类型
-export type StreamCallback = (
-  content: string,
-  isComplete: boolean,
-  toolCalls?: ToolCall[],
-  currentToolCall?: ToolCall, // 当前正在调用的工具
-) => void
+export type StreamCallback = (streamContent: StreamContent) => void
 
 // 请求配置类型
 interface RequestConfig {
@@ -152,7 +153,7 @@ export class AIService {
       const errorMessage =
         '❌ API配置无效，请先配置API密钥\n\n💡 请查看控制台获取配置指南'
       this.addMessage('assistant', errorMessage)
-      onStream(errorMessage, true, [])
+      onStream(createErrorContent(errorMessage, true))
       return
     }
 
@@ -185,7 +186,7 @@ export class AIService {
     } catch (error: unknown) {
       console.error('AI服务流式请求失败:', error)
       const errorMessage = this.getErrorMessage(error)
-      onStream(errorMessage, true)
+      onStream(createErrorContent(errorMessage, true))
     }
   }
 
@@ -258,7 +259,7 @@ export class AIService {
 
           if (delta?.content) {
             assistantContent += delta.content
-            onStream(assistantContent, false)
+            onStream(createNormalContent(assistantContent, false))
           }
 
           // 检查是否有工具调用
@@ -320,13 +321,13 @@ export class AIService {
     if (hasToolCalls && toolCalls.length > 0) {
       // 添加助手消息（保存工具调用信息，以便显示）
       this.addMessage('assistant', assistantContent, undefined, toolCalls)
-      onStream(assistantContent, false, toolCalls) // 传递 toolCalls 以便显示工具调用信息
+      onStream(createNormalContent(assistantContent, false, toolCalls)) // 传递 toolCalls 以便显示工具调用信息
 
       // 处理工具调用
       await this.handleToolCalls(toolCalls, onStream)
     } else {
       this.addMessage('assistant', assistantContent)
-      onStream(assistantContent, true)
+      onStream(createNormalContent(assistantContent, true))
     }
     resolve()
   }
@@ -349,7 +350,7 @@ export class AIService {
       await this.sendToolResultsToAI(toolResponses, onStream)
     } catch (error) {
       console.error('处理工具调用失败:', error)
-      onStream('工具调用处理失败，请稍后重试。', true)
+      onStream(createErrorContent('工具调用处理失败，请稍后重试。', true))
     }
   }
 
@@ -368,7 +369,7 @@ export class AIService {
         console.log(`执行工具 ${call.function.name}:`, args)
 
         // 通知页面显示正在调用的工具，传递当前工具信息
-        onStream('', false, undefined, call)
+        onStream(createStreamContent('', StreamContentType.NORMAL, false, undefined, call))
 
         const result = await executeToolCall(call.function.name, args, allTools)
         toolResults.push(result)
@@ -376,8 +377,8 @@ export class AIService {
         this.addMessage('tool', result.data, call.id)
 
         // 通知页面添加工具调用结果消息
-        // const toolMessage = formatToolCallMessage(call.function.name, result)
-        onStream(result.data || '', false, undefined, undefined) // 清除当前工具显示，但保持 toolCalls 显示
+        const toolMessage = formatToolCallMessage(call.function.name, result)
+        onStream(createToolContent(toolMessage, false)) // 清除当前工具显示，但保持 toolCalls 显示
       } catch (error) {
         console.error(`工具调用 ${call.function.name} 失败:`, error)
         const errorObj =
@@ -389,7 +390,7 @@ export class AIService {
           call.function.name,
           errorObj.message,
         )
-        onStream(errorMessage, false, undefined, undefined) // 清除当前工具显示
+        onStream(createToolContent(errorMessage, false)) // 清除当前工具显示
       }
     }
     return toolResults
@@ -429,7 +430,7 @@ export class AIService {
       }
     } catch (error) {
       console.error('发送工具结果给AI失败:', error)
-      onStream('\n\n处理工具调用结果失败，请稍后重试。', true)
+      onStream(createErrorContent('\n\n处理工具调用结果失败，请稍后重试。', true))
     }
   }
 
@@ -442,11 +443,11 @@ export class AIService {
     const streamInterval = setInterval(() => {
       if (index < characters.length) {
         currentContent += characters[index]
-        onStream(currentContent, false)
+        onStream(createNormalContent(currentContent, false))
         index++
       } else {
         clearInterval(streamInterval)
-        onStream(currentContent, true)
+        onStream(createNormalContent(currentContent, true))
       }
     }, 30)
   }
@@ -479,7 +480,7 @@ export class AIService {
             undefined,
             toolCalls,
           )
-          onStream(message?.content || '', false, toolCalls) // 传递 toolCalls 以便显示工具调用信息
+          onStream(createNormalContent(message?.content || '', false, toolCalls)) // 传递 toolCalls 以便显示工具调用信息
 
           // 处理工具调用
           await this.handleToolCalls(toolCalls, onStream)
@@ -497,7 +498,7 @@ export class AIService {
       }
     } catch (error) {
       console.error('非流式模式也失败:', error)
-      onStream('抱歉，服务暂时不可用，请稍后重试。', true)
+      onStream(createErrorContent('抱歉，服务暂时不可用，请稍后重试。', true))
       reject(error)
     }
   }

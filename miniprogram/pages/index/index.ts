@@ -1,6 +1,6 @@
 // index.ts
 import { AIService, Message, StreamCallback } from '../../lib/services/ai.js'
-import { isToolCallMessage } from '../../lib/utils/util.js'
+import { StreamContentType } from '../../lib/mcp/types.js'
 import { ToolCall, TowxmlNode, WxEvent } from '../../lib/mcp/types.js'
 const app = getApp()
 
@@ -156,12 +156,9 @@ Component({
         this.scrollToUserMessageTop()
 
         // 定义流式响应回调
-        const onStream: StreamCallback = (
-          content: string,
-          isComplete: boolean,
-          toolCalls?: ToolCall[],
-          currentToolCall?: ToolCall,
-        ) => {
+        const onStream: StreamCallback = (streamContent) => {
+          const { content, type, isComplete, toolCalls, currentToolCall } = streamContent
+
           // 处理当前工具调用显示
           if (currentToolCall) {
             // 更新助手消息，显示当前正在调用的工具
@@ -170,10 +167,8 @@ Component({
             return
           }
 
-          // 检查是否是工具调用消息（通过内容前缀判断）
-          const isToolMessage = isToolCallMessage(content)
-
-          if (isToolMessage) {
+          // 根据类型处理不同的消息
+          if (type === StreamContentType.TOOL) {
             // 添加工具调用消息作为独立消息
             const toolMessage: Message = {
               role: 'tool',
