@@ -3,15 +3,36 @@
 /* 引入 Tailwind-like 工具类样式 */
 @import './tailwind.scss';
 
+/* ===== CSS 变量定义 ===== */
+:root {
+  /* 行高变量 */
+  --line-height-base: 1.6;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+  
+  /* 字体大小变量 */
+  --font-size-base: 32rpx;
+  --font-size-xs: 24rpx;
+  --font-size-sm: 28rpx;
+  --font-size-lg: 36rpx;
+  --font-size-xl: 40rpx;
+  
+  /* 颜色变量 */
+  --color-text-primary: #333333;
+  --color-bg-primary: #f5f5f5;
+}
+
 /* ===== 基础页面样式 ===== */
 
 /* 全局字体和排版设置 */
 page {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 32rpx;
-  line-height: 1.6;
-  color: #333333;
-  background-color: #f5f5f5;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
 }
 
 /* 重置和基础样式 */
@@ -54,6 +75,8 @@ button::after {
 
 .h2w {
   background: none !important;
+  font-weight: normal !important;
+  line-height: var(--line-height-base) !important;
 
   & > .h2w__main {
     margin: 0 !important;

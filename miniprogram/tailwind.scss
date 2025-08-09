@@ -253,14 +253,15 @@
 .italic { font-style: italic; }
 .not-italic { font-style: normal; }
 
-/* 行高 */
+/* 行高 - 使用 CSS 变量 */
 .leading-none { line-height: 1; }
-.leading-tight { line-height: 1.25; }
+.leading-tight { line-height: var(--line-height-tight); }
 .leading-snug { line-height: 1.375; }
-.leading-normal { line-height: 1.5; }
-.leading-relaxed { line-height: 1.625; }
-.leading-loose { line-height: 2; }
+.leading-normal { line-height: var(--line-height-normal); }
+.leading-relaxed { line-height: var(--line-height-relaxed); }
+.leading-loose { line-height: var(--line-height-loose); }
 .leading-140 { line-height: 1.4; }
+.leading-base { line-height: var(--line-height-base); }
 
 /* 文本对齐 */
 .text-left { text-align: left; }
