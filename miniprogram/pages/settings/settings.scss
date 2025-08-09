@@ -1,0 +1,38 @@
+.settings-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.settings-content {
+  padding: 20px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  margin-top: 40px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.empty-description {
+  font-size: 14px;
+  color: #999;
+  text-align: center;
+  line-height: 1.5;
+}

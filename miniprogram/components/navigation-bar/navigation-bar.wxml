@@ -34,6 +34,21 @@
           </view>
         </block>
       </block>
+      <block wx:elif="{{showSidebar}}">
+        <!-- 侧边栏按钮 -->
+        <view class="weui-navigation-bar__buttons weui-navigation-bar__buttons_sidebar">
+          <view
+            bindtap="toggleSidebar"
+            class="weui-navigation-bar__btn_sidebar_wrapper"
+            hover-class="weui-active"
+            hover-stay-time="100"
+            aria-role="button"
+            aria-label="侧边栏"
+          >
+            <view class="weui-navigation-bar__button weui-navigation-bar__btn_sidebar"></view>
+          </view>
+        </view>
+      </block>
       <block wx:else>
         <slot name="left"></slot>
       </block>

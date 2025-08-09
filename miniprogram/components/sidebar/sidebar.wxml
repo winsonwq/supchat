@@ -1,0 +1,52 @@
+<!-- 侧边栏遮罩层 -->
+<view class="sidebar-mask {{isOpen ? 'sidebar-mask--open' : ''}}" bindtap="closeSidebar"></view>
+
+<!-- 侧边栏主体 -->
+<view class="sidebar {{isOpen ? 'sidebar--open' : ''}}">
+  <!-- 侧边栏头部 -->
+  <view class="sidebar-header">
+    <text class="sidebar-title">聊天记录</text>
+  </view>
+
+  <!-- 话题列表 -->
+  <scroll-view class="sidebar-content" scroll-y="true">
+    <view class="topics-list">
+      <view 
+        wx:for="{{topics}}" 
+        wx:key="id" 
+        class="topic-item {{currentTopicId === item.id ? 'topic-item--active' : ''}}"
+        bindtap="selectTopic"
+        data-id="{{item.id}}"
+      >
+        <view class="topic-title">{{item.title}}</view>
+        <view class="topic-time">{{item.lastMessageTime}}</view>
+      </view>
+      
+      <!-- 空状态 -->
+      <view wx:if="{{topics.length === 0}}" class="empty-state">
+        <text class="empty-text">暂无聊天记录</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 新建话题按钮 -->
+  <view class="sidebar-footer">
+    <view class="new-topic-btn" bindtap="createNewTopic">
+      <view class="new-topic-icon">+</view>
+      <text class="new-topic-text">新建话题</text>
+    </view>
+  </view>
+
+  <!-- 底部用户栏 -->
+  <view class="sidebar-bottom-bar">
+    <view class="user-info" bindtap="showUserMenu">
+      <view class="user-avatar">
+        <text class="avatar-text">{{userInfo.name ? userInfo.name.charAt(0) : 'U'}}</text>
+      </view>
+      <text class="user-name">{{userInfo.name || '用户'}}</text>
+    </view>
+    <view class="settings-btn" bindtap="openSettings">
+      <view class="settings-icon"></view>
+    </view>
+  </view>
+</view>

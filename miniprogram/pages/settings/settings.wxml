@@ -1,0 +1,18 @@
+<!--settings.wxml-->
+<navigation-bar
+  title="设置"
+  back="{{ true }}"
+  color="black"
+  background="#FFF"
+>
+</navigation-bar>
+
+<view class="settings-container">
+  <view class="settings-content">
+    <view class="empty-state">
+      <view class="empty-icon">⚙️</view>
+      <text class="empty-title">设置页面</text>
+      <text class="empty-description">功能正在开发中，敬请期待...</text>
+    </view>
+  </view>
+</view>

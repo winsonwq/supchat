@@ -1,6 +1,7 @@
 {
   "usingComponents": {
     "navigation-bar": "/components/navigation-bar/navigation-bar",
+    "sidebar": "/components/sidebar/sidebar",
     "towxml":"/towxml/towxml",
     "message-input": "/components/message-input/message-input",
     "message-item": "/components/message-item/message-item"

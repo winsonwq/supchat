@@ -11,6 +11,8 @@
   overflow: hidden;
   color: var(--weui-FG-0);
   flex: none;
+  position: relative;
+  z-index: 100;
 }
 
 .weui-navigation-bar__inner {
@@ -52,6 +54,26 @@
   height: 24px;
   -webkit-mask: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='24' viewBox='0 0 12 24'%3E  %3Cpath fill-opacity='.9' fill-rule='evenodd' d='M10 19.438L8.955 20.5l-7.666-7.79a1.02 1.02 0 0 1 0-1.42L8.955 3.5 10 4.563 2.682 12 10 19.438z'/%3E%3C/svg%3E") no-repeat 50% 50%;
   mask: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='24' viewBox='0 0 12 24'%3E  %3Cpath fill-opacity='.9' fill-rule='evenodd' d='M10 19.438L8.955 20.5l-7.666-7.79a1.02 1.02 0 0 1 0-1.42L8.955 3.5 10 4.563 2.682 12 10 19.438z'/%3E%3C/svg%3E") no-repeat 50% 50%;
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  background-color: var(--weui-FG-0);
+}
+
+.weui-navigation-bar__btn_sidebar_wrapper {
+  padding: 11px 18px 11px 16px;
+  margin: -11px -18px -11px -16px;
+}
+
+.weui-navigation-bar__btn_sidebar_wrapper.weui-active {
+  opacity: 0.5;
+}
+
+.weui-navigation-bar__btn_sidebar {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  -webkit-mask: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M3 6h18M3 12h18M3 18h18' stroke='currentColor' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat 50% 50%;
+  mask: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M3 6h18M3 12h18M3 18h18' stroke='currentColor' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat 50% 50%;
   -webkit-mask-size: cover;
   mask-size: cover;
   background-color: var(--weui-FG-0);

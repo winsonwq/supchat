@@ -50,6 +50,11 @@ Component({
       type: Number,
       value: 1
     },
+    // 是否显示侧边栏按钮
+    showSidebar: {
+      type: Boolean,
+      value: false
+    },
   },
   /**
    * 组件的初始数据
@@ -100,6 +105,15 @@ Component({
         })
       }
       this.triggerEvent('back', { delta: data.delta }, {})
+    },
+    home() {
+      wx.switchTab({
+        url: '/pages/index/index'
+      })
+      this.triggerEvent('home', {}, {})
+    },
+    toggleSidebar() {
+      this.triggerEvent('toggleSidebar', {}, {})
     }
   },
 })

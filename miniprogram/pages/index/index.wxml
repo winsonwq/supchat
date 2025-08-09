@@ -2,10 +2,24 @@
 <navigation-bar
   title="AI助手"
   back="{{ false }}"
+  showSidebar="{{ true }}"
   color="black"
   background="#FFF"
+  bind:toggleSidebar="toggleSidebar"
 >
 </navigation-bar>
+
+<!-- 侧边栏组件 -->
+<sidebar
+  isOpen="{{ sidebarOpen }}"
+  topics="{{ topics }}"
+  currentTopicId="{{ currentTopicId }}"
+  userInfo="{{ userInfo }}"
+  bind:close="closeSidebar"
+  bind:selectTopic="selectTopic"
+  bind:createNewTopic="createNewTopic"
+  bind:openSettings="openSettings"
+/>
 
 <!-- 聊天历史区域 -->
 <scroll-view

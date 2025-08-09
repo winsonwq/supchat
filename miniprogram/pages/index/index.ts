@@ -14,6 +14,14 @@ Component({
     emptyMessage: {} as Message, // 空消息对象，用于加载状态
     viewportHeight: 0, // viewport 高度
     scrollViewHeight: 0, // 聊天区域高度
+    // 侧边栏相关数据
+    sidebarOpen: false,
+    topics: [] as any[],
+    currentTopicId: '',
+    userInfo: {
+      name: '用户',
+      avatar: ''
+    }
   },
 
   lifetimes: {
@@ -22,6 +30,8 @@ Component({
       this.loadMessageHistory()
       // 计算 viewport 高度
       this.calculateViewportHeight()
+      // 初始化话题数据
+      this.initTopics()
     },
 
     ready() {
@@ -78,6 +88,31 @@ Component({
       })
       // 加载历史后滚动到最新消息
       this.scrollToLatestMessage()
+    },
+
+    // 初始化话题数据（示例数据）
+    initTopics() {
+      const sampleTopics = [
+        {
+          id: 'topic-1',
+          title: '关于 AI 的讨论',
+          lastMessageTime: '2小时前'
+        },
+        {
+          id: 'topic-2', 
+          title: '小程序开发问题',
+          lastMessageTime: '昨天'
+        },
+        {
+          id: 'topic-3',
+          title: 'TypeScript 学习',
+          lastMessageTime: '3天前'
+        }
+      ]
+
+      this.setData({
+        topics: sampleTopics
+      })
     },
 
     // 处理消息内容，使用 towxml 解析 Markdown
@@ -329,6 +364,68 @@ Component({
             })
           }
         },
+      })
+    },
+
+    // 侧边栏相关方法
+    // 切换侧边栏
+    toggleSidebar() {
+      this.setData({
+        sidebarOpen: !this.data.sidebarOpen
+      })
+    },
+
+    // 关闭侧边栏
+    closeSidebar() {
+      this.setData({
+        sidebarOpen: false
+      })
+    },
+
+    // 选择话题
+    selectTopic(e: any) {
+      const { topicId } = e.detail
+      console.log('选择话题:', topicId)
+      
+      // 这里可以根据 topicId 加载对应的聊天记录
+      this.setData({
+        currentTopicId: topicId,
+        sidebarOpen: false
+      })
+      
+      // TODO: 实现切换话题的逻辑
+      wx.showToast({
+        title: '切换话题功能待实现',
+        icon: 'none'
+      })
+    },
+
+    // 创建新话题
+    createNewTopic() {
+      console.log('创建新话题')
+      
+      // 清空当前聊天
+      this.getAIService().clearMessages()
+      this.setData({
+        messages: [],
+        currentTopicId: '',
+        sidebarOpen: false
+      })
+      
+      wx.showToast({
+        title: '已创建新话题',
+        icon: 'success'
+      })
+    },
+
+    // 打开设置页面
+    openSettings() {
+      this.setData({
+        sidebarOpen: false
+      })
+      
+      wx.navigateTo({
+        url: '/pages/settings/settings'
       })
     },
   },
