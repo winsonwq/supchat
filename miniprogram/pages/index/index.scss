@@ -13,125 +13,7 @@ page {
   overflow: hidden;
 }
 
-/* 消息卡片基础样式 - 仅保留不能用工具类替代的样式 */
-.message-card {
-  /* 使用工具类替代: mb-2 mx-5 */
-}
-
-/* 用户卡片样式 - 仅保留不能用工具类替代的样式 */
-.user-card {
-  /* 使用工具类替代: bg-white text-gray-800 rounded-lg overflow-hidden shadow-md */
-}
-
-/* AI卡片样式 - 仅保留不能用工具类替代的样式 */
-.ai-card {
-  /* 使用工具类替代: text-gray-800 */
-}
-
-/* 工具卡片样式 - 仅保留不能用工具类替代的样式 */
-.tool-card {
-  /* 使用工具类替代: rounded-lg overflow-hidden shadow-md border-l-4 border-blue-500 */
-  background: #f0f8ff; /* 淡蓝色背景，工具类中没有直接对应的 */
-  color: #333;
-}
-
-/* 工具调用信息样式 - 仅保留特殊的背景色和边框 */
-.tool-calls-info {
-  /* 使用工具类替代: px-5 py-3 */
-  background: rgba(59, 130, 246, 0.1);
-  border-bottom: 1rpx solid rgba(59, 130, 246, 0.2);
-}
-
-.tool-calls-header {
-  /* 使用工具类替代: mb-2 */
-}
-
-.tool-call-item {
-  /* 使用工具类替代: flex flex-col mb-2 p-3 rounded */
-  background: rgba(255, 255, 255, 0.8);
-  border: 1rpx solid rgba(59, 130, 246, 0.2);
-}
-
-.tool-call-name {
-  /* 使用工具类替代: mb-1 */
-}
-
-.tool-call-args {
-  word-break: break-all;
-  line-height: 1.4;
-}
-
-/* 卡片头部 - 仅保留特殊的内边距 */
-.card-header {
-  /* 使用工具类替代: flex items-center justify-between */
-  padding: 12rpx 20rpx 8rpx 20rpx;
-}
-
-.card-title {
-  /* 使用工具类替代: text-xs font-medium text-gray-600 */
-}
-
-/* 流式响应指示器 */
-.streaming-indicator {
-  /* 使用工具类替代: flex items-center */
-}
-
-.streaming-dot {
-  animation: streaming-pulse 1.5s infinite ease-in-out;
-}
-
-.streaming-dot:nth-child(1) {
-  animation-delay: -0.3s;
-}
-
-.streaming-dot:nth-child(2) {
-  animation-delay: -0.15s;
-}
-
-.streaming-dot:nth-child(3) {
-  animation-delay: 0s;
-}
-
-@keyframes streaming-pulse {
-  0%, 80%, 100% {
-    transform: scale(0.8);
-    opacity: 0.5;
-  }
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* 流式输入光标 */
-.streaming-cursor {
-  display: inline-block;
-  animation: cursor-blink 1s infinite;
-}
-
-@keyframes cursor-blink {
-  0%, 50% {
-    opacity: 1;
-  }
-  51%, 100% {
-    opacity: 0;
-  }
-}
-
-/* 卡片内容 - 仅保留特殊的内边距 */
-.card-content {
-  padding: 16rpx 20rpx 20rpx 20rpx;
-}
-
-.card-text {
-  /* 使用工具类替代: text-sm leading-relaxed whitespace-pre-wrap */
-  word-wrap: break-word;
-}
-
-/* Markdown 内容样式 */
-.markdown-content {
-  /* 使用工具类替代: text-sm leading-relaxed */
-}
+/* 消息相关样式已移至 message-item 组件 */
 
 /* 代码块样式 */
 .markdown-content .code-block {
@@ -196,29 +78,7 @@ page {
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* 加载动画 */
-.loading-dot {
-  animation: loading 1.4s infinite ease-in-out;
-}
-
-.loading-dot:nth-child(1) {
-  animation-delay: -0.32s;
-}
-
-.loading-dot:nth-child(2) {
-  animation-delay: -0.16s;
-}
-
-@keyframes loading {
-  0%, 80%, 100% {
-    transform: scale(0);
-    opacity: 0.5;
-  }
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
+/* 加载动画已移至 message-item 组件 */
 
 
 

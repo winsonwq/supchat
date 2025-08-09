@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "towxml": "/towxml/towxml"
+  },
+  "styleIsolation": "apply-shared"
+}

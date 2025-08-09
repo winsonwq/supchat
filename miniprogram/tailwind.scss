@@ -260,6 +260,7 @@
 .leading-normal { line-height: 1.5; }
 .leading-relaxed { line-height: 1.625; }
 .leading-loose { line-height: 2; }
+.leading-140 { line-height: 1.4; }
 
 /* 文本对齐 */
 .text-left { text-align: left; }
@@ -287,6 +288,10 @@
 
 .overflow-ellipsis { text-overflow: ellipsis; }
 .overflow-clip { text-overflow: clip; }
+
+/* 文本换行处理 */
+.break-all { word-break: break-all; }
+.break-words { word-break: break-word; word-wrap: break-word; }
 
 /* 空白处理 */
 .whitespace-normal { white-space: normal; }
@@ -349,6 +354,11 @@
 .bg-purple-500 { background-color: #a855f7; }
 .bg-purple-600 { background-color: #9333ea; }
 
+/* 组件特有颜色 */
+.bg-blue-50 { background-color: #f0f8ff; }
+.bg-blue-alpha-10 { background-color: rgba(59, 130, 246, 0.1); }
+.bg-white-alpha-80 { background-color: rgba(255, 255, 255, 0.8); }
+
 /* ===== 边框 (Borders) ===== */
 
 /* 边框宽度 */
@@ -376,6 +386,7 @@
 .border-red-500 { border-color: #ef4444; }
 .border-green-500 { border-color: #10b981; }
 .border-blue-500 { border-color: #3b82f6; }
+.border-blue-alpha-20 { border-color: rgba(59, 130, 246, 0.2); }
 
 /* 圆角 */
 .rounded-none { border-radius: 0; }

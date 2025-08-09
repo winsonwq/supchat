@@ -11,6 +11,7 @@ Component({
     isLoading: false,
     scrollToMessage: '',
     isStreaming: false, // 新增：标记是否正在流式响应
+    emptyMessage: {} as Message, // 空消息对象，用于加载状态
   },
 
   lifetimes: {
