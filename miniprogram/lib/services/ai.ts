@@ -1,4 +1,4 @@
-import { API_CONFIG } from '../config/api.js'
+import { API_CONFIG, isConfigValid } from '../config/api.js'
 import {
   transformToOpenRouterTool,
   executeToolCall,
@@ -92,7 +92,7 @@ export class AIService {
   ): RequestConfig {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${API_CONFIG.OPENROUTER.API_KEY}`,
+      Authorization: `Bearer ${API_CONFIG.AI.API_KEY}`,
     }
 
     if (isStream) {
@@ -100,11 +100,11 @@ export class AIService {
     }
 
     return {
-      url: `${API_CONFIG.OPENROUTER.HOST}/chat/completions`,
+      url: `${API_CONFIG.AI.HOST}/chat/completions`,
       method: 'POST',
       headers,
       data: {
-        model: API_CONFIG.OPENROUTER.MODEL,
+        model: API_CONFIG.AI.MODEL,
         messages: this.getMessages(),
         tools: allTools.map(transformToOpenRouterTool),
         tool_choice: 'auto',
@@ -141,13 +141,25 @@ export class AIService {
     userMessage: string,
     onStream: StreamCallback,
   ): Promise<void> {
+    // 检查API配置是否有效
+    if (!isConfigValid) {
+      const errorMessage = '❌ API配置无效，请先配置API密钥\n\n💡 请查看控制台获取配置指南'
+      this.addMessage('assistant', errorMessage)
+      onStream({
+        data: errorMessage,
+        isComplete: true,
+        toolCalls: []
+      })
+      return
+    }
+
     // 添加用户消息到历史
     this.addMessage('user', userMessage)
 
     try {
       console.log(
         '发送流式请求到:',
-        `${API_CONFIG.OPENROUTER.HOST}/chat/completions`,
+        `${API_CONFIG.AI.HOST}/chat/completions`,
       )
 
       // 取消之前的请求
@@ -518,13 +530,20 @@ export class AIService {
 
   // 发送消息到AI服务（非流式模式，作为后备方案）
   async sendMessageNonStream(userMessage: string): Promise<string> {
+    // 检查API配置是否有效
+    if (!isConfigValid) {
+      const errorMessage = '❌ API配置无效，请先配置API密钥\n\n💡 请查看控制台获取配置指南'
+      this.addMessage('assistant', errorMessage)
+      return errorMessage
+    }
+
     // 添加用户消息到历史
     this.addMessage('user', userMessage)
 
     try {
       console.log(
         '发送请求到:',
-        `${API_CONFIG.OPENROUTER.HOST}/chat/completions`,
+        `${API_CONFIG.AI.HOST}/chat/completions`,
       )
 
       const config = this.buildRequestConfig({})

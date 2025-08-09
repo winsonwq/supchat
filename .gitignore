@@ -42,6 +42,14 @@ coverage/
 .env.test.local
 .env.production.local
 
+# 本地配置文件（包含API密钥）
+miniprogram/lib/config/local.config.js
+local.config.js
+
+# API密钥和敏感配置
+**/api-keys.json
+**/secrets.json
+
 # 操作系统生成的文件
 .DS_Store
 .DS_Store?
