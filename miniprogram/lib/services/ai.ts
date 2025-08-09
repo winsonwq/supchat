@@ -369,16 +369,21 @@ export class AIService {
         console.log(`执行工具 ${call.function.name}:`, args)
 
         // 通知页面显示正在调用的工具，传递当前工具信息
-        onStream(createStreamContent('', StreamContentType.NORMAL, false, undefined, call))
+        onStream(
+          createStreamContent(
+            '',
+            StreamContentType.NORMAL,
+            false,
+            undefined,
+            call,
+          ),
+        )
 
         const result = await executeToolCall(call.function.name, args, allTools)
         toolResults.push(result)
 
         this.addMessage('tool', result.data, call.id)
-
-        // 通知页面添加工具调用结果消息
-        const toolMessage = formatToolCallMessage(call.function.name, result)
-        onStream(createToolContent(toolMessage, false)) // 清除当前工具显示，但保持 toolCalls 显示
+        onStream(createToolContent(result.data || '', false)) // 清除当前工具显示，但保持 toolCalls 显示
       } catch (error) {
         console.error(`工具调用 ${call.function.name} 失败:`, error)
         const errorObj =
@@ -430,7 +435,9 @@ export class AIService {
       }
     } catch (error) {
       console.error('发送工具结果给AI失败:', error)
-      onStream(createErrorContent('\n\n处理工具调用结果失败，请稍后重试。', true))
+      onStream(
+        createErrorContent('\n\n处理工具调用结果失败，请稍后重试。', true),
+      )
     }
   }
 
@@ -480,7 +487,9 @@ export class AIService {
             undefined,
             toolCalls,
           )
-          onStream(createNormalContent(message?.content || '', false, toolCalls)) // 传递 toolCalls 以便显示工具调用信息
+          onStream(
+            createNormalContent(message?.content || '', false, toolCalls),
+          ) // 传递 toolCalls 以便显示工具调用信息
 
           // 处理工具调用
           await this.handleToolCalls(toolCalls, onStream)
