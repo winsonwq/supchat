@@ -1,0 +1,24 @@
+<!-- 输入区域 -->
+<view class="input-container w-full bg-white border-t border-gray-200 p-6 relative">
+  <!-- 输入框容器 -->
+  <view class="w-full mb-4">
+    <textarea
+      class="message-textarea w-full text-base border-2 border-gray-200 bg-gray-50 overflow-y-auto"
+      placeholder="{{ isStreaming ? 'AI正在回复中...' : '你有什么想知道的，快来问问我' }}"
+      value="{{ inputMessage }}"
+      bindinput="onInputChange"
+      bindconfirm="onConfirm"
+      confirm-type="send"
+      disabled="{{ isLoading }}"
+      auto-height="true"
+      maxlength="1000"
+      show-confirm-bar="false"
+      cursor-spacing="20"
+    />
+  </view>
+  
+  <!-- 底部提示文字 -->
+  <view class="text-center text-xs text-gray-400 leading-tight">
+    内容由 AI 生成，仅供参考
+  </view>
+</view>

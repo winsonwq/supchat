@@ -13,60 +13,47 @@ page {
   overflow: hidden;
 }
 
-/* 消息卡片基础样式 */
+/* 消息卡片基础样式 - 仅保留不能用工具类替代的样式 */
 .message-card {
-  margin-bottom: 8rpx;
-  margin-left: 20rpx;
-  margin-right: 20rpx;
+  /* 使用工具类替代: mb-2 mx-5 */
 }
 
-/* 用户卡片样式 */
+/* 用户卡片样式 - 仅保留不能用工具类替代的样式 */
 .user-card {
-  background: white;
-  color: #333;
-  border-radius: 16rpx;
-  overflow: hidden;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  /* 使用工具类替代: bg-white text-gray-800 rounded-lg overflow-hidden shadow-md */
 }
 
-/* AI卡片样式 */
+/* AI卡片样式 - 仅保留不能用工具类替代的样式 */
 .ai-card {
-  color: #333;
+  /* 使用工具类替代: text-gray-800 */
 }
 
-/* 工具卡片样式 */
+/* 工具卡片样式 - 仅保留不能用工具类替代的样式 */
 .tool-card {
-  background: #f0f8ff;
+  /* 使用工具类替代: rounded-lg overflow-hidden shadow-md border-l-4 border-blue-500 */
+  background: #f0f8ff; /* 淡蓝色背景，工具类中没有直接对应的 */
   color: #333;
-  border-radius: 16rpx;
-  overflow: hidden;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
-  border-left: 4rpx solid #3b82f6;
 }
 
-/* 工具调用信息样式 */
+/* 工具调用信息样式 - 仅保留特殊的背景色和边框 */
 .tool-calls-info {
-  padding: 12rpx 20rpx 8rpx 20rpx;
+  /* 使用工具类替代: px-5 py-3 */
   background: rgba(59, 130, 246, 0.1);
   border-bottom: 1rpx solid rgba(59, 130, 246, 0.2);
 }
 
 .tool-calls-header {
-  margin-bottom: 8rpx;
+  /* 使用工具类替代: mb-2 */
 }
 
 .tool-call-item {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 8rpx;
-  padding: 8rpx 12rpx;
+  /* 使用工具类替代: flex flex-col mb-2 p-3 rounded */
   background: rgba(255, 255, 255, 0.8);
-  border-radius: 8rpx;
   border: 1rpx solid rgba(59, 130, 246, 0.2);
 }
 
 .tool-call-name {
-  margin-bottom: 4rpx;
+  /* 使用工具类替代: mb-1 */
 }
 
 .tool-call-args {
@@ -74,24 +61,19 @@ page {
   line-height: 1.4;
 }
 
-/* 卡片头部 */
+/* 卡片头部 - 仅保留特殊的内边距 */
 .card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  /* 使用工具类替代: flex items-center justify-between */
   padding: 12rpx 20rpx 8rpx 20rpx;
 }
 
 .card-title {
-  font-size: 24rpx;
-  font-weight: 500;
-  color: #666;
+  /* 使用工具类替代: text-xs font-medium text-gray-600 */
 }
 
 /* 流式响应指示器 */
 .streaming-indicator {
-  display: flex;
-  align-items: center;
+  /* 使用工具类替代: flex items-center */
 }
 
 .streaming-dot {
@@ -136,22 +118,19 @@ page {
   }
 }
 
-/* 卡片内容 */
+/* 卡片内容 - 仅保留特殊的内边距 */
 .card-content {
   padding: 16rpx 20rpx 20rpx 20rpx;
 }
 
 .card-text {
-  font-size: 28rpx;
-  line-height: 1.6;
-  white-space: pre-wrap;
+  /* 使用工具类替代: text-sm leading-relaxed whitespace-pre-wrap */
   word-wrap: break-word;
 }
 
 /* Markdown 内容样式 */
 .markdown-content {
-  font-size: 28rpx;
-  line-height: 1.6;
+  /* 使用工具类替代: text-sm leading-relaxed */
 }
 
 /* 代码块样式 */
@@ -241,69 +220,7 @@ page {
   }
 }
 
-/* 输入区域 */
-.input-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  border-top: 1rpx solid #e5e7eb;
-  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  /* iOS安全区域适配 */
-  padding-bottom: env(safe-area-inset-bottom);
-  /* 兼容不支持env()的设备 */
-  padding-bottom: 34rpx;
-}
 
-/* 输入框样式 */
-.message-textarea {
-  transition: all 0.3s ease;
-  resize: none;
-  line-height: 1.5;
-  word-wrap: break-word;
-  overflow-y: auto;
-}
-
-.message-textarea:focus {
-  border-color: #667eea;
-  background: white;
-}
-
-/* 输入框占位符样式 */
-.message-textarea::placeholder {
-  color: #999;
-  line-height: 1.5;
-}
-
-/* 发送按钮 */
-.send-button {
-  background: #e0e0e0;
-  color: #999;
-  transition: all 0.3s ease;
-}
-
-.send-button-active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.send-button:disabled {
-  opacity: 0.5;
-}
-
-/* 取消按钮 */
-.cancel-button {
-  background: #ff4757;
-  color: white;
-  transition: all 0.3s ease;
-}
-
-.cancel-button:active {
-  background: #ff3742;
-  transform: scale(0.95);
-}
 
 /* 底部操作按钮 */
 .action-btn {

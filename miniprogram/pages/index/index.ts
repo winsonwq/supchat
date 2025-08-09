@@ -77,6 +77,11 @@ Component({
       })
     },
 
+    // 处理组件发送事件
+    onSendMessage() {
+      this.sendMessage()
+    },
+
     // 发送消息（流式模式）
     async sendMessage() {
       const message = this.data.inputMessage.trim()

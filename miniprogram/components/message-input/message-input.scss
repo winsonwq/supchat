@@ -1,0 +1,43 @@
+/* 自定义样式，不能直接用工具类替代的部分 */
+
+/* 输入区域 - 特殊的定位和安全区域适配 */
+.input-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  /* iOS安全区域适配 */
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  /* 兼容不支持env()的设备 */
+  padding-bottom: calc(24rpx + 34rpx);
+}
+
+/* 输入框样式 - 需要特殊的圆角和高度限制 */
+.message-textarea {
+  min-height: 88rpx;
+  max-height: 200rpx;
+  padding: 24rpx 32rpx;
+  border-radius: 44rpx;
+  transition: all 0.3s ease;
+  resize: none;
+  word-wrap: break-word;
+  box-sizing: border-box;
+}
+
+.message-textarea:focus {
+  border-color: #3b82f6; /* border-blue-500 */
+  background-color: #ffffff; /* bg-white */
+  outline: none;
+}
+
+.message-textarea:disabled {
+  background-color: #f3f4f6; /* bg-gray-100 */
+  color: #9ca3af; /* text-gray-400 */
+}
+
+/* 输入框占位符样式 */
+.message-textarea::placeholder {
+  color: #9ca3af; /* text-gray-400 */
+  font-size: 32rpx; /* text-base */
+}

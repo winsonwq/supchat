@@ -19,34 +19,14 @@
   <view class="flex flex-col gap-4 p-4" style="padding-bottom: 100px">
     <!-- 欢迎消息 -->
     <view wx:if="{{ messages.length === 0 }}" class="flex justify-center py-10">
-      <view class="p-10 rounded-2xl text-center shadow-lg welcome-card">
-        <text class="block text-lg font-bold text-white mb-5"
+      <view class="p-10 rounded-2xl text-center">
+        <text class="text-lg font-bold mb-5"
           >欢迎使用AI助手</text
         >
-        <text class="block text-sm leading-normal welcome-text"
+        <text class="block text-sm leading-normal"
           >我是你的AI助手，有什么可以帮助你的吗？</text
         >
-        <!-- 测试工具调用按钮 -->
-        <view class="mt-4 flex flex-col gap-2">
-          <button 
-            class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm"
-            bindtap="testToolCall"
-          >
-            测试照片选择
-          </button>
-          <button 
-            class="px-4 py-2 bg-green-500 text-white rounded-lg text-sm"
-            bindtap="testWeatherQuery"
-          >
-            测试天气查询
-          </button>
-          <button 
-            class="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm"
-            bindtap="testToolMessageDisplay"
-          >
-            测试工具消息显示
-          </button>
-        </view>
+
       </view>
     </view>
 
@@ -55,31 +35,28 @@
       wx:for="{{ messages }}"
       wx:key="index"
       id="message-{{ index }}"
-      class="message-card {{ item.role === 'user' ? 'user-card' : item.role === 'tool' ? 'tool-card' : 'ai-card' }}"
+      class="message-card mb-2 mx-5 {{ item.role === 'user' ? 'user-card bg-white text-gray-800 rounded-lg overflow-hidden shadow-md' : item.role === 'tool' ? 'tool-card rounded-lg overflow-hidden shadow-md border-l-4 border-blue-500' : 'ai-card text-gray-800' }}"
     >
       <!-- 卡片头部 -->
-      <view class="card-header">
-        <text class="card-title">
+      <view class="card-header flex items-center justify-between">
+        <text class="card-title text-xs font-medium text-gray-600">
           {{ item.role === 'user' ? '用户' : item.role === 'tool' ? '工具' : 'AI助手' }}
         </text>
         <!-- 流式响应指示器 -->
-        <view wx:if="{{ item.role === 'assistant' && isStreaming && index === messages.length - 1 && !item.content }}" class="streaming-indicator">
+        <view wx:if="{{ item.role === 'assistant' && isStreaming && index === messages.length - 1 && !item.content }}" class="streaming-indicator flex items-center">
           <view class="flex gap-1 items-center">
-            <view class="w-2 h-2 rounded-full bg-blue-500 streaming-dot"></view>
-            <view class="w-2 h-2 rounded-full bg-blue-500 streaming-dot"></view>
-            <view class="w-2 h-2 rounded-full bg-blue-500 streaming-dot"></view>
             <text class="text-xs text-gray-500 ml-2">正在思考...</text>
           </view>
         </view>
       </view>
       
       <!-- 工具调用信息 -->
-      <view wx:if="{{ item.tool_calls && item.tool_calls.length > 0 }}" class="tool-calls-info">
-        <view class="tool-calls-header">
+      <view wx:if="{{ item.tool_calls && item.tool_calls.length > 0 }}" class="tool-calls-info px-5 py-3">
+        <view class="tool-calls-header mb-2">
           <text class="text-sm font-medium text-blue-600">正在调用工具:</text>
         </view>
-        <view wx:for="{{ item.tool_calls }}" wx:key="id" wx:for-item="toolCall" class="tool-call-item">
-          <view class="tool-call-name">
+        <view wx:for="{{ item.tool_calls }}" wx:key="id" wx:for-item="toolCall" class="tool-call-item flex flex-col mb-2 p-3 rounded">
+          <view class="tool-call-name mb-1">
             <text class="text-xs font-medium text-gray-700">{{ toolCall.function.name }}</text>
           </view>
           <view class="tool-call-args">
@@ -93,7 +70,7 @@
         <!-- 使用 towxml 渲染 Markdown 内容 -->
         <towxml wx:if="{{ item.towxmlNodes }}" nodes="{{ item.towxmlNodes }}" />
         <!-- 如果没有 towxml 节点，显示原始文本 -->
-        <text wx:else class="card-text">{{ item.content }}</text>
+        <text wx:else class="card-text text-sm leading-relaxed whitespace-pre-wrap">{{ item.content }}</text>
         <!-- 流式输入光标 -->
         <view wx:if="{{ item.role === 'assistant' && isStreaming && index === messages.length - 1 && item.content }}" class="streaming-cursor">
           <text class="text-blue-500">|</text>
@@ -102,9 +79,9 @@
     </view>
 
     <!-- 加载状态（仅在非流式模式下显示） -->
-    <view wx:if="{{ isLoading && !isStreaming }}" class="message-card ai-card">
-      <view class="card-header">
-        <text class="card-title">AI助手</text>
+    <view wx:if="{{ isLoading && !isStreaming }}" class="message-card mb-2 mx-5 ai-card text-gray-800">
+      <view class="card-header flex items-center justify-between">
+        <text class="card-title text-xs font-medium text-gray-600">AI助手</text>
       </view>
       <view class="card-content">
         <view class="flex gap-2 items-center loading-dots">
@@ -117,39 +94,12 @@
   </view>
 </scroll-view>
 
-<!-- 输入区域 -->
-<view class="input-container">
-  <!-- 输入框和发送按钮 -->
-  <view class="flex items-end gap-3 p-4">
-    <textarea
-      class="flex-1 min-h-14 max-h-28 px-4 py-3 border-2 border-gray-200 rounded-2xl text-sm bg-gray-50 message-textarea"
-      placeholder="{{ isStreaming ? 'AI正在回复中...' : '输入消息...' }}"
-      value="{{ inputMessage }}"
-      bindinput="onInputChange"
-      bindconfirm="sendMessage"
-      confirm-type="send"
-      disabled="{{ isLoading }}"
-      auto-height="true"
-      maxlength="1000"
-      show-confirm-bar="false"
-      cursor-spacing="20"
-    />
-    <!-- 取消按钮（流式响应时显示） -->
-    <button
-      wx:if="{{ isStreaming }}"
-      class="w-16 h-16 rounded-full text-sm border-none cancel-button flex-shrink-0"
-      bindtap="cancelRequest"
-    >
-      取消
-    </button>
-    <!-- 发送按钮 -->
-    <button
-      wx:else
-      class="w-16 h-16 rounded-full text-sm border-none send-button {{ inputMessage.trim() ? 'send-button-active' : '' }} flex-shrink-0"
-      bindtap="sendMessage"
-      disabled="{{ !inputMessage.trim() || isLoading }}"
-    >
-      发送
-    </button>
-  </view>
-</view>
+<!-- 输入组件 -->
+<message-input
+  inputMessage="{{ inputMessage }}"
+  isLoading="{{ isLoading }}"
+  isStreaming="{{ isStreaming }}"
+  bind:inputchange="onInputChange"
+  bind:send="onSendMessage"
+  bind:cancel="cancelRequest"
+></message-input>
