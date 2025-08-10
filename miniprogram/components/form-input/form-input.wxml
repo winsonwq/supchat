@@ -19,7 +19,7 @@
       bindblur="onBlur"
     />
     <view class="form-input__clear" wx:if="{{ value && !disabled }}" bindtap="onClear">
-      <text class="clear-icon">×</text>
+      <svg-icon name="clear" size="32" color="gray"></svg-icon>
     </view>
   </view>
   

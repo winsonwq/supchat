@@ -59,12 +59,12 @@
   border-radius: 50%;
   background-color: #cccccc;
   margin-left: 16rpx;
-}
-
-.clear-icon {
-  font-size: 28rpx;
-  color: #ffffff;
-  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: #999999;
+  }
 }
 
 .form-input__helper {

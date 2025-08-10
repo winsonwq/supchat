@@ -40,10 +40,19 @@
   <!-- 底部用户栏 -->
   <view class="sidebar-bottom-bar">
     <view class="user-info" bindtap="showUserMenu">
-      <view class="user-avatar">
-        <text class="avatar-text">{{userInfo.name ? userInfo.name.charAt(0) : 'U'}}</text>
+      <view class="user-avatar" bindtap="showUserMenu">
+        <!-- 如果有头像URL，显示图片 -->
+        <image wx:if="{{localUserInfo && localUserInfo.avatar}}" 
+               src="{{localUserInfo.avatar}}" 
+               class="avatar-image"
+               mode="aspectFill" />
+        <!-- 否则显示文字头像 -->
+        <text wx:else class="avatar-text">{{localUserInfo && localUserInfo.name ? localUserInfo.name.charAt(0) : 'U'}}</text>
       </view>
-      <text class="user-name">{{userInfo.name || '用户'}}</text>
+      <view class="user-name-wrapper" bindtap="showUserMenu">
+        <text class="user-name">{{localUserInfo && localUserInfo.name || '点击设置昵称'}}</text>
+        <text wx:if="{{!localUserInfo || !localUserInfo.isAuthorized}}" class="auth-hint">未授权</text>
+      </view>
     </view>
     <button class="settings-btn" bindtap="openSettings">
       <svg-icon name="settings" size="36" color="gray" class="settings-icon"></svg-icon>

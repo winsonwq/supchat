@@ -19,6 +19,7 @@
   bind:selectTopic="selectTopic"
   bind:createNewTopic="createNewTopic"
   bind:openSettings="openSettings"
+  bind:userInfoUpdated="onUserInfoUpdated"
 />
 
 <!-- 聊天历史区域 -->

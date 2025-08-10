@@ -82,6 +82,17 @@ Component({
     onCancel() {
       // 触发取消事件
       this.triggerEvent('cancel')
+    },
+
+    // 清空输入框
+    onClear() {
+      this.setData({
+        inputMessage: ''
+      })
+      // 触发输入变化事件
+      this.triggerEvent('inputchange', {
+        value: ''
+      })
     }
   }
 })

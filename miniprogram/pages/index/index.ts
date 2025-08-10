@@ -3,6 +3,8 @@ import { AIService, Message, StreamCallback } from '../../lib/services/ai.js'
 import { StreamContentType } from '../../lib/mcp/types.js'
 import { ToolCall, TowxmlNode, WxEvent } from '../../lib/mcp/types.js'
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
+import { UserInfoStorage } from '../../lib/storage/user-info-storage'
+import { UserInfo } from '../../lib/types/user-info'
 const app = getApp()
 
 Component({
@@ -38,6 +40,8 @@ Component({
       this.calculateViewportHeight()
       // 初始化话题数据
       this.initTopics()
+      // 加载用户信息
+      this.loadUserInfo()
     },
 
     ready() {
@@ -128,6 +132,40 @@ Component({
       this.setData({
         topics: sampleTopics
       })
+    },
+
+    // 加载用户信息
+    loadUserInfo() {
+      const userInfo = UserInfoStorage.getUserInfo()
+      if (userInfo) {
+        this.setData({
+          userInfo: {
+            name: userInfo.name,
+            avatar: userInfo.avatar || ''
+          }
+        })
+      }
+    },
+
+    // 处理用户信息更新
+    onUserInfoUpdated(e: WxEvent) {
+      const { userInfo } = e.detail as { userInfo: UserInfo | null }
+      if (userInfo) {
+        this.setData({
+          userInfo: {
+            name: userInfo.name,
+            avatar: userInfo.avatar || ''
+          }
+        })
+      } else {
+        // 用户信息被清除
+        this.setData({
+          userInfo: {
+            name: '用户',
+            avatar: ''
+          }
+        })
+      }
     },
 
     // 处理消息内容，使用 towxml 解析 Markdown

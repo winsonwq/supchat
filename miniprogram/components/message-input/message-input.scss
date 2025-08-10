@@ -38,3 +38,23 @@
   color: #9ca3af; /* text-gray-400 */
   font-size: 32rpx; /* text-base */
 }
+
+/* 清空按钮样式 */
+.message-input__clear {
+  position: absolute;
+  top: 12rpx;
+  right: 12rpx;
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #e5e7eb; /* bg-gray-200 */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.message-input__clear:hover {
+  background-color: #d1d5db; /* bg-gray-300 */
+}

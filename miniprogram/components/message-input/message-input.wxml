@@ -1,7 +1,7 @@
 <!-- 输入区域 -->
 <view class="input-container w-full bg-white border-t border-gray-200 p-6 relative" style="padding-bottom: calc(24rpx + {{ bottomSafeHeight }}px);">
   <!-- 输入框容器 -->
-  <view class="w-full mb-4">
+  <view class="w-full mb-4 relative">
     <textarea
       class="message-textarea w-full text-base border-2 border-gray-200 bg-gray-50 overflow-y-auto"
       placeholder="{{ isStreaming ? 'AI正在回复中...' : '你有什么想知道的，快来问问我' }}"
@@ -15,6 +15,10 @@
       show-confirm-bar="false"
       cursor-spacing="20"
     />
+    <!-- 清空按钮 -->
+    <view wx:if="{{ inputMessage && !isLoading }}" class="message-input__clear" bindtap="onClear">
+      <svg-icon name="clear" size="32" color="gray"></svg-icon>
+    </view>
   </view>
   
   <!-- 底部提示文字 -->
