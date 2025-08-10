@@ -7,7 +7,6 @@ export interface EnvConfig {
   AI_API_KEY: string
   AI_MODEL: string
   AI_HOST: string
-  AI_PROVIDER?: string // 可选：标识AI服务提供商（如：openrouter, openai, claude等）
   NODE_ENV: 'development' | 'production'
 }
 
@@ -16,7 +15,6 @@ const defaultConfig: EnvConfig = {
   AI_API_KEY: '',
   AI_MODEL: 'anthropic/claude-3.5-sonnet',
   AI_HOST: 'https://openrouter.ai/api/v1',
-  AI_PROVIDER: 'openrouter',
   NODE_ENV: 'development'
 }
 
@@ -42,7 +40,6 @@ function getCurrentConfig(): EnvConfig {
       AI_API_KEY: activeConfig.apiKey,
       AI_MODEL: activeConfig.model,
       AI_HOST: activeConfig.apiHost,
-      AI_PROVIDER: activeConfig.provider,
       NODE_ENV: 'development'
     }
   }

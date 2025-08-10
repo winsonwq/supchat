@@ -133,10 +133,6 @@ export class AIConfigStorage {
       return { isValid: false, message: '请输入配置名称' }
     }
     
-    if (!config.provider?.trim()) {
-      return { isValid: false, message: '请选择服务提供商' }
-    }
-    
     if (!config.apiKey?.trim()) {
       return { isValid: false, message: '请输入API密钥' }
     }

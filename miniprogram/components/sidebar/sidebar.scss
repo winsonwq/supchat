@@ -120,7 +120,7 @@
   align-items: center;
   justify-content: center;
   padding: 12px;
-  background-color: #1976d2;
+  background-color: var(--color-primary);
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -129,10 +129,6 @@
   outline: none;
   font-size: inherit;
   line-height: inherit;
-}
-
-.new-topic-btn:hover {
-  background-color: #1565c0;
 }
 
 .new-topic-icon {

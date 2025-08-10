@@ -8,26 +8,10 @@
 </navigation-bar>
 
 <view class="ai-settings-container" style="padding-top: {{ contentPaddingTop }}px">
-
-  <view class="active-config-section" wx:if="{{ activeConfig }}">
-    <view class="section-header">
-      <text class="section-title">当前激活</text>
-    </view>
-    <view class="active-config-card">
-      <view class="config-info">
-        <text class="config-name">{{ activeConfig.name }}</text>
-        <text class="config-detail">{{ activeConfig.provider }} • {{ activeConfig.model }}</text>
-      </view>
-      <view class="active-badge">
-        <text class="badge-text">激活</text>
-      </view>
-    </view>
-  </view>
-
   <!-- 配置列表 -->
   <view class="configs-section">
     <view class="section-header">
-      <text class="section-title">所有配置</text>
+      <text class="section-title">AI 配置</text>
       <button class="add-button flex align-center gap-4" bindtap="onAddConfig">
         <svg-icon name="plus" size="32" color="white"></svg-icon>
         <text class="add-text">添加</text>
@@ -44,9 +28,12 @@
         data-id="{{ item.id }}"
       >
         <view class="config-content">
+          <view class="config-check" wx:if="{{ item.isActive }}">
+            <svg-icon name="check" size="28" color="white"></svg-icon>
+          </view>
           <view class="config-main">
             <text class="config-name">{{ item.name }}</text>
-            <text class="config-detail">{{ item.provider }} • {{ item.model }}</text>
+            <text class="config-detail">{{ item.model }}</text>
           </view>
           <view class="config-actions">
             <button class="action-btn" bindtap="onEditConfig" data-id="{{ item.id }}" catchtap="true">
@@ -56,9 +43,6 @@
               <svg-icon name="delete" size="32" color="gray"></svg-icon>
             </button>
           </view>
-        </view>
-        <view class="selection-indicator" wx:if="{{ item.isActive }}">
-          <svg-icon name="check" size="24" color="success"></svg-icon>
         </view>
       </view>
     </view>

@@ -73,6 +73,11 @@ Page({
     
     if (!config) return
 
+    // 如果当前配置已经是激活状态，则不做任何操作
+    if (config.isActive) {
+      return
+    }
+
     wx.showModal({
       title: '确认激活',
       content: `是否将 "${config.name}" 设为当前激活的AI配置？`,

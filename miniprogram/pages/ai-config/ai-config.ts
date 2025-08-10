@@ -1,5 +1,5 @@
 // ai-config.ts
-import { AIConfig, AI_PROVIDERS, AIProvider } from '../../lib/types/ai-config'
+import { AIConfig } from '../../lib/types/ai-config'
 import { AIConfigStorage } from '../../lib/storage/ai-config-storage'
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
 
@@ -12,24 +12,16 @@ Page({
     configId: '',
     form: {
       name: '',
-      provider: '',
       apiKey: '',
       apiHost: '',
-      model: '',
-      customModel: ''
+      model: ''
     },
     errors: {
       name: '',
-      provider: '',
       apiKey: '',
       apiHost: '',
-      model: '',
-      customModel: ''
+      model: ''
     },
-    providers: AI_PROVIDERS,
-    selectedProvider: null as AIProvider | null,
-    availableModels: [] as string[],
-    showCustomModel: false,
     canSave: false,
     contentPaddingTop: 0
   },
@@ -60,15 +52,11 @@ Page({
       this.setData({
         form: {
           name: config.name,
-          provider: config.provider,
           apiKey: config.apiKey,
           apiHost: config.apiHost,
-          model: config.model,
-          customModel: ''
+          model: config.model
         }
       })
-      
-      this.updateProviderSelection(config.provider)
       this.validateForm()
     }
   },
@@ -89,81 +77,21 @@ Page({
   },
 
   /**
-   * 服务提供商选择变化
-   */
-  onProviderChange(e: any) {
-    const { value } = e.detail
-    this.setData({
-      'form.provider': value,
-      'errors.provider': ''
-    })
-    
-    this.updateProviderSelection(value)
-    this.validateForm()
-  },
-
-  /**
-   * 更新服务提供商相关信息
-   */
-  updateProviderSelection(providerId: string) {
-    const provider = AI_PROVIDERS.find(p => p.id === providerId)
-    if (provider) {
-      const models = [...provider.models]
-      if (provider.id !== 'custom') {
-        models.push('自定义')
-      }
-      
-      this.setData({
-        selectedProvider: provider,
-        availableModels: models,
-        'form.apiHost': provider.defaultHost,
-        'form.model': '',
-        showCustomModel: false
-      })
-    }
-  },
-
-  /**
-   * 模型选择变化
-   */
-  onModelChange(e: any) {
-    const { value } = e.detail
-    const showCustomModel = value === '自定义'
-    
-    this.setData({
-      'form.model': showCustomModel ? '' : value,
-      'errors.model': '',
-      showCustomModel,
-      'form.customModel': '',
-      'errors.customModel': ''
-    })
-    
-    this.validateForm()
-  },
-
-  /**
    * 表单验证
    */
   validateForm() {
-    const { form, showCustomModel } = this.data
+    const { form } = this.data
     const errors = {
       name: '',
-      provider: '',
       apiKey: '',
       apiHost: '',
-      model: '',
-      customModel: ''
+      model: ''
     }
 
     let isValid = true
 
     if (!form.name.trim()) {
       errors.name = '请输入配置名称'
-      isValid = false
-    }
-
-    if (!form.provider.trim()) {
-      errors.provider = '请选择服务提供商'
       isValid = false
     }
 
@@ -177,13 +105,8 @@ Page({
       isValid = false
     }
 
-    if (showCustomModel) {
-      if (!form.customModel.trim()) {
-        errors.customModel = '请输入自定义模型名称'
-        isValid = false
-      }
-    } else if (!form.model.trim()) {
-      errors.model = '请选择模型'
+    if (!form.model.trim()) {
+      errors.model = '请输入模型名称'
       isValid = false
     }
 
@@ -205,16 +128,14 @@ Page({
       return
     }
 
-    const { form, isEdit, configId, showCustomModel } = this.data
-    const model = showCustomModel ? form.customModel : form.model
+    const { form, isEdit, configId } = this.data
 
     const config: AIConfig = {
       id: isEdit ? configId : AIConfigStorage.generateConfigId(),
       name: form.name.trim(),
-      provider: form.provider,
       apiKey: form.apiKey.trim(),
       apiHost: form.apiHost.trim(),
-      model: model.trim(),
+      model: form.model.trim(),
       isActive: false,
       createdAt: isEdit ? 0 : Date.now(), // 编辑时保持原创建时间
       updatedAt: Date.now()

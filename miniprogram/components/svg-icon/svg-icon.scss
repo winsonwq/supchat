@@ -1,4 +1,7 @@
-/* 简化的 SVG 图标组件样式 */
+svg-icon {
+  display: inline-flex;
+}
+
 .svg-icon {
   display: inline-flex;
   align-items: center;

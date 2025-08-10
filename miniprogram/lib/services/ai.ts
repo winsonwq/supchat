@@ -1,4 +1,5 @@
-import { API_CONFIG, isConfigValid } from '../config/api.js'
+
+import { AIConfigStorage } from '../storage/ai-config-storage.js'
 import {
   transformToOpenRouterTool,
   executeToolCall,
@@ -92,14 +93,40 @@ export class AIService {
     this.messages = []
   }
 
+  // 获取当前激活的AI配置
+  private getActiveAIConfig() {
+    const activeConfig = AIConfigStorage.getActiveConfig()
+    if (!activeConfig) {
+      throw new Error('没有激活的AI配置，请先在设置中配置AI服务')
+    }
+    return activeConfig
+  }
+
+  // 检查AI配置是否有效
+  private isActiveConfigValid(): boolean {
+    try {
+      const activeConfig = AIConfigStorage.getActiveConfig()
+      if (!activeConfig) {
+        return false
+      }
+      
+      const validation = AIConfigStorage.validateConfig(activeConfig)
+      return validation.isValid
+    } catch (error) {
+      return false
+    }
+  }
+
   // 构建请求配置
   private buildRequestConfig(
     data: Record<string, unknown>,
     isStream: boolean = false,
   ): RequestConfig {
+    const aiConfig = this.getActiveAIConfig()
+    
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${API_CONFIG.AI.API_KEY}`,
+      Authorization: `Bearer ${aiConfig.apiKey}`,
     }
 
     if (isStream) {
@@ -107,11 +134,11 @@ export class AIService {
     }
 
     return {
-      url: `${API_CONFIG.AI.HOST}/chat/completions`,
+      url: `${aiConfig.apiHost}/chat/completions`,
       method: 'POST',
       headers,
       data: {
-        model: API_CONFIG.AI.MODEL,
+        model: aiConfig.model,
         messages: this.getMessages(),
         tools: allTools.map(transformToOpenRouterTool),
         tool_choice: 'auto',
@@ -148,10 +175,10 @@ export class AIService {
     userMessage: string,
     onStream: StreamCallback,
   ): Promise<void> {
-    // 检查API配置是否有效
-    if (!isConfigValid) {
+    // 检查AI配置是否有效
+    if (!this.isActiveConfigValid()) {
       const errorMessage =
-        '❌ API配置无效，请先配置API密钥\n\n💡 请查看控制台获取配置指南'
+        '❌ AI配置无效或未激活，请先在设置中配置并激活AI服务\n\n💡 前往：设置 → AI设置'
       this.addMessage('assistant', errorMessage)
       onStream(createErrorContent(errorMessage, true))
       return
@@ -161,7 +188,8 @@ export class AIService {
     this.addMessage('user', userMessage)
 
     try {
-      console.log('发送流式请求到:', `${API_CONFIG.AI.HOST}/chat/completions`)
+      const aiConfig = this.getActiveAIConfig()
+      console.log('发送流式请求到:', `${aiConfig.apiHost}/chat/completions`)
 
       // 取消之前的请求
       this.cancelPreviousRequest()
@@ -514,10 +542,10 @@ export class AIService {
 
   // 发送消息到AI服务（非流式模式，作为后备方案）
   async sendMessageNonStream(userMessage: string): Promise<string> {
-    // 检查API配置是否有效
-    if (!isConfigValid) {
+    // 检查AI配置是否有效
+    if (!this.isActiveConfigValid()) {
       const errorMessage =
-        '❌ API配置无效，请先配置API密钥\n\n💡 请查看控制台获取配置指南'
+        '❌ AI配置无效或未激活，请先在设置中配置并激活AI服务\n\n💡 前往：设置 → AI设置'
       this.addMessage('assistant', errorMessage)
       return errorMessage
     }
@@ -526,7 +554,8 @@ export class AIService {
     this.addMessage('user', userMessage)
 
     try {
-      console.log('发送请求到:', `${API_CONFIG.AI.HOST}/chat/completions`)
+      const aiConfig = this.getActiveAIConfig()
+      console.log('发送请求到:', `${aiConfig.apiHost}/chat/completions`)
 
       const config = this.buildRequestConfig({})
       console.log('请求数据:', config.data)

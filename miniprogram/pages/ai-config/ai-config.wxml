@@ -22,18 +22,6 @@
         bindinput="onInputChange"
         data-field="name"
       />
-      
-      <form-select
-        label="服务提供商"
-        placeholder="请选择服务提供商"
-        options="{{ providers }}"
-        option-key="id"
-        option-label="name"
-        value="{{ form.provider }}"
-        required="{{ true }}"
-        error="{{ errors.provider }}"
-        bindchange="onProviderChange"
-      />
     </view>
 
     <!-- API配置 -->
@@ -57,33 +45,19 @@
         value="{{ form.apiHost }}"
         required="{{ true }}"
         error="{{ errors.apiHost }}"
-        helper="{{ selectedProvider ? selectedProvider.description : '' }}"
+        helper="API服务地址"
         bindinput="onInputChange"
         data-field="apiHost"
       />
       
-      <form-select
+      <form-input
         label="模型"
-        placeholder="请选择模型"
-        options="{{ availableModels }}"
+        placeholder="请输入模型名称，如：gpt-4o、claude-3-5-sonnet-20241022"
         value="{{ form.model }}"
         required="{{ true }}"
         error="{{ errors.model }}"
-        bindchange="onModelChange"
-      />
-    </view>
-
-    <!-- 自定义模型输入（当选择自定义时显示） -->
-    <view class="form-section" wx:if="{{ showCustomModel }}">
-      <form-input
-        label="自定义模型名称"
-        placeholder="请输入模型名称"
-        value="{{ form.customModel }}"
-        required="{{ true }}"
-        error="{{ errors.customModel }}"
-        helper="请输入完整的模型名称，如：gpt-4o、claude-3-5-sonnet-20241022"
         bindinput="onInputChange"
-        data-field="customModel"
+        data-field="model"
       />
     </view>
   </view>

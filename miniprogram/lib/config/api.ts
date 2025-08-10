@@ -27,8 +27,7 @@ export const API_CONFIG = {
   AI: {
     HOST: env.AI_HOST,
     API_KEY: env.AI_API_KEY,
-    MODEL: env.AI_MODEL,
-    PROVIDER: env.AI_PROVIDER || 'generic'
+    MODEL: env.AI_MODEL
   }
 }
 
