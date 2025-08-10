@@ -11,7 +11,7 @@
   <!-- AI 配置分组 -->
   <settings-group title="AI 配置" description="管理你的 AI 服务配置">
     <settings-menu-item
-      icon="AI"
+      icon="settings"
       title="AI 设置"
       description="配置 AI 服务提供商和参数"
       bindtap="onAISettings"
@@ -21,7 +21,7 @@
   <!-- 功能设置分组 -->
   <settings-group title="功能设置" description="扩展功能配置">
     <settings-menu-item
-      icon="插件"
+      icon="plus"
       title="MCP Servers"
       description="模型上下文协议服务器设置"
       bindtap="onMCPSettings"
@@ -31,7 +31,7 @@
   <!-- 其他设置分组 -->
   <settings-group title="其他" description="应用相关设置">
     <settings-menu-item
-      icon="关于"
+      icon="user"
       title="关于"
       description="应用版本和信息"
       bindtap="onAbout"

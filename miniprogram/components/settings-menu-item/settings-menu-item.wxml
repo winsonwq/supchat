@@ -5,7 +5,7 @@
   bindtap="onTap"
 >
   <view class="settings-menu-item__icon" wx:if="{{ icon }}">
-    <text class="icon-text">{{ icon }}</text>
+    <svg-icon name="{{ icon }}" size="40" color="gray"></svg-icon>
   </view>
   
   <view class="settings-menu-item__content">
@@ -14,7 +14,7 @@
   </view>
   
   <view class="settings-menu-item__arrow" wx:if="{{ showArrow }}">
-    <text class="arrow-icon">›</text>
+    <svg-icon name="arrow-right" size="40" color="gray"></svg-icon>
   </view>
   
   <view class="settings-menu-item__badge" wx:if="{{ badge }}">

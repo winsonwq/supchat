@@ -31,10 +31,10 @@
 
   <!-- 新建话题按钮 -->
   <view class="sidebar-footer">
-    <view class="new-topic-btn" bindtap="createNewTopic">
-      <view class="new-topic-icon">+</view>
+    <button class="new-topic-btn" bindtap="createNewTopic">
+      <svg-icon name="plus" size="32" color="white" class="new-topic-icon"></svg-icon>
       <text class="new-topic-text">新建话题</text>
-    </view>
+    </button>
   </view>
 
   <!-- 底部用户栏 -->
@@ -45,8 +45,8 @@
       </view>
       <text class="user-name">{{userInfo.name || '用户'}}</text>
     </view>
-    <view class="settings-btn" bindtap="openSettings">
-      <view class="settings-icon"></view>
-    </view>
+    <button class="settings-btn" bindtap="openSettings">
+      <svg-icon name="settings" size="36" color="gray" class="settings-icon"></svg-icon>
+    </button>
   </view>
 </view>

@@ -30,6 +30,11 @@
   background-color: #007aff;
   border-radius: 24rpx;
   padding: 12rpx 24rpx;
+  border: none;
+  outline: none;
+  font-size: inherit;
+  line-height: inherit;
+  cursor: pointer;
 }
 
 .add-icon {
@@ -138,6 +143,11 @@
   background-color: #f5f5f5;
   transition: background-color 0.2s ease;
   padding: 0 16rpx;
+  border: none;
+  outline: none;
+  font-size: inherit;
+  line-height: inherit;
+  cursor: pointer;
 }
 
 .action-btn:active {

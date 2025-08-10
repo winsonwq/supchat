@@ -53,6 +53,8 @@ button {
   outline: none;
   background-image: none;
   box-sizing: border-box;
+  width: auto !important;
+  height: auto !important;
 }
 
 button::after {
