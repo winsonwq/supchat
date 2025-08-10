@@ -1,0 +1,11 @@
+<!-- 设置分组组件 -->
+<view class="settings-group">
+  <view class="settings-group__header" wx:if="{{ title }}">
+    <text class="settings-group__title">{{ title }}</text>
+    <text class="settings-group__description" wx:if="{{ description }}">{{ description }}</text>
+  </view>
+  
+  <view class="settings-group__content">
+    <slot></slot>
+  </view>
+</view>

@@ -1,0 +1,78 @@
+/* AI配置编辑页面样式 */
+.ai-config-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding-bottom: 160rpx; /* 为底部按钮留出空间 */
+  box-sizing: border-box;
+}
+
+.config-form {
+  padding: 32rpx;
+}
+
+.form-section {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 32rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+/* 底部按钮区域 */
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  padding: 32rpx;
+  border-top: 1rpx solid #f0f0f0;
+  z-index: 100;
+}
+
+.btn-group {
+  display: flex;
+  gap: 24rpx;
+}
+
+.btn {
+  flex: 1;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  border: none;
+  outline: none;
+  transition: opacity 0.2s ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+}
+
+.btn-primary {
+  background-color: #007aff;
+  color: #ffffff;
+}
+
+.btn-primary:disabled {
+  background-color: #cccccc;
+}
+
+.btn-secondary {
+  background-color: #f5f5f5;
+  color: #666666;
+  border: 2rpx solid #e5e5e5;
+}

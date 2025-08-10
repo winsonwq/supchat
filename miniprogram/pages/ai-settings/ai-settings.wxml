@@ -1,0 +1,73 @@
+<!--ai-settings.wxml-->
+<navigation-bar
+  title="AI 设置"
+  back="{{ true }}"
+  color="black"
+  background="#FFF"
+>
+</navigation-bar>
+
+<view class="ai-settings-container" style="padding-top: {{ contentPaddingTop }}px">
+  <!-- 当前激活的配置 -->
+  <view class="active-config-section" wx:if="{{ activeConfig }}">
+    <view class="section-header">
+      <text class="section-title">当前激活</text>
+    </view>
+    <view class="active-config-card">
+      <view class="config-info">
+        <text class="config-name">{{ activeConfig.name }}</text>
+        <text class="config-detail">{{ activeConfig.provider }} • {{ activeConfig.model }}</text>
+      </view>
+      <view class="active-badge">
+        <text class="badge-text">激活</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 配置列表 -->
+  <view class="configs-section">
+    <view class="section-header">
+      <text class="section-title">所有配置</text>
+      <view class="add-button" bindtap="onAddConfig">
+        <text class="add-icon">+</text>
+        <text class="add-text">添加</text>
+      </view>
+    </view>
+
+    <!-- 配置列表 -->
+    <view class="configs-list" wx:if="{{ configs.length > 0 }}">
+      <view 
+        wx:for="{{ configs }}" 
+        wx:key="id" 
+        class="config-item {{ item.isActive ? 'config-item--active' : '' }}"
+        bindtap="onSelectConfig"
+        data-id="{{ item.id }}"
+      >
+        <view class="config-content">
+          <view class="config-main">
+            <text class="config-name">{{ item.name }}</text>
+            <text class="config-detail">{{ item.provider }} • {{ item.model }}</text>
+          </view>
+          <view class="config-actions">
+            <view class="action-btn" bindtap="onEditConfig" data-id="{{ item.id }}" catchtap="true">
+              <text class="action-icon">编辑</text>
+            </view>
+            <view class="action-btn" bindtap="onDeleteConfig" data-id="{{ item.id }}" catchtap="true">
+              <text class="action-icon">删除</text>
+            </view>
+          </view>
+        </view>
+        <view class="selection-indicator" wx:if="{{ item.isActive }}">
+          <text class="indicator-text">✓</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:else>
+      <view class="empty-icon">AI</view>
+      <text class="empty-title">暂无AI配置</text>
+      <text class="empty-description">点击上方"添加"按钮创建你的第一个AI配置</text>
+    </view>
+  </view>
+</view>

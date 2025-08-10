@@ -3,6 +3,7 @@
 interface IAppOption {
   globalData: {
     userInfo?: WechatMiniprogram.UserInfo,
+    safeAreaTop: number,
   }
   towxml: any,
   userInfoReadyCallback?: WechatMiniprogram.GetUserInfoSuccessCallback,

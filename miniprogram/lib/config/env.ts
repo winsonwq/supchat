@@ -1,6 +1,8 @@
 // 环境变量读取工具
 // 注意：微信小程序不支持 process.env，这里提供一个配置接口
 
+import { AIConfigStorage } from '../storage/ai-config-storage'
+
 export interface EnvConfig {
   AI_API_KEY: string
   AI_MODEL: string
@@ -9,7 +11,7 @@ export interface EnvConfig {
   NODE_ENV: 'development' | 'production'
 }
 
-// 默认配置（用于开发环境）
+// 默认配置（用于开发环境和后备）
 const defaultConfig: EnvConfig = {
   AI_API_KEY: '',
   AI_MODEL: 'anthropic/claude-3.5-sonnet',
@@ -18,7 +20,7 @@ const defaultConfig: EnvConfig = {
   NODE_ENV: 'development'
 }
 
-// 尝试加载本地配置文件
+// 尝试加载本地配置文件（后备方案）
 let localConfig: Partial<EnvConfig> = {}
 
 try {
@@ -26,14 +28,40 @@ try {
   // 这个文件应该被gitignore忽略
   localConfig = require('./local.config.js') || {}
 } catch (error) {
-  console.warn('未找到本地配置文件，使用默认配置')
-  console.warn('请复制 local.config.example.js 为 local.config.js 并配置API密钥')
+  // 本地配置文件不存在，这是正常情况
+  // 现在优先使用UI配置的AI设置
 }
 
-// 合并配置
-export const env: EnvConfig = {
-  ...defaultConfig,
-  ...localConfig
+// 获取当前生效的配置
+function getCurrentConfig(): EnvConfig {
+  // 优先使用UI配置的激活AI设置
+  const activeConfig = AIConfigStorage.getActiveConfig()
+  
+  if (activeConfig) {
+    return {
+      AI_API_KEY: activeConfig.apiKey,
+      AI_MODEL: activeConfig.model,
+      AI_HOST: activeConfig.apiHost,
+      AI_PROVIDER: activeConfig.provider,
+      NODE_ENV: 'development'
+    }
+  }
+  
+  // 后备方案：使用本地配置文件或默认配置
+  return {
+    ...defaultConfig,
+    ...localConfig
+  }
+}
+
+// 导出动态配置
+export const env: EnvConfig = getCurrentConfig()
+
+// 刷新配置的方法（在AI设置变更后调用）
+export function refreshEnvConfig(): EnvConfig {
+  const newConfig = getCurrentConfig()
+  Object.assign(env, newConfig)
+  return env
 }
 
 // 验证必要的配置项

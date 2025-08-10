@@ -1,66 +1,49 @@
 // settings.ts
+import { getNavigationHeight } from '../../lib/utils/navigation-height'
+
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-
+    contentPaddingTop: 0
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad() {
-
+    // 计算内容顶部间距
+    const paddingTop = getNavigationHeight() + 16 // 16px = 32rpx
+    this.setData({ contentPaddingTop: paddingTop })
   },
 
   /**
-   * 生命周期函数--监听页面初次渲染完成
+   * AI 设置
    */
-  onReady() {
-
+  onAISettings() {
+    wx.navigateTo({
+      url: '/pages/ai-settings/ai-settings'
+    })
   },
 
   /**
-   * 生命周期函数--监听页面显示
+   * MCP Servers 设置
    */
-  onShow() {
-
+  onMCPSettings() {
+    wx.navigateTo({
+      url: '/pages/mcp-settings/mcp-settings'
+    })
   },
 
   /**
-   * 生命周期函数--监听页面隐藏
+   * 关于页面
    */
-  onHide() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
-
+  onAbout() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none'
+    })
   }
 })

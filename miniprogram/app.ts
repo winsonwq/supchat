@@ -1,6 +1,11 @@
+import getSafeArea from './lib/utils/safe-area'
+const safeAreaData = getSafeArea()
+
 // app.ts
 App<IAppOption>({
-  globalData: {},
+  globalData: {
+    safeAreaTop: safeAreaData.safeAreaTop,
+  },
   towxml: require('/towxml/index'),
   onLaunch() {
     // 展示本地存储能力

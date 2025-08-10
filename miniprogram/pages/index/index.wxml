@@ -24,13 +24,14 @@
 <!-- 聊天历史区域 -->
 <scroll-view
   class="chat-scroll-view"
+  style="padding-top: {{ chatScrollTopPadding }}px"
   scroll-y="true"
   scroll-into-view="{{ scrollToMessage }}"
   scroll-with-animation="true"
   enhanced="true"
   show-scrollbar="false"
 >
-  <view class="flex flex-col gap-4 p-6" style="padding-bottom: 120px">
+  <view class="flex flex-col gap-4 p-6">
     <!-- 欢迎消息 -->
     <view wx:if="{{ messages.length === 0 }}" class="flex justify-center py-10">
       <view class="p-10 rounded-2xl text-center">

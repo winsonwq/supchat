@@ -1,0 +1,31 @@
+/* 设置分组组件样式 */
+.settings-group {
+  margin-bottom: 32rpx;
+}
+
+.settings-group__header {
+  padding: 32rpx 32rpx 16rpx 32rpx;
+}
+
+.settings-group__title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #666666;
+  text-transform: uppercase;
+  letter-spacing: 0.5rpx;
+}
+
+.settings-group__description {
+  font-size: 24rpx;
+  color: #999999;
+  margin-top: 8rpx;
+  line-height: 1.4;
+}
+
+.settings-group__content {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  margin: 0 32rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}

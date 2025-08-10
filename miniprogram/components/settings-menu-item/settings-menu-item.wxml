@@ -1,0 +1,23 @@
+<!-- 设置菜单项组件 -->
+<view 
+  class="settings-menu-item" 
+  hover-class="settings-menu-item--hover"
+  bindtap="onTap"
+>
+  <view class="settings-menu-item__icon" wx:if="{{ icon }}">
+    <text class="icon-text">{{ icon }}</text>
+  </view>
+  
+  <view class="settings-menu-item__content">
+    <text class="settings-menu-item__title">{{ title }}</text>
+    <text class="settings-menu-item__description" wx:if="{{ description }}">{{ description }}</text>
+  </view>
+  
+  <view class="settings-menu-item__arrow" wx:if="{{ showArrow }}">
+    <text class="arrow-icon">›</text>
+  </view>
+  
+  <view class="settings-menu-item__badge" wx:if="{{ badge }}">
+    <text class="badge-text">{{ badge }}</text>
+  </view>
+</view>

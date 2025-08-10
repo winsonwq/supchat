@@ -1,6 +1,8 @@
 {
   "usingComponents": {
-    "navigation-bar": "../../components/navigation-bar/navigation-bar"
+    "navigation-bar": "../../components/navigation-bar/navigation-bar",
+    "settings-group": "../../components/settings-group/settings-group",
+    "settings-menu-item": "../../components/settings-menu-item/settings-menu-item"
   },
   "navigationStyle": "custom"
 }

@@ -7,12 +7,34 @@
 >
 </navigation-bar>
 
-<view class="settings-container">
-  <view class="settings-content">
-    <view class="empty-state">
-      <view class="empty-icon">⚙️</view>
-      <text class="empty-title">设置页面</text>
-      <text class="empty-description">功能正在开发中，敬请期待...</text>
-    </view>
-  </view>
-</view>
+<scroll-view class="settings-container" style="padding-top: {{ contentPaddingTop }}px" scroll-y="true">
+  <!-- AI 配置分组 -->
+  <settings-group title="AI 配置" description="管理你的 AI 服务配置">
+    <settings-menu-item
+      icon="AI"
+      title="AI 设置"
+      description="配置 AI 服务提供商和参数"
+      bindtap="onAISettings"
+    />
+  </settings-group>
+
+  <!-- 功能设置分组 -->
+  <settings-group title="功能设置" description="扩展功能配置">
+    <settings-menu-item
+      icon="插件"
+      title="MCP Servers"
+      description="模型上下文协议服务器设置"
+      bindtap="onMCPSettings"
+    />
+  </settings-group>
+
+  <!-- 其他设置分组 -->
+  <settings-group title="其他" description="应用相关设置">
+    <settings-menu-item
+      icon="关于"
+      title="关于"
+      description="应用版本和信息"
+      bindtap="onAbout"
+    />
+  </settings-group>
+</scroll-view>

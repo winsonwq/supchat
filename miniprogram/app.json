@@ -1,7 +1,10 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/settings/settings"
+    "pages/settings/settings",
+    "pages/ai-settings/ai-settings",
+    "pages/ai-config/ai-config",
+    "pages/mcp-settings/mcp-settings"
   ],
   "window": {
     "navigationBarTextStyle": "black",

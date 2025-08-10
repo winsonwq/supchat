@@ -578,6 +578,13 @@
 .z-40 { z-index: 40; }
 .z-50 { z-index: 50; }
 
+/* ===== 导航栏间距工具类 ===== */
+
+/* 页面内容顶部间距（用于固定导航栏的页面） */
+.content-with-navbar {
+  padding-top: var(--navbar-height, 88px); /* 默认88px，iOS 44px + 44px安全区域 */
+}
+
 /* ===== 常用组合类 ===== */
 
 /* 卡片样式 */

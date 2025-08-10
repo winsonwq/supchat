@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "navigation-bar": "../../components/navigation-bar/navigation-bar",
+    "form-input": "../../components/form-input/form-input",
+    "form-select": "../../components/form-select/form-select"
+  },
+  "navigationStyle": "custom"
+}

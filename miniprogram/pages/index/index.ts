@@ -2,6 +2,7 @@
 import { AIService, Message, StreamCallback } from '../../lib/services/ai.js'
 import { StreamContentType } from '../../lib/mcp/types.js'
 import { ToolCall, TowxmlNode, WxEvent } from '../../lib/mcp/types.js'
+import { getNavigationHeight } from '../../lib/utils/navigation-height'
 const app = getApp()
 
 Component({
@@ -14,6 +15,8 @@ Component({
     emptyMessage: {} as Message, // 空消息对象，用于加载状态
     viewportHeight: 0, // viewport 高度
     scrollViewHeight: 0, // 聊天区域高度
+    chatScrollTopPadding: 0, // 聊天区域顶部间距
+
     // 侧边栏相关数据
     sidebarOpen: false,
     topics: [] as any[],
@@ -26,6 +29,9 @@ Component({
 
   lifetimes: {
     attached() {
+      // 计算安全区域和导航栏高度
+      this.calculateSafeAreaPadding()
+      
       // 页面加载时初始化并加载消息历史
       this.loadMessageHistory()
       // 计算 viewport 高度
@@ -48,6 +54,15 @@ Component({
   },
 
   methods: {
+    // 计算安全区域顶部间距
+    calculateSafeAreaPadding() {
+      const topPadding = getNavigationHeight()
+      
+      this.setData({
+        chatScrollTopPadding: topPadding
+      })
+    },
+
     // 获取 AI 服务实例
     getAIService(): AIService {
       return AIService.getInstance()

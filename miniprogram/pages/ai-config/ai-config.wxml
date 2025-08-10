@@ -1,0 +1,100 @@
+<!--ai-config.wxml-->
+<navigation-bar
+  title="{{ isEdit ? '编辑AI配置' : '新增AI配置' }}"
+  back="{{ true }}"
+  color="black"
+  background="#FFF"
+>
+</navigation-bar>
+
+<scroll-view class="ai-config-container" style="padding-top: {{ contentPaddingTop }}px" scroll-y="true">
+  <view class="config-form">
+    <!-- 基本信息 -->
+    <view class="form-section">
+      <view class="section-title">基本信息</view>
+      
+      <form-input
+        label="配置名称"
+        placeholder="例如：GPT-4o、Claude 3.5 Sonnet"
+        value="{{ form.name }}"
+        required="{{ true }}"
+        error="{{ errors.name }}"
+        bindinput="onInputChange"
+        data-field="name"
+      />
+      
+      <form-select
+        label="服务提供商"
+        placeholder="请选择服务提供商"
+        options="{{ providers }}"
+        option-key="id"
+        option-label="name"
+        value="{{ form.provider }}"
+        required="{{ true }}"
+        error="{{ errors.provider }}"
+        bindchange="onProviderChange"
+      />
+    </view>
+
+    <!-- API配置 -->
+    <view class="form-section">
+      <view class="section-title">API配置</view>
+      
+      <form-input
+        label="API密钥"
+        placeholder="请输入API密钥"
+        value="{{ form.apiKey }}"
+        password="{{ true }}"
+        required="{{ true }}"
+        error="{{ errors.apiKey }}"
+        bindinput="onInputChange"
+        data-field="apiKey"
+      />
+      
+      <form-input
+        label="API地址"
+        placeholder="API服务地址"
+        value="{{ form.apiHost }}"
+        required="{{ true }}"
+        error="{{ errors.apiHost }}"
+        helper="{{ selectedProvider ? selectedProvider.description : '' }}"
+        bindinput="onInputChange"
+        data-field="apiHost"
+      />
+      
+      <form-select
+        label="模型"
+        placeholder="请选择模型"
+        options="{{ availableModels }}"
+        value="{{ form.model }}"
+        required="{{ true }}"
+        error="{{ errors.model }}"
+        bindchange="onModelChange"
+      />
+    </view>
+
+    <!-- 自定义模型输入（当选择自定义时显示） -->
+    <view class="form-section" wx:if="{{ showCustomModel }}">
+      <form-input
+        label="自定义模型名称"
+        placeholder="请输入模型名称"
+        value="{{ form.customModel }}"
+        required="{{ true }}"
+        error="{{ errors.customModel }}"
+        helper="请输入完整的模型名称，如：gpt-4o、claude-3-5-sonnet-20241022"
+        bindinput="onInputChange"
+        data-field="customModel"
+      />
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-actions">
+    <view class="btn-group">
+      <button class="btn btn-secondary" bindtap="onCancel">取消</button>
+      <button class="btn btn-primary" bindtap="onSave" disabled="{{ !canSave }}">
+        {{ isEdit ? '保存' : '创建' }}
+      </button>
+    </view>
+  </view>
+</scroll-view>

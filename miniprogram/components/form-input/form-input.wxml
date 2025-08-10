@@ -1,0 +1,29 @@
+<!-- 表单输入组件 -->
+<view class="form-input">
+  <view class="form-input__label" wx:if="{{ label }}">
+    <text class="label-text">{{ label }}</text>
+    <text class="required-mark" wx:if="{{ required }}">*</text>
+  </view>
+  
+  <view class="form-input__wrapper {{ error ? 'form-input__wrapper--error' : '' }}">
+    <input
+      class="form-input__field"
+      type="{{ type }}"
+      placeholder="{{ placeholder }}"
+      value="{{ value }}"
+      disabled="{{ disabled }}"
+      maxlength="{{ maxlength }}"
+      password="{{ password }}"
+      bindinput="onInput"
+      bindfocus="onFocus"
+      bindblur="onBlur"
+    />
+    <view class="form-input__clear" wx:if="{{ value && !disabled }}" bindtap="onClear">
+      <text class="clear-icon">×</text>
+    </view>
+  </view>
+  
+  <view class="form-input__helper" wx:if="{{ helper || error }}">
+    <text class="helper-text {{ error ? 'helper-text--error' : '' }}">{{ error || helper }}</text>
+  </view>
+</view>

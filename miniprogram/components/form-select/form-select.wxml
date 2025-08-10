@@ -1,0 +1,28 @@
+<!-- 表单选择组件 -->
+<view class="form-select">
+  <view class="form-select__label" wx:if="{{ label }}">
+    <text class="label-text">{{ label }}</text>
+    <text class="required-mark" wx:if="{{ required }}">*</text>
+  </view>
+  
+  <view class="form-select__wrapper {{ error ? 'form-select__wrapper--error' : '' }}">
+    <picker
+      range="{{ options }}"
+      range-key="{{ optionKey }}"
+      value="{{ selectedIndex }}"
+      disabled="{{ disabled }}"
+      bindchange="onChange"
+    >
+      <view class="form-select__field">
+        <text class="select-text {{ !selectedOption ? 'select-text--placeholder' : '' }}">
+          {{ selectedOption ? selectedOption[optionLabel] : placeholder }}
+        </text>
+        <text class="select-arrow">▼</text>
+      </view>
+    </picker>
+  </view>
+  
+  <view class="form-select__helper" wx:if="{{ helper || error }}">
+    <text class="helper-text {{ error ? 'helper-text--error' : '' }}">{{ error || helper }}</text>
+  </view>
+</view>

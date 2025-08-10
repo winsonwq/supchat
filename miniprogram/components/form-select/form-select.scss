@@ -1,0 +1,74 @@
+/* 表单选择组件样式 */
+.form-select {
+  margin-bottom: 32rpx;
+}
+
+.form-select__label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.label-text {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333333;
+}
+
+.required-mark {
+  font-size: 28rpx;
+  color: #ff4757;
+  margin-left: 4rpx;
+}
+
+.form-select__wrapper {
+  background-color: #ffffff;
+  border: 2rpx solid #e5e5e5;
+  border-radius: 12rpx;
+  transition: border-color 0.2s ease;
+}
+
+.form-select__wrapper--error {
+  border-color: #ff4757;
+}
+
+.form-select__field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx;
+  height: 88rpx;
+  box-sizing: border-box;
+}
+
+.select-text {
+  flex: 1;
+  font-size: 32rpx;
+  color: #333333;
+}
+
+.select-text--placeholder {
+  color: #999999;
+}
+
+.select-arrow {
+  font-size: 24rpx;
+  color: #999999;
+  margin-left: 16rpx;
+  transition: transform 0.2s ease;
+}
+
+.form-select__helper {
+  margin-top: 12rpx;
+  padding-left: 4rpx;
+}
+
+.helper-text {
+  font-size: 24rpx;
+  color: #999999;
+  line-height: 1.3;
+}
+
+.helper-text--error {
+  color: #ff4757;
+}
