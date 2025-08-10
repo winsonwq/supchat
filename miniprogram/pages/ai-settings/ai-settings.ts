@@ -110,11 +110,24 @@ Page({
     const configId = e.currentTarget.dataset.id
     const config = this.data.configs.find(c => c.id === configId)
     
-    if (!config) return
+    if (!config) {
+      wx.showToast({
+        title: '配置不存在',
+        icon: 'error'
+      })
+      return
+    }
+
+    // 如果要删除的是当前激活的配置，给出更明确的提示
+    const warningContent = config.isActive 
+      ? `"${config.name}" 是当前使用的配置，删除后将无激活配置。确定要删除吗？`
+      : `是否删除配置 "${config.name}"？删除后无法恢复。`
 
     wx.showModal({
       title: '确认删除',
-      content: `是否删除配置 "${config.name}"？删除后无法恢复。`,
+      content: warningContent,
+      confirmText: '删除',
+      confirmColor: '#ff4757',
       success: (res) => {
         if (res.confirm) {
           const success = AIConfigStorage.deleteConfig(configId)
@@ -123,6 +136,10 @@ Page({
               title: '删除成功',
               icon: 'success'
             })
+            // 如果删除的是激活配置，刷新环境配置
+            if (config.isActive) {
+              refreshEnvConfig()
+            }
             this.loadConfigs()
           } else {
             wx.showToast({

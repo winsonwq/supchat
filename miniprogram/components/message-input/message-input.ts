@@ -1,5 +1,6 @@
 // message-input.ts
 import { WxEvent } from '../../lib/mcp/types.js'
+import getSafeArea from '../../lib/utils/safe-area'
 
 Component({
   /**
@@ -27,7 +28,20 @@ Component({
    * 组件的初始数据
    */
   data: {
+    bottomSafeHeight: 0
+  },
 
+  /**
+   * 组件生命周期
+   */
+  lifetimes: {
+    attached() {
+      // 计算底部安全区域
+      const safeArea = getSafeArea()
+      this.setData({
+        bottomSafeHeight: safeArea.safeAreaBottom
+      })
+    }
   },
 
   /**

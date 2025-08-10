@@ -2,6 +2,7 @@
 import { AIConfig } from '../../lib/types/ai-config'
 import { AIConfigStorage } from '../../lib/storage/ai-config-storage'
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
+import getSafeArea from '../../lib/utils/safe-area'
 
 Page({
   /**
@@ -23,7 +24,8 @@ Page({
       model: ''
     },
     canSave: false,
-    contentPaddingTop: 0
+    contentPaddingTop: 0,
+    bottomSafeHeight: 0
   },
 
   /**
@@ -32,7 +34,15 @@ Page({
   onLoad(options: any) {
     // 计算内容顶部间距
     const paddingTop = getNavigationHeight()
-    this.setData({ contentPaddingTop: paddingTop })
+    
+    // 计算底部安全区域高度
+    const safeArea = getSafeArea()
+    const bottomSafeHeight = safeArea.safeAreaBottom
+    
+    this.setData({ 
+      contentPaddingTop: paddingTop,
+      bottomSafeHeight: bottomSafeHeight
+    })
     
     const { id } = options
     if (id) {
@@ -130,15 +140,33 @@ Page({
 
     const { form, isEdit, configId } = this.data
 
-    const config: AIConfig = {
-      id: isEdit ? configId : AIConfigStorage.generateConfigId(),
-      name: form.name.trim(),
-      apiKey: form.apiKey.trim(),
-      apiHost: form.apiHost.trim(),
-      model: form.model.trim(),
-      isActive: false,
-      createdAt: isEdit ? 0 : Date.now(), // 编辑时保持原创建时间
-      updatedAt: Date.now()
+    let config: AIConfig
+    
+    if (isEdit) {
+      // 编辑模式：保持原有配置的创建时间和激活状态
+      const originalConfig = AIConfigStorage.getConfigById(configId)
+      config = {
+        id: configId,
+        name: form.name.trim(),
+        apiKey: form.apiKey.trim(),
+        apiHost: form.apiHost.trim(),
+        model: form.model.trim(),
+        isActive: originalConfig ? originalConfig.isActive : false,
+        createdAt: originalConfig ? originalConfig.createdAt : Date.now(),
+        updatedAt: Date.now()
+      }
+    } else {
+      // 创建模式：新配置默认不激活
+      config = {
+        id: AIConfigStorage.generateConfigId(),
+        name: form.name.trim(),
+        apiKey: form.apiKey.trim(),
+        apiHost: form.apiHost.trim(),
+        model: form.model.trim(),
+        isActive: false,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      }
     }
 
     const success = AIConfigStorage.saveConfig(config)
@@ -159,10 +187,7 @@ Page({
     }
   },
 
-  /**
-   * 取消操作
-   */
-  onCancel() {
-    wx.navigateBack()
-  }
+
+
+
 })

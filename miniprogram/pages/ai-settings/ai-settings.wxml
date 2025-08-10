@@ -36,10 +36,10 @@
             <text class="config-detail">{{ item.model }}</text>
           </view>
           <view class="config-actions">
-            <button class="action-btn" bindtap="onEditConfig" data-id="{{ item.id }}" catchtap="true">
+            <button class="action-btn" catchtap="onEditConfig" data-id="{{ item.id }}">
               <svg-icon name="edit" size="32" color="gray"></svg-icon>
             </button>
-            <button class="action-btn" bindtap="onDeleteConfig" data-id="{{ item.id }}" catchtap="true">
+            <button class="action-btn" catchtap="onDeleteConfig" data-id="{{ item.id }}">
               <svg-icon name="delete" size="32" color="gray"></svg-icon>
             </button>
           </view>

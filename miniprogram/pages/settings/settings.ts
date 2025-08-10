@@ -42,7 +42,7 @@ Page({
    */
   onAbout() {
     wx.showToast({
-      title: '功能开发中',
+      title: '功能开发中...',
       icon: 'none'
     })
   }

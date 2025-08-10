@@ -63,9 +63,8 @@
   </view>
 
   <!-- 底部按钮 -->
-  <view class="bottom-actions">
+  <view class="bottom-actions" style="padding-bottom: calc(32rpx + {{ bottomSafeHeight }}px);">
     <view class="btn-group">
-      <button class="btn btn-secondary" bindtap="onCancel">取消</button>
       <button class="btn btn-primary" bindtap="onSave" disabled="{{ !canSave }}">
         {{ isEdit ? '保存' : '创建' }}
       </button>

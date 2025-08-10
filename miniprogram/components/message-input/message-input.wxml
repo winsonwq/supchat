@@ -1,5 +1,5 @@
 <!-- 输入区域 -->
-<view class="input-container w-full bg-white border-t border-gray-200 p-6 relative">
+<view class="input-container w-full bg-white border-t border-gray-200 p-6 relative" style="padding-bottom: calc(24rpx + {{ bottomSafeHeight }}px);">
   <!-- 输入框容器 -->
   <view class="w-full mb-4">
     <textarea

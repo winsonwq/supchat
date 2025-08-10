@@ -597,10 +597,7 @@
 
 /* 按钮基础样式 */
 .btn {
-  padding-left: 16rpx;
-  padding-right: 16rpx;
-  padding-top: 8rpx;
-  padding-bottom: 8rpx;
+  padding: 16rpx;
   border-radius: 8rpx;
   text-align: center;
   font-weight: 500;
@@ -608,54 +605,42 @@
 }
 
 .btn-primary {
-  padding-left: 16rpx;
-  padding-right: 16rpx;
-  padding-top: 8rpx;
-  padding-bottom: 8rpx;
+  padding: 16rpx;
   border-radius: 8rpx;
   text-align: center;
   font-weight: 500;
   font-size: 32rpx;
-  background-color: #3b82f6;
+  background-color: var(--color-primary);
   color: #ffffff;
 }
 
 .btn-secondary {
-  padding-left: 16rpx;
-  padding-right: 16rpx;
-  padding-top: 8rpx;
-  padding-bottom: 8rpx;
+  padding: 16rpx;
   border-radius: 8rpx;
   text-align: center;
   font-weight: 500;
   font-size: 32rpx;
-  background-color: #6b7280;
+  background-color: var(--color-secondary);
   color: #ffffff;
 }
 
 .btn-success {
-  padding-left: 16rpx;
-  padding-right: 16rpx;
-  padding-top: 8rpx;
-  padding-bottom: 8rpx;
+  padding: 16rpx;
   border-radius: 8rpx;
   text-align: center;
   font-weight: 500;
   font-size: 32rpx;
-  background-color: #10b981;
+  background-color: var(--color-success);
   color: #ffffff;
 }
 
 .btn-danger {
-  padding-left: 16rpx;
-  padding-right: 16rpx;
-  padding-top: 8rpx;
-  padding-bottom: 8rpx;
+  padding: 16rpx;
   border-radius: 8rpx;
   text-align: center;
   font-weight: 500;
   font-size: 32rpx;
-  background-color: #ef4444;
+  background-color: var(--color-danger);
   color: #ffffff;
 }
 

@@ -7,10 +7,7 @@
   left: 0;
   right: 0;
   z-index: 50;
-  /* iOS安全区域适配 */
-  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
-  /* 兼容不支持env()的设备 */
-  padding-bottom: calc(24rpx + 34rpx);
+  /* 安全区域通过 JS 动态设置 */
 }
 
 /* 输入框样式 - 需要特殊的圆角和高度限制 */
