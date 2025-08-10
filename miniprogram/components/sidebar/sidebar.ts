@@ -1,3 +1,5 @@
+import getSafeArea from '../../lib/utils/safe-area'
+
 Component({
   /**
    * 组件的属性列表
@@ -5,30 +7,42 @@ Component({
   properties: {
     isOpen: {
       type: Boolean,
-      value: false
+      value: false,
     },
     topics: {
       type: Array,
-      value: []
+      value: [],
     },
     currentTopicId: {
       type: String,
-      value: ''
+      value: '',
     },
     userInfo: {
       type: Object,
       value: {
         name: '用户',
-        avatar: ''
-      }
-    }
+        avatar: '',
+      },
+    },
   },
 
   /**
    * 组件的初始数据
    */
-  data: {
+  data: {},
 
+  lifetimes: {
+    attached() {
+      const safeAreaData = getSafeArea()
+      this.setData({
+        s: {
+          sidebarPaddingTop:
+            safeAreaData.isDevtools || safeAreaData.isAndroid
+              ? `padding-top: ${safeAreaData.safeAreaTop}px`
+              : ``,
+        },
+      })
+    },
   },
 
   /**
@@ -60,6 +74,6 @@ Component({
     // 打开设置页面
     openSettings() {
       this.triggerEvent('openSettings', {}, {})
-    }
-  }
+    },
+  },
 })

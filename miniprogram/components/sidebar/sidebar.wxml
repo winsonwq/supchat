@@ -2,7 +2,7 @@
 <view class="sidebar-mask {{isOpen ? 'sidebar-mask--open' : ''}}" bindtap="closeSidebar"></view>
 
 <!-- 侧边栏主体 -->
-<view class="sidebar {{isOpen ? 'sidebar--open' : ''}}">
+<view class="sidebar {{isOpen ? 'sidebar--open' : ''}}" style="{{s.sidebarPaddingTop}}">
   <!-- 侧边栏头部 -->
   <view class="sidebar-header">
     <text class="sidebar-title">聊天记录</text>
