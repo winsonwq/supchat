@@ -1,0 +1,20 @@
+<!-- 简化的 SVG 图标组件 -->
+<view 
+  class="svg-icon"
+  hover-class="{{ disabled ? '' : 'svg-icon--hover' }}"
+  bind:tap="onTap"
+>
+  <image 
+    wx:if="{{ iconPath }}" 
+    src="{{ iconPath }}"
+    style="{{ iconStyle }}"
+    class="svg-icon__image"
+    mode="aspectFit"
+    bind:error="onImageError"
+  ></image>
+  
+  <!-- 兜底显示，当图标无法加载时 -->
+  <view wx:else class="svg-icon__placeholder" style="{{ iconStyle }}">
+    <text class="svg-icon__text">{{ name || '?' }}</text>
+  </view>
+</view>

@@ -198,3 +198,41 @@
   color: #999999;
   line-height: 1.5;
 }
+
+/* SVG 图标演示区域样式 */
+.svg-demo-section {
+  margin-bottom: 32rpx;
+  
+  .section-header {
+    margin-bottom: 24rpx;
+  }
+}
+
+.svg-demo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24rpx;
+  padding: 0 32rpx;
+}
+
+.demo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx;
+  background-color: #f8f9fa;
+  border-radius: 16rpx;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2rpx);
+  }
+}
+
+.demo-label {
+  font-size: 24rpx;
+  color: #666666;
+  margin-top: 12rpx;
+  text-align: center;
+}

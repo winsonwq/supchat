@@ -8,7 +8,7 @@
 </navigation-bar>
 
 <view class="ai-settings-container" style="padding-top: {{ contentPaddingTop }}px">
-  <!-- 当前激活的配置 -->
+
   <view class="active-config-section" wx:if="{{ activeConfig }}">
     <view class="section-header">
       <text class="section-title">当前激活</text>
@@ -29,7 +29,7 @@
     <view class="section-header">
       <text class="section-title">所有配置</text>
       <view class="add-button" bindtap="onAddConfig">
-        <text class="add-icon">+</text>
+        <svg-icon name="plus" size="24"></svg-icon>
         <text class="add-text">添加</text>
       </view>
     </view>
@@ -58,7 +58,7 @@
           </view>
         </view>
         <view class="selection-indicator" wx:if="{{ item.isActive }}">
-          <text class="indicator-text">✓</text>
+          <svg-icon name="check" size="24" color="success"></svg-icon>
         </view>
       </view>
     </view>
