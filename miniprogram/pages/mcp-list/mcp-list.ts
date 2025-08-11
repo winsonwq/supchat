@@ -18,9 +18,7 @@ Page({
     refreshing: {} as Record<string, boolean>, // 记录每个配置的刷新状态
     // 工具详情对话框相关状态
     toolDialogVisible: false,
-    selectedTool: null as MCPTool | null,
-    selectedConfigId: '' as string,
-    selectedServerEnabled: false as boolean
+    selectedTool: null as MCPTool | null
   },
 
   /**
@@ -332,6 +330,30 @@ Page({
   },
 
   /**
+   * 显示工具详情对话框
+   */
+  onShowToolDetail(e: WxEvent) {
+    const { configId, toolName } = e.currentTarget.dataset
+    if (!configId || !toolName) return
+    const targetConfig = this.data.configs.find(c => c.id === configId)
+    const targetTool = targetConfig?.tools?.find(t => t.name === toolName) || null
+    this.setData({
+      toolDialogVisible: true,
+      selectedTool: targetTool
+    })
+  },
+
+  /**
+   * 关闭工具详情对话框
+   */
+  onCloseToolDialog() {
+    this.setData({
+      toolDialogVisible: false,
+      selectedTool: null
+    })
+  },
+
+  /**
    * 切换工具启用状态
    */
   onToggleTool(e: WxEvent) {
@@ -369,60 +391,7 @@ Page({
   },
 
   /**
-   * 工具项点击事件（阻止冒泡）
-   */
-  onToolItemTap() {
-    // 空方法，仅用于阻止事件冒泡
-    // 防止点击工具项时触发父级的 onEditConfig 事件
-  },
-
-  /**
-   * 显示工具详情对话框
-   */
-  onShowToolDetail(e: WxEvent) {
-    const { configId, toolName } = e.currentTarget.dataset
-    if (!configId || !toolName) return
-    const targetConfig = this.data.configs.find(c => c.id === configId)
-    const targetTool = targetConfig?.tools?.find(t => t.name === toolName) || null
-    this.setData({
-      toolDialogVisible: true,
-      selectedTool: targetTool,
-      selectedConfigId: configId,
-      selectedServerEnabled: !!targetConfig?.isEnabled
-    })
-  },
-
-  /**
-   * 关闭工具详情对话框
-   */
-  onCloseToolDialog() {
-    this.setData({
-      toolDialogVisible: false,
-      selectedTool: null,
-      selectedConfigId: '',
-      selectedServerEnabled: false
-    })
-  },
-
-  /**
-   * 从对话框中切换工具状态
-   */
-  onToggleToolFromDialog(e: WxEvent) {
-    const { configId, toolName } = e.detail || {}
-    if (!configId || !toolName) return
-    try {
-      this.toggleToolById(configId, toolName)
-      // 同步更新对话框中的 selectedTool 状态
-      const updatedConfig = this.data.configs.find(c => c.id === configId)
-      const updatedTool = updatedConfig?.tools?.find(t => t.name === toolName) || null
-      this.setData({ selectedTool: updatedTool })
-    } catch (error) {
-      console.error('对话框切换工具状态失败:', error)
-    }
-  },
-
-  /**
-   * 按配置与工具名切换工具启用状态（复用逻辑）
+   * 按配置与工具名切换工具启用状态
    */
   toggleToolById(configId: string, toolName: string) {
     const { configs } = this.data

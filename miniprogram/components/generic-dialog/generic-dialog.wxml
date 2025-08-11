@@ -1,0 +1,17 @@
+<!--generic-dialog.wxml-->
+<view class="generic-dialog-overlay {{ visible ? 'visible' : '' }}" bindtap="onOverlayTap" wx:if="{{ showMask }}">
+  <view class="generic-dialog-container" catchtap="onContainerTap" style="width: {{ width }}; height: {{ height }};">
+    <!-- 标题栏 -->
+    <view class="generic-dialog-header" wx:if="{{ title }}">
+      <text class="generic-dialog-title">{{ title }}</text>
+      <view class="generic-dialog-close" bindtap="onClose" wx:if="{{ showClose }}">
+        <svg-icon name="clear" size="32" color="#999"></svg-icon>
+      </view>
+    </view>
+    
+    <!-- 内容区域 -->
+    <view class="generic-dialog-content">
+      <slot></slot>
+    </view>
+  </view>
+</view>

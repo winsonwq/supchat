@@ -77,7 +77,6 @@
               wx:key="name" 
               wx:for-item="tool"
               class="tool-item"
-              catchtap="onToolItemTap"
             >
               <view 
                 class="tool-info"
@@ -137,8 +136,6 @@
   <tool-detail-dialog 
     visible="{{ toolDialogVisible }}"
     tool="{{ selectedTool }}"
-    configId="{{ selectedConfigId }}"
     bind:close="onCloseToolDialog"
-    bind:toggle="onToggleToolFromDialog"
   />
 </view>

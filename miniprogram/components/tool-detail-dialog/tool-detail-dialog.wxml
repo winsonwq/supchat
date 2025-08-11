@@ -1,9 +1,10 @@
 <!--tool-detail-dialog.wxml-->
-<dialog 
+<generic-dialog 
   visible="{{ visible }}" 
   title="工具详情"
-  showFooter="{{ false }}"
+  showClose="{{ true }}"
   maskClosable="{{ true }}"
+  width="700rpx"
   bind:close="onClose"
 >
   <view class="tool-detail-content">
@@ -39,23 +40,6 @@
         </view>
       </view>
     </view>
-    
-    <!-- 工具状态：按需已移除 -->
-    
-    <!-- 操作按钮 -->
-    <view class="tool-actions">
-      <button 
-        class="action-btn action-btn-toggle"
-        bindtap="onToggleTool"
-      >
-        {{ tool.isEnabled !== false ? '禁用工具' : '启用工具' }}
-      </button>
-      <button 
-        class="action-btn action-btn-close"
-        bindtap="onClose"
-      >
-        关闭
-      </button>
-    </view>
+
   </view>
-</dialog>
+</generic-dialog>

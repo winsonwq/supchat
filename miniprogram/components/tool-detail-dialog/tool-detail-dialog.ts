@@ -15,11 +15,6 @@ Component({
     tool: {
       type: Object as () => MCPTool,
       value: {}
-    },
-    // 配置ID
-    configId: {
-      type: String,
-      value: ''
     }
   },
 
@@ -37,16 +32,6 @@ Component({
      */
     onClose() {
       this.triggerEvent('close')
-    },
-
-    /**
-     * 切换工具启用状态
-     */
-    onToggleTool() {
-      this.triggerEvent('toggle', {
-        configId: this.properties.configId,
-        toolName: this.properties.tool.name
-      })
     },
 
     /**
