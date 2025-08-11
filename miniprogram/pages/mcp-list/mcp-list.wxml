@@ -1,0 +1,122 @@
+<!--mcp-list.wxml-->
+<navigation-bar
+  title="MCP 配置"
+  back="{{ true }}"
+  color="black"
+  background="#FFF"
+>
+</navigation-bar>
+
+<view class="mcp-list-container" style="padding-top: {{ contentPaddingTop }}px">
+  <!-- MCP 配置列表 -->
+  <view class="configs-section">
+    <view class="section-header">
+      <text class="section-title">MCP Server 列表</text>
+      <button class="add-button flex items-center gap-4" bindtap="onAddConfig">
+        <svg-icon name="plus" size="32" color="white"></svg-icon>
+        <text class="add-text">创建 MCP</text>
+      </button>
+    </view>
+
+    <!-- 配置列表 -->
+    <view class="configs-list" wx:if="{{ configs && configs.length > 0 }}">
+      <view 
+        wx:for="{{ configs }}" 
+        wx:key="id" 
+        class="config-item"
+        bindtap="onEditConfig"
+        data-id="{{ item.id }}"
+      >
+        <!-- 配置基本信息 -->
+        <view class="config-content">
+          <view class="config-main">
+            <view class="config-header">
+              <view class="status-indicator {{ item.isOnline ? 'status-online' : 'status-offline' }}"></view>
+              <text class="config-name">{{ item.name }}</text>
+            </view>
+            <text class="config-url">{{ item.url }}</text>
+            <view class="config-badges">
+              <view class="badge badge-tools">{{ item.toolCount || 0 }} 个工具</view>
+            </view>
+          </view>
+          
+          <!-- 操作按钮 -->
+          <view class="config-actions">
+            
+            <!-- 启用状态切换开关 (switch 样式，最右侧) -->
+            <view 
+              class="switch-container" 
+              catchtap="onToggleEnabled" 
+              data-id="{{ item.id }}"
+            >
+              <view class="switch {{ item.isEnabled ? 'switch-on' : 'switch-off' }}">
+                <view class="switch-handle"></view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 可展开的工具列表 -->
+        <view class="tools-section" wx:if="{{ item.showTools && item.tools && item.tools.length > 0 }}">
+          <view class="tools-header">
+            <text class="tools-title">可用工具</text>
+          </view>
+          <view class="tools-list">
+            <view 
+              wx:for="{{ item.tools }}" 
+              wx:key="name" 
+              wx:for-item="tool"
+              class="tool-item"
+              catchtap="onToolItemTap"
+            >
+              <view class="tool-info">
+                <text class="tool-name">{{ tool.chineseName || tool.name }}</text>
+                <text class="tool-description">{{ tool.description }}</text>
+              </view>
+              
+              <!-- 工具开关 -->
+              <view 
+                class="tool-switch-container {{ !item.isEnabled ? 'disabled' : '' }}" 
+                catchtap="{{ item.isEnabled ? 'onToggleTool' : '' }}" 
+                data-config-id="{{ item.id }}"
+                data-tool-name="{{ tool.name }}"
+              >
+                <view class="tool-switch {{ !item.isEnabled ? 'switch-disabled' : (tool.isEnabled !== false ? 'switch-on' : 'switch-off') }}">
+                  <view class="switch-handle"></view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 展开/收起按钮 -->
+        <view class="expand-section" wx:if="{{ item.tools && item.tools.length > 0 }}">
+          <button 
+            class="expand-btn" 
+            catchtap="onToggleTools" 
+            data-id="{{ item.id }}"
+          >
+            <text class="expand-text">{{ item.showTools ? '收起工具' : '查看工具' }}</text>
+            <svg-icon 
+              name="arrow-right" 
+              size="24" 
+              color="#666"
+              class="expand-icon {{ item.showTools ? 'expand-icon-rotated' : '' }}"
+            ></svg-icon>
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:elif="{{ !configs || configs.length === 0 }}">
+      <text class="empty-title">暂无 MCP Server 配置</text>
+      <text class="empty-desc">点击右上角"创建 MCP"按钮添加第一个 MCP Server</text>
+    </view>
+    
+    <!-- 调试信息 -->
+    <view class="debug-info" wx:else style="padding: 20rpx; background: #f0f0f0; margin: 20rpx; border-radius: 10rpx;">
+      <text>调试信息：configs 数量 = {{ configs.length }}</text>
+    </view>
+  </view>
+</view>

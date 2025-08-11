@@ -7,6 +7,7 @@ import {
   buildToolCallResponse,
   allTools,
 } from '../mcp/index.js'
+import { MCPToolsService } from './mcp-tools.js'
 import {
   formatToolCallMessage,
   formatToolCallErrorMessage,
@@ -140,7 +141,10 @@ export class AIService {
       data: {
         model: aiConfig.model,
         messages: this.getMessages(),
-        tools: allTools.map(transformToOpenRouterTool),
+        tools: [
+          ...allTools.map(transformToOpenRouterTool),
+          ...MCPToolsService.getAllOpenRouterMCPTools()
+        ],
         tool_choice: 'auto',
         stream: isStream,
         ...data,
@@ -407,7 +411,14 @@ export class AIService {
           ),
         )
 
-        const result = await executeToolCall(call.function.name, args, allTools)
+        let result: ToolCallResult
+        
+        // 检查是否为 MCP 工具
+        if (MCPToolsService.isMCPTool(call.function.name)) {
+          result = await MCPToolsService.executeMCPTool(call.function.name, args)
+        } else {
+          result = await executeToolCall(call.function.name, args, allTools)
+        }
         toolResults.push(result)
 
         this.addMessage('tool', result.data, call.id)
@@ -625,11 +636,14 @@ export class AIService {
           >
           console.log(`执行工具 ${call.function.name}:`, args)
 
-          const result = await executeToolCall(
-            call.function.name,
-            args,
-            allTools,
-          )
+          let result: ToolCallResult
+          
+          // 检查是否为 MCP 工具
+          if (MCPToolsService.isMCPTool(call.function.name)) {
+            result = await MCPToolsService.executeMCPTool(call.function.name, args)
+          } else {
+            result = await executeToolCall(call.function.name, args, allTools)
+          }
 
           this.addMessage('tool', result.data as string, call.id)
         } catch (error) {

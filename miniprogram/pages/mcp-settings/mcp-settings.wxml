@@ -1,6 +1,6 @@
 <!--mcp-settings.wxml-->
 <navigation-bar
-  title="MCP Servers"
+  title="MCP 配置"
   back="{{ true }}"
   color="black"
   background="#FFF"
@@ -8,10 +8,54 @@
 </navigation-bar>
 
 <view class="mcp-settings-container" style="padding-top: {{ contentPaddingTop }}px">
-  <view class="placeholder-content">
-    <view class="placeholder-icon">服务器</view>
-    <text class="placeholder-title">MCP Servers 设置</text>
-    <text class="placeholder-description">Model Context Protocol (MCP) 服务器设置功能正在开发中</text>
-    <text class="placeholder-note">这里将用于配置各种MCP服务器，扩展AI助手的能力</text>
+  <view class="settings-content">
+    <!-- MCP 服务器列表入口 -->
+    <view class="settings-section">
+      <view class="section-header">
+        <text class="section-title">MCP 服务器</text>
+        <text class="section-desc">管理 Model Context Protocol 服务器配置</text>
+      </view>
+      
+      <button class="nav-button" bindtap="onGoToMCPList">
+        <view class="nav-content">
+          <view class="nav-info">
+            <text class="nav-title">MCP 服务器列表</text>
+            <text class="nav-subtitle">查看和管理所有 MCP 服务器配置</text>
+          </view>
+          <view class="nav-arrow">
+            <svg-icon name="arrow-right" size="32" color="#666"></svg-icon>
+          </view>
+        </view>
+      </button>
+    </view>
+
+    <!-- 说明信息 -->
+    <view class="info-section">
+      <view class="info-card">
+        <view class="info-header">
+          <text class="info-title">关于 MCP</text>
+        </view>
+        <view class="info-content">
+          <text class="info-text">Model Context Protocol (MCP) 是一个开放标准，允许 AI 助手连接到外部数据源和工具。通过配置 MCP 服务器，您可以大大扩展 AI 助手的能力。</text>
+        </view>
+      </view>
+      
+      <view class="feature-list">
+        <view class="feature-item">
+          <view class="feature-icon">🔧</view>
+          <text class="feature-text">连接外部工具和服务</text>
+        </view>
+        
+        <view class="feature-item">
+          <view class="feature-icon">📊</view>
+          <text class="feature-text">访问实时数据源</text>
+        </view>
+        
+        <view class="feature-item">
+          <view class="feature-icon">⚡</view>
+          <text class="feature-text">扩展 AI 助手功能</text>
+        </view>
+      </view>
+    </view>
   </view>
 </view>

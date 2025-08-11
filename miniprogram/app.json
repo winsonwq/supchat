@@ -4,7 +4,11 @@
     "pages/settings/settings",
     "pages/ai-settings/ai-settings",
     "pages/ai-config/ai-config",
-    "pages/mcp-settings/mcp-settings"
+    "pages/mcp-settings/mcp-settings",
+    "pages/mcp-list/mcp-list",
+    "pages/mcp-detail/mcp-detail",
+    "pages/mcp-edit/mcp-edit",
+    "pages/mcp-add/mcp-add"
   ],
   "window": {
     "navigationBarTextStyle": "black",

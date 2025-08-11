@@ -14,7 +14,16 @@ Page({
    */
   onLoad() {
     // 计算内容顶部间距
-    const paddingTop = getNavigationHeight() + 16 // 16px = 32rpx
+    const paddingTop = getNavigationHeight()
     this.setData({ contentPaddingTop: paddingTop })
+  },
+
+  /**
+   * 跳转到 MCP 列表页面
+   */
+  onGoToMCPList() {
+    wx.navigateTo({
+      url: '/pages/mcp-list/mcp-list'
+    })
   }
 })

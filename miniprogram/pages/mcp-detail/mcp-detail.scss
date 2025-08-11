@@ -1,0 +1,352 @@
+/* MCP 配置详情页面样式 */
+.mcp-detail-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding-bottom: 64rpx;
+  box-sizing: border-box;
+}
+
+.detail-content {
+  padding: 32rpx;
+}
+
+/* 详情区块 */
+.detail-section {
+  margin-bottom: 32rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.edit-button,
+.refresh-button {
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 20rpx;
+  padding: 12rpx 20rpx;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.edit-button::after,
+.refresh-button::after {
+  border: none;
+}
+
+.edit-text,
+.refresh-text {
+  color: white;
+}
+
+.refresh-button {
+  background-color: transparent;
+  color: #666;
+  padding: 8rpx 16rpx;
+}
+
+.refresh-text {
+  color: #666;
+}
+
+/* 信息卡片 */
+.info-card {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  gap: 24rpx;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 28rpx;
+  color: #666666;
+  font-weight: 500;
+  flex-shrink: 0;
+  width: 160rpx;
+}
+
+.info-value {
+  font-size: 28rpx;
+  color: #333333;
+  flex: 1;
+  text-align: right;
+  word-break: break-all;
+}
+
+.config-url {
+  font-family: Monaco, 'Courier New', monospace;
+  font-size: 24rpx;
+  line-height: 1.4;
+}
+
+/* 状态行 */
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  justify-content: flex-end;
+}
+
+/* 徽章样式 */
+.badge {
+  padding: 8rpx 16rpx;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.badge-enabled {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.badge-disabled {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* 切换按钮 */
+.toggle-btn {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn::after {
+  border: none;
+}
+
+.toggle-enabled {
+  background-color: #10b981;
+}
+
+.toggle-disabled {
+  background-color: #f3f4f6;
+}
+
+/* 状态指示器 */
+.status-indicator {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-online {
+  background-color: #10b981;
+}
+
+.status-offline {
+  background-color: #ef4444;
+}
+
+.status-text {
+  font-size: 28rpx;
+  color: #333333;
+}
+
+.refresh-btn {
+  width: 32rpx;
+  height: 32rpx;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(0deg);
+  transition: transform 0.3s ease;
+}
+
+.refresh-btn::after {
+  border: none;
+}
+
+.refresh-btn:active {
+  transform: rotate(180deg);
+}
+
+/* 工具列表 */
+.tools-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.tool-card {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  border-left: 6rpx solid #667eea;
+}
+
+.tool-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+  gap: 16rpx;
+}
+
+.tool-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+  flex: 1;
+}
+
+.tool-tech-name {
+  font-size: 24rpx;
+  color: #666666;
+  background-color: #f3f4f6;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  font-family: Monaco, 'Courier New', monospace;
+  flex-shrink: 0;
+}
+
+.tool-description {
+  font-size: 28rpx;
+  color: #666666;
+  line-height: 1.5;
+  margin-bottom: 16rpx;
+}
+
+/* 工具参数 */
+.tool-schema {
+  background-color: #f8fafc;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  border: 1rpx solid #e2e8f0;
+}
+
+.schema-title {
+  font-size: 24rpx;
+  color: #666666;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.schema-content {
+  font-size: 24rpx;
+  color: #334155;
+  font-family: Monaco, 'Courier New', monospace;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 工具为空状态 */
+.empty-tools {
+  text-align: center;
+  padding: 80rpx 32rpx;
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.empty-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #666666;
+  margin-bottom: 12rpx;
+}
+
+.empty-desc {
+  display: block;
+  font-size: 24rpx;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+/* 操作按钮 */
+.action-buttons {
+  display: flex;
+  gap: 24rpx;
+}
+
+.btn {
+  flex: 1;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  border: none;
+  outline: none;
+  transition: opacity 0.2s ease;
+}
+
+.btn::after {
+  border: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+}
+
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.btn-secondary:active {
+  background-color: #e5e7eb;
+}
+
+.btn-danger {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.btn-danger:active {
+  background-color: #fecaca;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #666666;
+}

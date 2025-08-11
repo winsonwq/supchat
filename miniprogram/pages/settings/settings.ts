@@ -33,7 +33,7 @@ Page({
    */
   onMCPSettings() {
     wx.navigateTo({
-      url: '/pages/mcp-settings/mcp-settings'
+      url: '/pages/mcp-list/mcp-list'
     })
   },
 

@@ -1,0 +1,117 @@
+<!--mcp-edit.wxml-->
+<navigation-bar
+  title="编辑 MCP 配置"
+  back="{{ true }}"
+  color="black"
+  background="#FFF"
+>
+</navigation-bar>
+
+<scroll-view class="mcp-edit-container" style="padding-top: {{ contentPaddingTop }}px" scroll-y="true">
+  <view class="edit-form">
+    <!-- 基本信息 -->
+    <view class="form-section">
+      <view class="section-title">基本信息</view>
+      
+      <form-input
+        label="配置名称"
+        placeholder="例如：天气服务、文件管理器"
+        value="{{ form.name }}"
+        required="{{ true }}"
+        error="{{ errors.name }}"
+        bindinput="onInputChange"
+        data-field="name"
+      />
+      
+      <form-input
+        label="服务器地址"
+        placeholder="https://api.example.com/mcp"
+        value="{{ form.url }}"
+        required="{{ true }}"
+        error="{{ errors.url }}"
+        helper="MCP Server 的 URL 地址"
+        bindinput="onInputChange"
+        data-field="url"
+      />
+    </view>
+
+    <!-- 认证配置 -->
+    <view class="form-section">
+      <view class="section-title">认证配置</view>
+      
+      <form-select
+        label="认证方式"
+        value="{{ form.authType }}"
+        options="{{ authTypeOptions }}"
+        required="{{ true }}"
+        error="{{ errors.authType }}"
+        helper="选择与服务器匹配的认证方式"
+        bindchange="onAuthTypeChange"
+      />
+
+      <!-- Bearer Token -->
+      <form-input
+        wx:if="{{ form.authType === 'bearer_token' }}"
+        label="Bearer Token"
+        placeholder="请输入 Bearer Token"
+        value="{{ form.authConfig.token }}"
+        password="{{ true }}"
+        required="{{ true }}"
+        error="{{ errors.authToken }}"
+        bindinput="onAuthInputChange"
+        data-field="token"
+      />
+
+      <!-- Basic Auth -->
+      <block wx:if="{{ form.authType === 'basic_auth' }}">
+        <form-input
+          label="用户名"
+          placeholder="请输入用户名"
+          value="{{ form.authConfig.username }}"
+          required="{{ true }}"
+          error="{{ errors.authUsername }}"
+          bindinput="onAuthInputChange"
+          data-field="username"
+        />
+        
+        <form-input
+          label="密码"
+          placeholder="请输入密码"
+          value="{{ form.authConfig.password }}"
+          password="{{ true }}"
+          required="{{ true }}"
+          error="{{ errors.authPassword }}"
+          bindinput="onAuthInputChange"
+          data-field="password"
+        />
+      </block>
+
+      <!-- API Key -->
+      <form-input
+        wx:if="{{ form.authType === 'api_key' }}"
+        label="API Key"
+        placeholder="请输入 API Key"
+        value="{{ form.authConfig.apiKey }}"
+        password="{{ true }}"
+        required="{{ true }}"
+        error="{{ errors.authApiKey }}"
+        bindinput="onAuthInputChange"
+        data-field="apiKey"
+      />
+    </view>
+
+
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-actions" style="padding-bottom: calc(32rpx + {{ bottomSafeHeight }}px);">
+    <view class="btn-group">
+      <button class="btn btn-primary" bindtap="onSave" disabled="{{ !canSave }}">
+        保存配置
+      </button>
+      <button class="btn btn-danger" bindtap="onDeleteConfig">
+        删除此配置
+      </button>
+    </view>
+  </view>
+</scroll-view>

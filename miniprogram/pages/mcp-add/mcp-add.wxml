@@ -1,0 +1,159 @@
+<!--mcp-add.wxml-->
+<navigation-bar
+  title="添加 MCP 配置"
+  back="{{ true }}"
+  color="black"
+  background="#FFF"
+>
+</navigation-bar>
+
+<scroll-view class="mcp-add-container" style="padding-top: {{ contentPaddingTop }}px" scroll-y="true">
+  <view class="add-form">
+    <!-- 基本信息 -->
+    <view class="form-section">
+      <view class="section-title">基本信息</view>
+      
+      <form-input
+        label="配置名称"
+        placeholder="例如：天气服务、文件管理器"
+        value="{{ form.name }}"
+        required="{{ true }}"
+        error="{{ errors.name }}"
+        helper="为这个 MCP 服务起一个便于识别的名称"
+        bindinput="onInputChange"
+        data-field="name"
+      />
+      
+      <form-input
+        label="服务器地址"
+        placeholder="https://api.example.com/mcp"
+        value="{{ form.url }}"
+        required="{{ true }}"
+        error="{{ errors.url }}"
+        helper="MCP Server 的完整 URL 地址"
+        bindinput="onInputChange"
+        data-field="url"
+      />
+    </view>
+
+    <!-- 认证配置 -->
+    <view class="form-section">
+      <view class="section-title">认证配置</view>
+      
+      <form-select
+        label="认证方式"
+        value="{{ form.authType }}"
+        options="{{ authTypeOptions }}"
+        required="{{ true }}"
+        error="{{ errors.authType }}"
+        helper="选择与服务器匹配的认证方式"
+        bindchange="onAuthTypeChange"
+      />
+
+      <!-- Bearer Token -->
+      <form-input
+        wx:if="{{ form.authType === 'bearer_token' }}"
+        label="Bearer Token"
+        placeholder="请输入 Bearer Token"
+        value="{{ form.authConfig.token }}"
+        password="{{ true }}"
+        required="{{ true }}"
+        error="{{ errors.authToken }}"
+        helper="服务器提供的 Bearer Token"
+        bindinput="onAuthInputChange"
+        data-field="token"
+      />
+
+      <!-- Basic Auth -->
+      <block wx:if="{{ form.authType === 'basic_auth' }}">
+        <form-input
+          label="用户名"
+          placeholder="请输入用户名"
+          value="{{ form.authConfig.username }}"
+          required="{{ true }}"
+          error="{{ errors.authUsername }}"
+          bindinput="onAuthInputChange"
+          data-field="username"
+        />
+        
+        <form-input
+          label="密码"
+          placeholder="请输入密码"
+          value="{{ form.authConfig.password }}"
+          password="{{ true }}"
+          required="{{ true }}"
+          error="{{ errors.authPassword }}"
+          bindinput="onAuthInputChange"
+          data-field="password"
+        />
+      </block>
+
+      <!-- API Key -->
+      <form-input
+        wx:if="{{ form.authType === 'api_key' }}"
+        label="API Key"
+        placeholder="请输入 API Key"
+        value="{{ form.authConfig.apiKey }}"
+        password="{{ true }}"
+        required="{{ true }}"
+        error="{{ errors.authApiKey }}"
+        helper="服务器提供的 API Key"
+        bindinput="onAuthInputChange"
+        data-field="apiKey"
+      />
+    </view>
+
+    <!-- 状态设置 -->
+    <view class="form-section">
+      <view class="section-title">状态设置</view>
+      
+      <view class="switch-item">
+        <view class="switch-label">
+          <text class="label-text">启用配置</text>
+          <text class="label-helper">启用后可在 AI 对话中使用此 MCP 服务</text>
+        </view>
+        <switch 
+          class="switch-control"
+          checked="{{ form.isEnabled }}"
+          bindchange="onSwitchChange"
+          data-field="isEnabled"
+          color="#667eea"
+        />
+      </view>
+    </view>
+
+    <!-- 使用提示 -->
+    <view class="form-section tips-section">
+      <view class="section-title">使用提示</view>
+      
+      <view class="tips-content">
+        <view class="tip-item">
+          <view class="tip-icon">💡</view>
+          <text class="tip-text">配置保存后，系统会自动测试连接并获取可用工具</text>
+        </view>
+        
+        <view class="tip-item">
+          <view class="tip-icon">🔧</view>
+          <text class="tip-text">只有启用的 MCP 配置才会在 AI 对话中生效</text>
+        </view>
+        
+        <view class="tip-item">
+          <view class="tip-icon">🌐</view>
+          <text class="tip-text">确保服务器地址可访问且认证信息正确</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-actions" style="padding-bottom: calc(32rpx + {{ bottomSafeHeight }}px);">
+    <view class="btn-group">
+      <button class="btn btn-secondary" bindtap="onTestConnection">
+        测试连接
+      </button>
+      <button class="btn btn-primary" bindtap="onSave" disabled="{{ !canSave }}">
+        创建配置
+      </button>
+    </view>
+  </view>
+</scroll-view>

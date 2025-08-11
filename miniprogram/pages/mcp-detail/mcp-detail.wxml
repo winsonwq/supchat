@@ -1,0 +1,122 @@
+<!--mcp-detail.wxml-->
+<navigation-bar
+  title="MCP 配置详情"
+  back="{{ true }}"
+  color="black"
+  background="#FFF"
+>
+</navigation-bar>
+
+<scroll-view class="mcp-detail-container" style="padding-top: {{ contentPaddingTop }}px" scroll-y="true">
+  <view class="detail-content" wx:if="{{ config }}">
+    <!-- 基本信息 -->
+    <view class="detail-section">
+      <view class="section-header">
+        <text class="section-title">基本信息</text>
+        <button class="edit-button" bindtap="onEditConfig">
+          <svg-icon name="edit" size="28" color="white"></svg-icon>
+          <text class="edit-text">编辑</text>
+        </button>
+      </view>
+      
+      <view class="info-card">
+        <view class="info-item">
+          <text class="info-label">配置名称</text>
+          <text class="info-value">{{ config.name }}</text>
+        </view>
+        
+        <view class="info-item">
+          <text class="info-label">服务器地址</text>
+          <text class="info-value config-url">{{ config.url }}</text>
+        </view>
+        
+        <view class="info-item">
+          <text class="info-label">认证方式</text>
+          <text class="info-value">{{ authTypeLabel }}</text>
+        </view>
+        
+        <view class="info-item">
+          <text class="info-label">启用状态</text>
+          <view class="status-row">
+            <view class="badge {{ config.isEnabled ? 'badge-enabled' : 'badge-disabled' }}">
+              {{ config.isEnabled ? '已启用' : '已禁用' }}
+            </view>
+            <button 
+              class="toggle-btn {{ config.isEnabled ? 'toggle-enabled' : 'toggle-disabled' }}" 
+              bindtap="onToggleEnabled"
+            >
+              <svg-icon name="{{ config.isEnabled ? 'check' : 'clear' }}" size="24" color="{{ config.isEnabled ? 'white' : '#666' }}"></svg-icon>
+            </button>
+          </view>
+        </view>
+        
+        <view class="info-item">
+          <text class="info-label">在线状态</text>
+          <view class="status-row">
+            <view class="status-indicator {{ config.isOnline ? 'status-online' : 'status-offline' }}"></view>
+            <text class="status-text">{{ config.isOnline ? '在线' : '离线' }}</text>
+            <button class="refresh-btn" bindtap="onRefreshStatus">
+              <svg-icon name="arrow-right" size="24" color="#666"></svg-icon>
+            </button>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 工具列表 -->
+    <view class="detail-section">
+      <view class="section-header">
+        <text class="section-title">可用工具 ({{ config.toolCount || 0 }})</text>
+        <button class="refresh-button" bindtap="onRefreshTools">
+          <svg-icon name="arrow-right" size="24" color="#666"></svg-icon>
+          <text class="refresh-text">刷新</text>
+        </button>
+      </view>
+      
+      <!-- 工具列表 -->
+      <view class="tools-list" wx:if="{{ config.tools && config.tools.length > 0 }}">
+        <view 
+          wx:for="{{ config.tools }}" 
+          wx:key="name" 
+          wx:for-item="tool"
+          class="tool-card"
+        >
+          <view class="tool-header">
+            <text class="tool-name">{{ tool.chineseName || tool.name }}</text>
+            <view class="tool-tech-name" wx:if="{{ tool.chineseName }}">{{ tool.name }}</view>
+          </view>
+          <text class="tool-description">{{ tool.description }}</text>
+          
+          <!-- 工具参数信息 -->
+          <view class="tool-schema" wx:if="{{ tool.inputSchema }}">
+            <text class="schema-title">参数结构：</text>
+            <text class="schema-content">{{ tool.inputSchemaText }}</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 工具为空状态 -->
+      <view class="empty-tools" wx:else>
+        <text class="empty-title">暂无可用工具</text>
+        <text class="empty-desc">{{ config.isOnline ? '该服务器当前没有提供工具' : '服务器离线，无法获取工具信息' }}</text>
+      </view>
+    </view>
+
+    <!-- 操作区域 -->
+    <view class="detail-section">
+      <view class="action-buttons">
+        <button class="btn btn-secondary" bindtap="onTestConnection">
+          测试连接
+        </button>
+        <button class="btn btn-danger" bindtap="onDeleteConfig">
+          删除配置
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:else>
+    <text class="loading-text">加载中...</text>
+  </view>
+</scroll-view>
