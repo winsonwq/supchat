@@ -268,38 +268,30 @@
 
 /* 刷新按钮样式 */
 .refresh-btn {
-  background: none;
-  border: 1rpx solid #e5e7eb;
-  border-radius: 20rpx;
-  padding: 8rpx 16rpx;
-  display: inline-flex;
+  width: 40rpx;
+  height: 40rpx;
+  border: none;
+  background: transparent;
+  display: flex;
   align-items: center;
-  font-size: 24rpx;
-  color: #007AFF;
-  transition: all 0.3s ease;
+  justify-content: center;
+  padding: 0;
+  border-radius: 8rpx;
+  transition: all 0.2s ease;
 }
 
 .refresh-btn::after {
   border: none;
 }
 
-.refresh-btn:hover {
-  background-color: #f0f8ff;
-  border-color: #007AFF;
+.refresh-btn:active {
+  background-color: #f0f0f0;
 }
 
 .refresh-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
-
-.refresh-btn.refreshing {
-  background-color: #f5f5f5;
-  border-color: #d1d5db;
-  color: #999;
-}
-
-.refresh-text { font-size: 24rpx; }
 
 /* 旋转动画 */
 .rotating {

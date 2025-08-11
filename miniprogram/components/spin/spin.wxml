@@ -1,0 +1,5 @@
+<view class="spin-container {{ spinning ? 'spinning' : '' }}" style="width: {{ size }}px; height: {{ size }}px;">
+  <view class="spin-content">
+    <slot></slot>
+  </view>
+</view>

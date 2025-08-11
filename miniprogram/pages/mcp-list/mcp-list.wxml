@@ -63,12 +63,14 @@
           <view class="tools-header">
             <text class="tools-title">可用工具</text>
             <button 
-              class="refresh-btn {{ refreshing[item.id] ? 'refreshing' : '' }}"
+              class="refresh-btn"
               bindtap="refreshTools"
               data-id="{{ item.id }}"
               disabled="{{ refreshing[item.id] }}"
             >
-              <text class="refresh-text">{{ refreshing[item.id] ? '刷新中...' : '刷新' }}</text>
+              <spin spinning="{{ refreshing[item.id] }}" size="20">
+                <svg-icon name="refresh" size="40"></svg-icon>
+              </spin>
             </button>
           </view>
           <view class="tools-list">
