@@ -66,6 +66,39 @@
   align-items: center;
   gap: 24rpx;
   position: relative;
+  transition: all 0.2s ease;
+}
+
+/* 可点击的配置内容样式 */
+.config-content.clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.config-content.clickable:hover {
+  background-color: #f8f9fa;
+}
+
+.config-content.clickable:active {
+  background-color: #e9ecef;
+  transform: scale(0.98);
+}
+
+/* 添加点击反馈的视觉提示 */
+.config-content.clickable::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  border-radius: 16rpx;
+  transition: background-color 0.2s ease;
+}
+
+.config-content.clickable:hover::after {
+  background-color: rgba(0, 122, 255, 0.05);
 }
 
 /* 在线状态指示器 */
@@ -222,12 +255,64 @@
 
 .tools-header {
   margin-bottom: 16rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .tools-title {
   font-size: 26rpx;
   font-weight: 500;
   color: #666666;
+}
+
+/* 刷新按钮样式 */
+.refresh-btn {
+  background: none;
+  border: 1rpx solid #e5e7eb;
+  border-radius: 20rpx;
+  padding: 8rpx 16rpx;
+  display: inline-flex;
+  align-items: center;
+  font-size: 24rpx;
+  color: #007AFF;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn::after {
+  border: none;
+}
+
+.refresh-btn:hover {
+  background-color: #f0f8ff;
+  border-color: #007AFF;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.refresh-btn.refreshing {
+  background-color: #f5f5f5;
+  border-color: #d1d5db;
+  color: #999;
+}
+
+.refresh-text { font-size: 24rpx; }
+
+/* 旋转动画 */
+.rotating {
+  animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .tools-list {

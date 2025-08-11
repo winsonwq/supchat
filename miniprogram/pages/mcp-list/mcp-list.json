@@ -1,6 +1,7 @@
 {
   "usingComponents": {
     "navigation-bar": "../../components/navigation-bar/navigation-bar",
-    "svg-icon": "../../components/svg-icon/svg-icon"
+    "svg-icon": "../../components/svg-icon/svg-icon",
+    "tool-detail-dialog": "../../components/tool-detail-dialog/tool-detail-dialog"
   }
 }

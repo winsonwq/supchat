@@ -2,6 +2,7 @@
 import { MCPConfig, AuthType } from '../../lib/types/mcp-config'
 import { MCPConfigStorage } from '../../lib/storage/mcp-config-storage'
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
+import { MCPServerService, MCPTool } from '../../lib/services/mcp-server'
 
 interface ConfigWithShowTools extends MCPConfig {
   showTools?: boolean
@@ -13,7 +14,13 @@ Page({
    */
   data: {
     configs: [] as ConfigWithShowTools[],
-    contentPaddingTop: 0
+    contentPaddingTop: 0,
+    refreshing: {} as Record<string, boolean>, // 记录每个配置的刷新状态
+    // 工具详情对话框相关状态
+    toolDialogVisible: false,
+    selectedTool: null as MCPTool | null,
+    selectedConfigId: '' as string,
+    selectedServerEnabled: false as boolean
   },
 
   /**
@@ -59,7 +66,7 @@ Page({
     console.log('加载的MCP配置:', configsWithShowTools)
     this.setData({ configs: configsWithShowTools })
     
-    // 检查在线状态和工具信息（模拟异步操作）
+    // 检查在线状态和工具信息
     this.checkConfigsStatus()
   },
 
@@ -70,28 +77,15 @@ Page({
     const sampleConfigs = [
       {
         id: MCPConfigStorage.generateConfigId(),
-        name: '天气服务 MCP',
-        url: 'https://weather.example.com/mcp',
-        authType: AuthType.BEARER_TOKEN,
-        authConfig: { token: 'sample_token_123' },
+        name: '文件系统 MCP',
+        url: 'http://0.0.0.0:3001/api/servers/filesystem/mcp',
+        authType: AuthType.NONE,
+        authConfig: {},
         isEnabled: true,
         isOnline: false,
         tools: [],
         toolCount: 0,
         createdAt: Date.now() - 86400000, // 1天前
-        updatedAt: Date.now()
-      },
-      {
-        id: MCPConfigStorage.generateConfigId(),
-        name: '文件管理 MCP',
-        url: 'https://files.example.com/mcp',
-        authType: AuthType.API_KEY,
-        authConfig: { apiKey: 'sample_api_key_456' },
-        isEnabled: false,
-        isOnline: false,
-        tools: [],
-        toolCount: 0,
-        createdAt: Date.now() - 172800000, // 2天前
         updatedAt: Date.now()
       }
     ]
@@ -102,82 +96,160 @@ Page({
   },
 
   /**
-   * 检查配置状态（模拟检查在线状态和获取工具信息）
+   * 检查配置状态（使用真正的 MCP 服务）
    */
   async checkConfigsStatus() {
     const { configs } = this.data
     
-    // 模拟检查每个配置的状态
+    console.log('开始检查 MCP 配置状态...')
+    
+    // 检查每个配置的状态
     for (let i = 0; i < configs.length; i++) {
       const config = configs[i]
       
-      // 模拟检查在线状态
-      const isOnline = await this.checkServerOnline(config.url)
-      
-      // 模拟获取工具列表
-      const tools = await this.fetchServerTools(config)
-      
-      // 更新数据
-      const updatedConfigs = [...this.data.configs]
-      updatedConfigs[i] = {
-        ...updatedConfigs[i],
-        isOnline,
-        tools,
-        toolCount: tools.length
+      try {
+        console.log(`检查配置 ${config.name} (${config.url})`)
+        
+        // 检查在线状态
+        const isOnline = await MCPServerService.checkServerOnline(config)
+        
+        // 获取工具列表
+        let tools: MCPTool[] = []
+        if (isOnline) {
+          tools = await MCPServerService.getServerTools(config)
+        } else {
+          console.log(`MCP 服务器 ${config.name} 离线，跳过工具获取`)
+        }
+        
+        // 保持现有的工具状态
+        const toolsWithState = this.mergeToolsWithExistingState(config.tools || [], tools)
+        
+        // 更新数据
+        const updatedConfigs = [...this.data.configs]
+        updatedConfigs[i] = {
+          ...updatedConfigs[i],
+          isOnline,
+          tools: toolsWithState,
+          toolCount: toolsWithState.length
+        }
+        
+        this.setData({ configs: updatedConfigs })
+        
+        // 同时更新存储
+        MCPConfigStorage.updateConfigOnlineStatus(config.id, isOnline)
+        MCPConfigStorage.updateConfigTools(config.id, toolsWithState)
+        
+        console.log(`配置 ${config.name} 状态更新完成: 在线=${isOnline}, 工具数量=${toolsWithState.length}`)
+        
+      } catch (error) {
+        console.error(`检查配置 ${config.name} 状态失败:`, error)
+        
+        // 更新为离线状态
+        const updatedConfigs = [...this.data.configs]
+        updatedConfigs[i] = {
+          ...updatedConfigs[i],
+          isOnline: false,
+          tools: [],
+          toolCount: 0
+        }
+        
+        this.setData({ configs: updatedConfigs })
+        
+        // 更新存储
+        MCPConfigStorage.updateConfigOnlineStatus(config.id, false)
+        MCPConfigStorage.updateConfigTools(config.id, [])
+        
+        // 显示用户友好的错误提示
+        if (config.url.includes('example.com')) {
+          wx.showToast({
+            title: `${config.name} 是示例配置，无法连接`,
+            icon: 'none',
+            duration: 3000
+          })
+        } else {
+          wx.showToast({
+            title: `${config.name} 连接失败`,
+            icon: 'none',
+            duration: 3000
+          })
+        }
       }
+    }
+    
+    console.log('MCP 配置状态检查完成')
+  },
+
+  /**
+   * 合并新工具列表与现有状态，保持开启/关闭状态
+   */
+  mergeToolsWithExistingState(existingTools: MCPTool[], newTools: MCPTool[]): MCPTool[] {
+    return newTools.map(newTool => {
+      // 查找现有工具，保持其状态
+      const existingTool = existingTools.find(tool => tool.name === newTool.name)
+      
+      return {
+        ...newTool,
+        isEnabled: existingTool ? existingTool.isEnabled : true // 新工具默认为开启状态
+      }
+    })
+  },
+
+  /**
+   * 刷新指定配置的工具列表
+   */
+  async refreshTools(e: WxEvent) {
+    const { id } = e.currentTarget.dataset
+    if (!id) return
+
+    // 设置刷新状态
+    this.setData({
+      [`refreshing.${id}`]: true
+    })
+
+    try {
+      const config = this.data.configs.find(c => c.id === id)
+      if (!config) return
+
+      // 获取最新工具列表
+      const newTools = await MCPServerService.getServerTools(config)
+      
+      // 保持现有的工具状态
+      const toolsWithState = this.mergeToolsWithExistingState(config.tools || [], newTools)
+      
+      // 更新配置
+      const updatedConfigs = this.data.configs.map(c => {
+        if (c.id === id) {
+          return {
+            ...c,
+            tools: toolsWithState,
+            toolCount: toolsWithState.length
+          }
+        }
+        return c
+      })
       
       this.setData({ configs: updatedConfigs })
       
-      // 同时更新存储
-      MCPConfigStorage.updateConfigOnlineStatus(config.id, isOnline)
-      MCPConfigStorage.updateConfigTools(config.id, tools)
-    }
-  },
-
-  /**
-   * 模拟检查服务器在线状态
-   */
-  async checkServerOnline(url: string): Promise<boolean> {
-    try {
-      // 这里应该实际检查服务器状态，现在模拟随机结果
-      await new Promise(resolve => setTimeout(resolve, 500))
-      return Math.random() > 0.3 // 70% 概率在线
-    } catch {
-      return false
-    }
-  },
-
-  /**
-   * 模拟获取服务器工具列表
-   */
-  async fetchServerTools(config: MCPConfig): Promise<any[]> {
-    try {
-      // 这里应该实际请求 MCP Server 获取工具列表，现在返回模拟数据
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // 更新存储
+      MCPConfigStorage.updateConfigTools(id, toolsWithState)
       
-      const mockTools = [
-        {
-          name: 'get_weather',
-          description: '获取指定城市的天气信息',
-          chineseName: '天气查询'
-        },
-        {
-          name: 'send_email',
-          description: '发送邮件到指定邮箱',
-          chineseName: '发送邮件'
-        },
-        {
-          name: 'file_search',
-          description: '在文件系统中搜索文件',
-          chineseName: '文件搜索'
-        }
-      ]
-      
-      // 随机返回一些工具
-      const toolCount = Math.floor(Math.random() * mockTools.length) + 1
-      return mockTools.slice(0, toolCount)
-    } catch {
-      return []
+      wx.showToast({
+        title: '工具列表已刷新',
+        icon: 'success',
+        duration: 1500
+      })
+    } catch (error) {
+      console.error('刷新工具列表失败:', error)
+      wx.showToast({
+        title: '刷新失败',
+        icon: 'error',
+        duration: 2000
+      })
+    } finally {
+      // 清除刷新状态
+      this.setData({
+        [`refreshing.${id}`]: false
+      })
     }
   },
 
@@ -286,33 +358,7 @@ Page({
     }
     
     try {
-      const updatedConfigs = configs.map(config => {
-        if (config.id === configId) {
-          const updatedTools = config.tools?.map(tool => {
-            if (tool.name === toolName) {
-              // 如果 isEnabled 为 undefined 或 true，则设为 false；如果为 false，则设为 true
-              const currentEnabled = tool.isEnabled !== false // 默认为 true
-              const newIsEnabled = !currentEnabled
-              console.log(`切换工具 ${toolName} 状态: ${currentEnabled} -> ${newIsEnabled}`)
-              return { ...tool, isEnabled: newIsEnabled }
-            }
-            return tool
-          })
-          return { ...config, tools: updatedTools }
-        }
-        return config
-      })
-      
-      this.setData({ configs: updatedConfigs })
-      
-      // 这里可以添加保存到存储的逻辑
-      // MCPConfigStorage.updateConfigTools(configId, updatedTools)
-      
-      wx.showToast({
-        title: '工具状态已更新',
-        icon: 'success',
-        duration: 1500
-      })
+      this.toggleToolById(configId, toolName)
     } catch (error) {
       console.error('切换工具状态失败:', error)
       wx.showToast({
@@ -328,6 +374,149 @@ Page({
   onToolItemTap() {
     // 空方法，仅用于阻止事件冒泡
     // 防止点击工具项时触发父级的 onEditConfig 事件
+  },
+
+  /**
+   * 显示工具详情对话框
+   */
+  onShowToolDetail(e: WxEvent) {
+    const { configId, toolName } = e.currentTarget.dataset
+    if (!configId || !toolName) return
+    const targetConfig = this.data.configs.find(c => c.id === configId)
+    const targetTool = targetConfig?.tools?.find(t => t.name === toolName) || null
+    this.setData({
+      toolDialogVisible: true,
+      selectedTool: targetTool,
+      selectedConfigId: configId,
+      selectedServerEnabled: !!targetConfig?.isEnabled
+    })
+  },
+
+  /**
+   * 关闭工具详情对话框
+   */
+  onCloseToolDialog() {
+    this.setData({
+      toolDialogVisible: false,
+      selectedTool: null,
+      selectedConfigId: '',
+      selectedServerEnabled: false
+    })
+  },
+
+  /**
+   * 从对话框中切换工具状态
+   */
+  onToggleToolFromDialog(e: WxEvent) {
+    const { configId, toolName } = e.detail || {}
+    if (!configId || !toolName) return
+    try {
+      this.toggleToolById(configId, toolName)
+      // 同步更新对话框中的 selectedTool 状态
+      const updatedConfig = this.data.configs.find(c => c.id === configId)
+      const updatedTool = updatedConfig?.tools?.find(t => t.name === toolName) || null
+      this.setData({ selectedTool: updatedTool })
+    } catch (error) {
+      console.error('对话框切换工具状态失败:', error)
+    }
+  },
+
+  /**
+   * 按配置与工具名切换工具启用状态（复用逻辑）
+   */
+  toggleToolById(configId: string, toolName: string) {
+    const { configs } = this.data
+    const updatedConfigs = configs.map(config => {
+      if (config.id === configId) {
+        const updatedTools = config.tools?.map(tool => {
+          if (tool.name === toolName) {
+            const currentEnabled = tool.isEnabled !== false
+            const newIsEnabled = !currentEnabled
+            console.log(`切换工具 ${toolName} 状态: ${currentEnabled} -> ${newIsEnabled}`)
+            return { ...tool, isEnabled: newIsEnabled }
+          }
+          return tool
+        })
+        return { ...config, tools: updatedTools }
+      }
+      return config
+    })
+    
+    this.setData({ configs: updatedConfigs })
+    const targetConfig = updatedConfigs.find(c => c.id === configId)
+    if (targetConfig) {
+      MCPConfigStorage.updateConfigTools(configId, targetConfig.tools || [])
+    }
+    wx.showToast({
+      title: '工具状态已更新',
+      icon: 'success',
+      duration: 1500
+    })
+  },
+
+  /**
+   * 验证 MCP 服务器配置
+   */
+  async validateMCPConfig(url: string, authType: AuthType, authConfig: any): Promise<{ isValid: boolean; message: string }> {
+    try {
+      console.log(`验证 MCP 服务器配置: ${url}`)
+      
+      // 创建临时配置进行测试
+      const tempConfig: MCPConfig = {
+        id: 'temp',
+        name: '临时配置',
+        url,
+        authType,
+        authConfig,
+        isEnabled: false,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      }
+      
+      // 测试连接
+      const isOnline = await MCPServerService.checkServerOnline(tempConfig)
+      
+      if (!isOnline) {
+        return {
+          isValid: false,
+          message: '无法连接到 MCP 服务器，请检查地址和认证信息'
+        }
+      }
+      
+      // 测试获取工具列表
+      const tools = await MCPServerService.getServerTools(tempConfig)
+      
+      if (tools.length === 0) {
+        return {
+          isValid: false,
+          message: 'MCP 服务器连接成功，但未发现可用工具'
+        }
+      }
+      
+      return {
+        isValid: true,
+        message: `验证成功！发现 ${tools.length} 个可用工具`
+      }
+      
+    } catch (error: any) {
+      console.error('验证 MCP 配置失败:', error)
+      
+      let message = '验证失败'
+      if (error.message?.includes('timeout')) {
+        message = '连接超时，请检查服务器地址是否正确'
+      } else if (error.message?.includes('fail')) {
+        message = '网络请求失败，请检查网络连接'
+      } else if (error.message?.includes('无效的 MCP 服务器 URL')) {
+        message = '无效的服务器地址，请使用 http:// 或 https:// 开头'
+      } else {
+        message = error.message || '未知错误'
+      }
+      
+      return {
+        isValid: false,
+        message
+      }
+    }
   }
 })
 

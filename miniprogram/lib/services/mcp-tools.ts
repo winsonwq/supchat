@@ -2,6 +2,7 @@
 import { MCPConfigStorage } from '../storage/mcp-config-storage'
 import { MCPTool } from '../types/mcp-config'
 import { OpenRouterTool } from '../mcp/types'
+import { MCPServerService } from './mcp-server'
 
 /**
  * MCP 工具服务类
@@ -17,7 +18,9 @@ export class MCPToolsService {
     
     enabledConfigs.forEach(config => {
       if (config.isOnline && config.tools) {
-        allTools.push(...config.tools)
+        // 只添加已启用的工具
+        const enabledTools = config.tools.filter(tool => tool.isEnabled !== false)
+        allTools.push(...enabledTools)
       }
     })
     
@@ -32,9 +35,7 @@ export class MCPToolsService {
       type: 'function',
       function: {
         name: tool.name,
-        description: tool.chineseName 
-          ? `[${tool.chineseName}] ${tool.description}`
-          : tool.description,
+        description: tool.description,
         parameters: tool.inputSchema || {
           type: 'object',
           properties: {},
@@ -67,16 +68,36 @@ export class MCPToolsService {
     toolName: string, 
     args: Record<string, unknown>
   ): Promise<{ data: string }> {
-    // 这里应该实际调用对应的 MCP Server
-    // 现在返回模拟数据
-    console.log(`执行 MCP 工具: ${toolName}`, args)
+    // 查找工具对应的配置
+    const configs = MCPConfigStorage.getAllConfigs()
+    let targetConfig = null
+    let targetTool = null
     
-    // 模拟异步调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    for (const config of configs) {
+      if (config.isOnline && config.tools) {
+        const tool = config.tools.find(t => t.name === toolName)
+        if (tool && tool.isEnabled !== false) {
+          targetConfig = config
+          targetTool = tool
+          break
+        }
+      }
+    }
     
-    // 返回模拟结果
-    return {
-      data: `MCP 工具 ${toolName} 执行成功，参数：${JSON.stringify(args)}`
+    if (!targetConfig || !targetTool) {
+      throw new Error(`未找到可用的工具: ${toolName}`)
+    }
+    
+    try {
+      // 使用 MCP 服务器服务执行工具调用
+      const result = await MCPServerService.callTool(targetConfig, toolName, args)
+      
+      return {
+        data: JSON.stringify(result, null, 2)
+      }
+    } catch (error) {
+      console.error(`执行 MCP 工具 ${toolName} 失败:`, error)
+      throw error
     }
   }
 

@@ -1,0 +1,212 @@
+/* tool-detail-dialog.scss */
+.tool-detail-content {
+  min-width: 500rpx;
+}
+
+/* 工具部分 */
+.tool-section {
+  margin-bottom: 32rpx;
+}
+
+.tool-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #666666;
+  margin-bottom: 12rpx;
+  text-transform: uppercase;
+  letter-spacing: 0.5rpx;
+}
+
+.section-content {
+  background-color: #f8f9fa;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  border: 1rpx solid #e9ecef;
+}
+
+/* 工具名称 */
+.tool-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333333;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  background-color: #e3f2fd;
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+  border: 1rpx solid #bbdefb;
+}
+
+/* 工具描述 */
+.tool-description {
+  font-size: 26rpx;
+  color: #555555;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* 输入参数 */
+.schema-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.schema-type {
+  font-size: 24rpx;
+  color: #666666;
+  font-weight: 500;
+}
+
+.schema-properties {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.property-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 12rpx 16rpx;
+  background-color: #ffffff;
+  border-radius: 8rpx;
+  border: 1rpx solid #e5e7eb;
+}
+
+.property-name {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #333333;
+  min-width: 120rpx;
+}
+
+.property-type {
+  font-size: 22rpx;
+  color: #6b7280;
+  background-color: #f3f4f6;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.property-required {
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 24rpx;
+}
+
+/* 工具状态 */
+.status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 0;
+}
+
+.status-label {
+  font-size: 24rpx;
+  color: #666666;
+}
+
+.status-value {
+  font-size: 24rpx;
+  font-weight: 500;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+.status-value.enabled {
+  background-color: #dcfce7;
+  color: #16a34a;
+  border: 1rpx solid #bbf7d0;
+}
+
+.status-value.disabled {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1rpx solid #fecaca;
+}
+
+/* 操作按钮 */
+.tool-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 32rpx;
+  padding-top: 24rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.action-btn {
+  flex: 1;
+  height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.action-btn::after {
+  border: none;
+}
+
+.action-btn-toggle {
+  background-color: #007AFF;
+  color: white;
+  border: 1rpx solid #007AFF;
+}
+
+.action-btn-toggle:hover {
+  background-color: #0056CC;
+  border-color: #0056CC;
+}
+
+.action-btn-toggle:active {
+  background-color: #004499;
+  transform: scale(0.98);
+}
+
+/* 已不再禁用按钮，移除禁用态视觉 */
+
+.action-btn-close {
+  background-color: #f8f9fa;
+  color: #6b7280;
+  border: 1rpx solid #e5e7eb;
+}
+
+.action-btn-close:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.action-btn-close:active {
+  background-color: #e9ecef;
+  transform: scale(0.98);
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .tool-detail-content {
+    min-width: auto;
+  }
+  
+  .tool-actions {
+    flex-direction: column;
+  }
+  
+  .action-btn {
+    width: 100%;
+  }
+}
