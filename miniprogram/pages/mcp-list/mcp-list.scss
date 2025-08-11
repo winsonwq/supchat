@@ -25,24 +25,32 @@
 }
 
 .add-button {
-  background-color: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: 24rpx;
-  padding: 16rpx 24rpx;
-  font-size: 28rpx;
-  font-weight: 500;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 16rpx 24rpx;
+  border: none;
+  border-radius: 24rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  line-height: 1;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  outline: none;
+  min-height: 72rpx;
+  box-sizing: border-box;
+  background-color: var(--color-primary);
+  color: white;
   gap: 8rpx;
 }
 
-.add-button::after {
-  border: none;
+.add-button:active {
+  background-color: var(--color-primary-dark);
+  transform: scale(0.98);
 }
 
-.add-text {
-  color: white;
+.add-button:disabled {
+  background-color: #cccccc;
 }
 
 /* 配置列表 */
@@ -187,23 +195,28 @@
 }
 
 .action-btn {
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: 50%;
-  border: none;
-  background-color: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.action-btn::after {
+  width: 56rpx;
+  height: 56rpx;
   border: none;
+  border-radius: 50%;
+  background-color: #f3f4f6;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
 }
 
 .action-btn:active {
   background-color: #e5e7eb;
+  transform: scale(0.95);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Switch 开关样式 */
@@ -268,20 +281,18 @@
 
 /* 刷新按钮样式 */
 .refresh-btn {
-  width: 40rpx;
-  height: 40rpx;
-  border: none;
-  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  border-radius: 8rpx;
-  transition: all 0.2s ease;
-}
-
-.refresh-btn::after {
+  width: 40rpx;
+  height: 40rpx;
   border: none;
+  border-radius: 8rpx;
+  background: transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
 }
 
 .refresh-btn:active {
@@ -406,24 +417,31 @@
 }
 
 .expand-btn {
-  width: 100%;
-  background: transparent;
-  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8rpx;
+  width: 100%;
   padding: 16rpx;
-  border-radius: 12rpx;
-  transition: all 0.3s ease;
-}
-
-.expand-btn::after {
+  background: transparent;
   border: none;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+  line-height: 1;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  outline: none;
+  color: #666666;
+  gap: 8rpx;
 }
 
 .expand-btn:active {
   background-color: #f3f4f6;
+}
+
+.expand-btn:disabled {
+  opacity: 0.5;
+  color: #9ca3af;
 }
 
 .expand-text {

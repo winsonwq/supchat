@@ -1,0 +1,144 @@
+/* ===== 统一按钮样式系统 - 组件化 ===== */
+
+/* 基础按钮 */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx 32rpx;
+  border: none;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  line-height: 1;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  outline: none;
+  min-height: 88rpx;
+  box-sizing: border-box;
+}
+
+.btn::after {
+  border: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 主要按钮 */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+}
+
+.btn-primary:active {
+  background-color: var(--color-primary-dark);
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  background-color: #cccccc;
+}
+
+/* 次要按钮 */
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1rpx solid #e5e7eb;
+}
+
+.btn-secondary:active {
+  background-color: #e5e7eb;
+  transform: scale(0.98);
+}
+
+.btn-secondary:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+}
+
+/* 危险按钮 */
+.btn-danger {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1rpx solid #fca5a5;
+}
+
+.btn-danger:active {
+  background-color: #fecaca;
+  transform: scale(0.98);
+}
+
+/* 文本按钮 */
+.btn-text {
+  background: transparent;
+  color: var(--color-primary);
+  border: none;
+}
+
+.btn-text:active {
+  opacity: 0.7;
+}
+
+.btn-text:disabled {
+  opacity: 0.5;
+  color: #9ca3af;
+}
+
+/* 按钮尺寸 */
+.btn-small {
+  padding: 16rpx 24rpx;
+  font-size: 28rpx;
+  min-height: 72rpx;
+}
+
+.btn-large {
+  padding: 32rpx 48rpx;
+  font-size: 36rpx;
+  min-height: 112rpx;
+}
+
+/* 图标按钮 */
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border: none;
+  border-radius: 50%;
+  background-color: #f3f4f6;
+  padding: 0;
+}
+
+.btn-icon:active {
+  background-color: #e5e7eb;
+  transform: scale(0.95);
+}
+
+.btn-icon-small {
+  width: 56rpx;
+  height: 56rpx;
+}
+
+.btn-icon-large {
+  width: 88rpx;
+  height: 88rpx;
+}
+
+/* 成功按钮 */
+.btn-success {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.btn-success:active {
+  background-color: #059669;
+  transform: scale(0.98);
+}
+
+.btn-circle {
+  border-radius: 50%;
+}

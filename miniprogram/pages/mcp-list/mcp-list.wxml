@@ -12,7 +12,7 @@
   <view class="configs-section">
     <view class="section-header">
       <text class="section-title">MCP Server 列表</text>
-      <button class="add-button flex items-center gap-4" bindtap="onAddConfig">
+      <button class="btn btn-primary btn-small btn-rounded" bindtap="onAddConfig">
         <svg-icon name="plus" size="32" color="white"></svg-icon>
         <text class="add-text">创建 MCP</text>
       </button>
@@ -63,7 +63,7 @@
           <view class="tools-header">
             <text class="tools-title">可用工具</text>
             <button 
-              class="refresh-btn"
+              class="btn-icon btn-icon-small"
               bindtap="refreshTools"
               data-id="{{ item.id }}"
               disabled="{{ refreshing[item.id] }}"
@@ -107,7 +107,7 @@
         <!-- 展开/收起按钮 -->
         <view class="expand-section" wx:if="{{ item.tools && item.tools.length > 0 }}">
           <button 
-            class="expand-btn" 
+            class="btn btn-text btn-small" 
             catchtap="onToggleTools" 
             data-id="{{ item.id }}"
           >

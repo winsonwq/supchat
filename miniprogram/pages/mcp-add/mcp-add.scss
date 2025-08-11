@@ -107,35 +107,29 @@
   gap: 24rpx;
 }
 
-.btn {
-  height: 88rpx;
+.btn-primary {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 2;
+  padding: 24rpx 32rpx;
+  border: none;
   border-radius: 12rpx;
   font-size: 32rpx;
   font-weight: 500;
-  border: none;
-  outline: none;
+  line-height: 1;
   transition: all 0.2s ease;
-}
-
-.btn::after {
-  border: none;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-}
-
-.btn-primary {
-  flex: 2;
+  cursor: pointer;
+  outline: none;
+  min-height: 88rpx;
+  box-sizing: border-box;
   background-color: #667eea;
   color: white;
 }
 
 .btn-primary:active {
   background-color: #5a67d8;
+  transform: scale(0.98);
 }
 
 .btn-primary:disabled {
@@ -143,11 +137,31 @@
 }
 
 .btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: 1;
+  padding: 24rpx 32rpx;
+  border: 1rpx solid #e5e7eb;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  line-height: 1;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  outline: none;
+  min-height: 88rpx;
+  box-sizing: border-box;
   background-color: #f3f4f6;
   color: #374151;
 }
 
 .btn-secondary:active {
   background-color: #e5e7eb;
+  transform: scale(0.98);
+}
+
+.btn-secondary:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
 }

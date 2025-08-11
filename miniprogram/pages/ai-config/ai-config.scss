@@ -46,22 +46,29 @@
   gap: 24rpx;
 }
 
-.btn {
-  flex: 1;
-  height: 88rpx;
+.btn-primary {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 1;
+  padding: 24rpx 32rpx;
+  border: none;
   border-radius: 12rpx;
   font-size: 32rpx;
   font-weight: 500;
-  border: none;
+  line-height: 1;
+  transition: all 0.2s ease;
+  cursor: pointer;
   outline: none;
-  transition: opacity 0.2s ease;
+  min-height: 88rpx;
+  box-sizing: border-box;
+  background-color: var(--color-primary);
+  color: white;
 }
 
-.btn:disabled {
-  opacity: 0.5;
+.btn-primary:active {
+  background-color: var(--color-primary-dark);
+  transform: scale(0.98);
 }
 
 .btn-primary:disabled {

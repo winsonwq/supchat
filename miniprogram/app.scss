@@ -88,6 +88,9 @@ button::after {
   border: none;
 }
 
+/* 引入按钮组件样式 */
+@import './components/button/button.scss';
+
 
 /* 基础容器样式 */
 .container {

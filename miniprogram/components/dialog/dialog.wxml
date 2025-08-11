@@ -18,14 +18,14 @@
     <view class="dialog-footer" wx:if="{{ showFooter }}">
       <button 
         wx:if="{{ cancelText }}"
-        class="dialog-btn dialog-btn-cancel" 
+        class="btn btn-secondary" 
         bindtap="onCancel"
       >
         {{ cancelText }}
       </button>
       <button 
         wx:if="{{ confirmText }}"
-        class="dialog-btn dialog-btn-confirm" 
+        class="btn btn-primary" 
         bindtap="onConfirm"
       >
         {{ confirmText }}

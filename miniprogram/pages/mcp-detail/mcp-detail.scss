@@ -28,38 +28,6 @@
   color: #333333;
 }
 
-.edit-button,
-.refresh-button {
-  background-color: #667eea;
-  color: white;
-  border: none;
-  border-radius: 20rpx;
-  padding: 12rpx 20rpx;
-  font-size: 24rpx;
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.edit-button::after,
-.refresh-button::after {
-  border: none;
-}
-
-.edit-text,
-.refresh-text {
-  color: white;
-}
-
-.refresh-button {
-  background-color: transparent;
-  color: #666;
-  padding: 8rpx 16rpx;
-}
-
-.refresh-text {
-  color: #666;
-}
 
 /* 信息卡片 */
 .info-card {
@@ -132,28 +100,6 @@
 }
 
 /* 切换按钮 */
-.toggle-btn {
-  width: 48rpx;
-  height: 48rpx;
-  border-radius: 50%;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.toggle-btn::after {
-  border: none;
-}
-
-.toggle-enabled {
-  background-color: #10b981;
-}
-
-.toggle-disabled {
-  background-color: #f3f4f6;
-}
 
 /* 状态指示器 */
 .status-indicator {
@@ -176,25 +122,6 @@
   color: #333333;
 }
 
-.refresh-btn {
-  width: 32rpx;
-  height: 32rpx;
-  border: none;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform: rotate(0deg);
-  transition: transform 0.3s ease;
-}
-
-.refresh-btn::after {
-  border: none;
-}
-
-.refresh-btn:active {
-  transform: rotate(180deg);
-}
 
 /* 工具列表 */
 .tools-list {
@@ -298,45 +225,6 @@
   gap: 24rpx;
 }
 
-.btn {
-  flex: 1;
-  height: 88rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12rpx;
-  font-size: 32rpx;
-  font-weight: 500;
-  border: none;
-  outline: none;
-  transition: opacity 0.2s ease;
-}
-
-.btn::after {
-  border: none;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-}
-
-.btn-secondary {
-  background-color: #f3f4f6;
-  color: #374151;
-}
-
-.btn-secondary:active {
-  background-color: #e5e7eb;
-}
-
-.btn-danger {
-  background-color: #fee2e2;
-  color: #dc2626;
-}
-
-.btn-danger:active {
-  background-color: #fecaca;
-}
 
 /* 加载状态 */
 .loading-state {

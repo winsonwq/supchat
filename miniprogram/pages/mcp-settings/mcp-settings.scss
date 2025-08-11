@@ -39,23 +39,35 @@
 
 /* 导航按钮 */
 .nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   width: 100%;
-  background-color: #f8fafc;
+  padding: 24rpx;
   border: 1rpx solid #e2e8f0;
   border-radius: 12rpx;
-  padding: 24rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  line-height: 1;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  outline: none;
+  min-height: 72rpx;
+  box-sizing: border-box;
+  background-color: #f8fafc;
+  color: #374151;
   margin: 0;
   text-align: left;
-  transition: all 0.3s ease;
-}
-
-.nav-button::after {
-  border: none;
 }
 
 .nav-button:active {
   background-color: #f1f5f9;
   transform: scale(0.98);
+}
+
+.nav-button:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
 }
 
 .nav-content {

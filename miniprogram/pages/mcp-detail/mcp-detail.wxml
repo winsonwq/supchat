@@ -13,9 +13,9 @@
     <view class="detail-section">
       <view class="section-header">
         <text class="section-title">基本信息</text>
-        <button class="edit-button" bindtap="onEditConfig">
+        <button class="btn btn-primary btn-icon" bindtap="onEditConfig">
           <svg-icon name="edit" size="28" color="white"></svg-icon>
-          <text class="edit-text">编辑</text>
+          <text class="btn__text">编辑</text>
         </button>
       </view>
       
@@ -42,7 +42,7 @@
               {{ config.isEnabled ? '已启用' : '已禁用' }}
             </view>
             <button 
-              class="toggle-btn {{ config.isEnabled ? 'toggle-enabled' : 'toggle-disabled' }}" 
+              class="btn btn-icon {{ config.isEnabled ? 'btn-success' : 'btn-secondary' }}" 
               bindtap="onToggleEnabled"
             >
               <svg-icon name="{{ config.isEnabled ? 'check' : 'clear' }}" size="24" color="{{ config.isEnabled ? 'white' : '#666' }}"></svg-icon>
@@ -55,7 +55,7 @@
           <view class="status-row">
             <view class="status-indicator {{ config.isOnline ? 'status-online' : 'status-offline' }}"></view>
             <text class="status-text">{{ config.isOnline ? '在线' : '离线' }}</text>
-            <button class="refresh-btn" bindtap="onRefreshStatus">
+            <button class="btn btn-icon btn-secondary" bindtap="onRefreshStatus">
               <svg-icon name="arrow-right" size="24" color="#666"></svg-icon>
             </button>
           </view>
@@ -67,9 +67,9 @@
     <view class="detail-section">
       <view class="section-header">
         <text class="section-title">可用工具 ({{ config.toolCount || 0 }})</text>
-        <button class="refresh-button" bindtap="onRefreshTools">
+        <button class="btn btn-icon btn-secondary" bindtap="onRefreshTools">
           <svg-icon name="arrow-right" size="24" color="#666"></svg-icon>
-          <text class="refresh-text">刷新</text>
+          <text class="btn__text">刷新</text>
         </button>
       </view>
       

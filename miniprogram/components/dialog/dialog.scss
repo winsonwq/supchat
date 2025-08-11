@@ -88,15 +88,21 @@
 }
 
 .dialog-btn {
-  min-width: 120rpx;
-  height: 72rpx;
-  border-radius: 36rpx;
-  font-size: 28rpx;
-  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 120rpx;
+  padding: 24rpx 32rpx;
+  border: none;
+  border-radius: 36rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  line-height: 1;
   transition: all 0.2s ease;
+  cursor: pointer;
+  outline: none;
+  min-height: 72rpx;
+  box-sizing: border-box;
 }
 
 .dialog-btn::after {
@@ -109,13 +115,9 @@
   border: 1rpx solid #e5e7eb;
 }
 
-.dialog-btn-cancel:hover {
+.dialog-btn-cancel:active {
   background-color: #f3f4f6;
   border-color: #d1d5db;
-}
-
-.dialog-btn-cancel:active {
-  background-color: #e9ecef;
   transform: scale(0.98);
 }
 
@@ -125,13 +127,8 @@
   border: 1rpx solid #007AFF;
 }
 
-.dialog-btn-confirm:hover {
-  background-color: #0056CC;
-  border-color: #0056CC;
-}
-
 .dialog-btn-confirm:active {
-  background-color: #004499;
+  background-color: #0056CC;
   transform: scale(0.98);
 }
 
