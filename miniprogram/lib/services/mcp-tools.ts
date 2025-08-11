@@ -2,7 +2,8 @@
 import { MCPConfigStorage } from '../storage/mcp-config-storage'
 import { MCPTool } from '../types/mcp-config'
 import { OpenRouterTool } from '../mcp/types'
-import { MCPServerService } from './mcp-server'
+import { MCPToolExecutor } from './mcp-tool-executor'
+import { MCPToolTransformer } from './mcp-tool-transformer'
 
 /**
  * MCP 工具服务类
@@ -31,18 +32,7 @@ export class MCPToolsService {
    * 将 MCP 工具转换为 OpenRouter 格式
    */
   static transformMCPToolToOpenRouter(tool: MCPTool): OpenRouterTool {
-    return {
-      type: 'function',
-      function: {
-        name: tool.name,
-        description: tool.description,
-        parameters: tool.inputSchema || {
-          type: 'object',
-          properties: {},
-          required: []
-        }
-      }
-    }
+    return MCPToolTransformer.transformToOpenRouter(tool)
   }
 
   /**
@@ -50,7 +40,7 @@ export class MCPToolsService {
    */
   static getAllOpenRouterMCPTools(): OpenRouterTool[] {
     const mcpTools = this.getAllEnabledMCPTools()
-    return mcpTools.map(tool => this.transformMCPToolToOpenRouter(tool))
+    return MCPToolTransformer.transformMultiple(mcpTools)
   }
 
   /**
@@ -68,33 +58,10 @@ export class MCPToolsService {
     toolName: string, 
     args: Record<string, unknown>
   ): Promise<{ data: string }> {
-    // 查找工具对应的配置
-    const configs = MCPConfigStorage.getAllConfigs()
-    let targetConfig = null
-    let targetTool = null
-    
-    for (const config of configs) {
-      if (config.isOnline && config.tools) {
-        const tool = config.tools.find(t => t.name === toolName)
-        if (tool && tool.isEnabled !== false) {
-          targetConfig = config
-          targetTool = tool
-          break
-        }
-      }
-    }
-    
-    if (!targetConfig || !targetTool) {
-      throw new Error(`未找到可用的工具: ${toolName}`)
-    }
-    
     try {
-      // 使用 MCP 服务器服务执行工具调用
-      const result = await MCPServerService.callTool(targetConfig, toolName, args)
-      
-      return {
-        data: JSON.stringify(result, null, 2)
-      }
+      // 使用新的 MCP 工具执行器
+      const executor = MCPToolExecutor.getInstance()
+      return await executor.executeTool(toolName, args)
     } catch (error) {
       console.error(`执行 MCP 工具 ${toolName} 失败:`, error)
       throw error
@@ -105,6 +72,67 @@ export class MCPToolsService {
    * 检查是否为 MCP 工具
    */
   static isMCPTool(toolName: string): boolean {
-    return this.findMCPToolByName(toolName) !== null
+    return MCPToolExecutor.isMCPTool(toolName)
+  }
+
+  /**
+   * 获取所有可用的 MCP 工具名称
+   */
+  static getAvailableMCPToolNames(): string[] {
+    return MCPToolExecutor.getAvailableMCPToolNames()
+  }
+
+  /**
+   * 验证 MCP 工具配置
+   */
+  static validateMCPTool(tool: MCPTool): { isValid: boolean; message?: string } {
+    if (!tool.name?.trim()) {
+      return { isValid: false, message: '工具名称不能为空' }
+    }
+    
+    if (!tool.description?.trim()) {
+      return { isValid: false, message: '工具描述不能为空' }
+    }
+    
+    return { isValid: true }
+  }
+
+  /**
+   * 获取 MCP 工具统计信息
+   */
+  static getMCPToolStats(): {
+    total: number
+    enabled: number
+    disabled: number
+    byServer: Record<string, number>
+  } {
+    const configs = MCPConfigStorage.getAllConfigs()
+    let total = 0
+    let enabled = 0
+    let disabled = 0
+    const byServer: Record<string, number> = {}
+    
+    configs.forEach(config => {
+      if (config.tools) {
+        const serverToolCount = config.tools.length
+        total += serverToolCount
+        byServer[config.name] = serverToolCount
+        
+        config.tools.forEach(tool => {
+          if (tool.isEnabled !== false) {
+            enabled++
+          } else {
+            disabled++
+          }
+        })
+      }
+    })
+    
+    return {
+      total,
+      enabled,
+      disabled,
+      byServer
+    }
   }
 }

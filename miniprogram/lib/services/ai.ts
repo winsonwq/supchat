@@ -8,6 +8,7 @@ import {
   allTools,
 } from '../mcp/index.js'
 import { MCPToolsService } from './mcp-tools.js'
+import { ToolManager } from './tool-manager.js'
 import {
   formatToolCallMessage,
   formatToolCallErrorMessage,
@@ -134,6 +135,10 @@ export class AIService {
       headers.Accept = 'text/event-stream'
     }
 
+    // 使用工具管理器获取所有工具
+    const toolManager = ToolManager.getInstance()
+    const allAvailableTools = toolManager.getAllTools()
+
     return {
       url: `${aiConfig.apiHost}/chat/completions`,
       method: 'POST',
@@ -141,10 +146,7 @@ export class AIService {
       data: {
         model: aiConfig.model,
         messages: this.getMessages(),
-        tools: [
-          ...allTools.map(transformToOpenRouterTool),
-          ...MCPToolsService.getAllOpenRouterMCPTools()
-        ],
+        tools: allAvailableTools,
         tool_choice: 'auto',
         stream: isStream,
         ...data,
@@ -392,6 +394,8 @@ export class AIService {
     onStream: StreamCallback,
   ): Promise<(ToolCallResult | Error)[]> {
     const toolResults: (ToolCallResult | Error)[] = []
+    const toolManager = ToolManager.getInstance()
+    
     for (const call of toolCalls) {
       try {
         const args = JSON.parse(call.function.arguments) as Record<
@@ -411,14 +415,8 @@ export class AIService {
           ),
         )
 
-        let result: ToolCallResult
-        
-        // 检查是否为 MCP 工具
-        if (MCPToolsService.isMCPTool(call.function.name)) {
-          result = await MCPToolsService.executeMCPTool(call.function.name, args)
-        } else {
-          result = await executeToolCall(call.function.name, args, allTools)
-        }
+        // 使用工具管理器执行工具
+        const result = await toolManager.executeTool(call.function.name, args)
         toolResults.push(result)
 
         this.addMessage('tool', result.data, call.id)
@@ -627,6 +625,8 @@ export class AIService {
     try {
       console.log('处理工具调用（非流式）:', toolCalls)
 
+      const toolManager = ToolManager.getInstance()
+
       // 执行所有工具调用
       for (const call of toolCalls) {
         try {
@@ -636,15 +636,8 @@ export class AIService {
           >
           console.log(`执行工具 ${call.function.name}:`, args)
 
-          let result: ToolCallResult
-          
-          // 检查是否为 MCP 工具
-          if (MCPToolsService.isMCPTool(call.function.name)) {
-            result = await MCPToolsService.executeMCPTool(call.function.name, args)
-          } else {
-            result = await executeToolCall(call.function.name, args, allTools)
-          }
-
+          // 使用工具管理器执行工具
+          const result = await toolManager.executeTool(call.function.name, args)
           this.addMessage('tool', result.data as string, call.id)
         } catch (error) {
           console.error(`工具调用 ${call.function.name} 失败:`, error)
