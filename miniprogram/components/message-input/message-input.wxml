@@ -18,7 +18,7 @@
       />
     </view>
     <view class="w-full flex align-center">
-      <button class="btn btn-tiny" catchtap="onEditConfig" data-id="{{ item.id }}">
+      <button class="btn btn-tiny" catchtap="onOpenMcpSheet">
         <svg-icon name="server" size="32"></svg-icon>
         MCP 服务
       </button>
@@ -29,4 +29,27 @@
   <view class="text-center text-xs text-gray-400 leading-tight">
     内容由 AI 生成，仅供参考
   </view>
+
+  <!-- MCP 选择抽屉 -->
+  <bottom-sheet visible="{{ mcpSheetVisible }}" title="MCP 服务" bind:close="onCloseMcpSheet">
+    <view class="mcp-list">
+      <block wx:if="{{ mcpConfigs.length > 0 }}">
+        <block wx:for="{{ mcpConfigs }}" wx:key="id">
+          <view class="mcp-item">
+            <view class="mcp-meta">
+              <text class="mcp-name">{{ item.name }}</text>
+              <view class="mcp-status">
+                <view class="dot {{ item.isOnline ? 'online' : 'offline' }}"></view>
+                <text class="status-text">{{ item.isOnline ? '在线' : '离线' }}</text>
+              </view>
+            </view>
+            <switch class="mcp-switch" checked="{{ item.isEnabled }}" bindchange="onToggleMcp" data-id="{{ item.id }}"></switch>
+          </view>
+        </block>
+      </block>
+      <view class="mcp-empty" wx:else>
+        <text>暂无 MCP 配置，可前往设置添加</text>
+      </view>
+    </view>
+  </bottom-sheet>
 </view>

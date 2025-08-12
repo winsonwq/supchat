@@ -1,0 +1,82 @@
+.bottom-sheet-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bottom-sheet-root.is-visible {
+  pointer-events: auto;
+}
+
+.bottom-sheet-mask {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.bottom-sheet-root.is-visible .bottom-sheet-mask {
+  opacity: 1;
+  visibility: visible;
+}
+
+.bottom-sheet-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  max-height: 75vh;
+  min-height: 35vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.is-visible .bottom-sheet-panel {
+  transform: translateY(0%);
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px 0 16px;
+}
+
+.header-spacer {
+  width: 80px; /* 与右侧操作等宽 */
+  height: 44px;
+}
+
+.header-title {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.header-action {
+  width: 80px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  color: #6b7280;
+}
+
+.close-text {
+  font-size: 14px;
+}
+
+.sheet-content {
+  padding: 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto;
+}

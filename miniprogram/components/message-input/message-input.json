@@ -1,7 +1,8 @@
 {
   "component": true,
   "usingComponents": {
-    "svg-icon": "/components/svg-icon/svg-icon"
+    "svg-icon": "/components/svg-icon/svg-icon",
+    "bottom-sheet": "/components/bottom-sheet/bottom-sheet"
   },
   "styleIsolation": "apply-shared"
 }

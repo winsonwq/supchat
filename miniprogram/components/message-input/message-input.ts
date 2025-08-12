@@ -1,5 +1,6 @@
 // message-input.ts
 import { WxEvent } from '../../lib/mcp/types.js'
+import { MCPConfigStorage } from '../../lib/storage/mcp-config-storage'
 import getSafeArea from '../../lib/utils/safe-area'
 
 Component({
@@ -28,7 +29,9 @@ Component({
    * 组件的初始数据
    */
   data: {
-    bottomSafeHeight: 0
+    bottomSafeHeight: 0,
+    mcpSheetVisible: false,
+    mcpConfigs: [] as any[]
   },
 
   /**
@@ -41,6 +44,8 @@ Component({
       this.setData({
         bottomSafeHeight: safeArea.safeAreaBottom
       })
+      // 载入 MCP 配置
+      this.loadMcpConfigs()
     }
   },
 
@@ -93,6 +98,24 @@ Component({
       this.triggerEvent('inputchange', {
         value: ''
       })
+    },
+
+    // 打开/关闭 MCP 抽屉
+    onOpenMcpSheet() {
+      this.setData({ mcpSheetVisible: true })
+    },
+    onCloseMcpSheet() {
+      this.setData({ mcpSheetVisible: false })
+    },
+    loadMcpConfigs() {
+      const configs = MCPConfigStorage.getAllConfigs()
+      this.setData({ mcpConfigs: configs })
+    },
+    onToggleMcp(e: WxEvent) {
+      const id = e.currentTarget.dataset.id as string
+      MCPConfigStorage.toggleConfigEnabled(id)
+      this.loadMcpConfigs()
+      this.triggerEvent('mcpchange', { id })
     }
   }
 })

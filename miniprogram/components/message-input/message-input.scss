@@ -37,3 +37,49 @@
   color: #9ca3af; /* text-gray-400 */
   font-size: 32rpx; /* text-base */
 }
+
+/* MCP 列表 */
+.mcp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.mcp-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 16rpx;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.mcp-meta {
+  display: flex;
+  flex-direction: row;
+  gap: 16rpx;
+  align-items: center;
+}
+
+.mcp-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #111827;
+}
+
+.mcp-status { display: flex; align-items: center; gap: 8rpx; }
+.dot { width: 12rpx; height: 12rpx; border-radius: 50%; }
+.dot.online { background-color: #10B981; }
+.dot.offline { background-color: #EF4444; }
+.status-text { font-size: 24rpx; color: #6b7280; }
+
+/* 缩小 switch 尺寸 */
+.mcp-switch {
+  transform: scale(0.88);
+  transform-origin: right center;
+}
+
+.mcp-empty {
+  padding: 32rpx 12rpx;
+  text-align: center;
+  color: #9ca3af;
+}

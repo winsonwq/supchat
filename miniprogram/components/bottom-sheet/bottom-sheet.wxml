@@ -1,0 +1,18 @@
+<view class="bottom-sheet-root {{ visible ? 'is-visible' : '' }}" style="z-index: {{ zIndex }};" catchtouchmove="noop">
+  <!-- 遮罩层 -->
+  <view class="bottom-sheet-mask" catchtap="onMaskTap"></view>
+
+  <!-- 抽屉内容 -->
+  <view class="bottom-sheet-panel">
+    <view class="sheet-header">
+      <view class="header-spacer"></view>
+      <view class="header-title">{{ title }}</view>
+      <view class="header-action" catchtap="onClose">
+        <text class="close-text">关闭</text>
+      </view>
+    </view>
+    <view class="sheet-content">
+      <slot></slot>
+    </view>
+  </view>
+</view>
