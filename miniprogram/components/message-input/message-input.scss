@@ -13,7 +13,7 @@
 /* 输入框样式 - 需要特殊的圆角和高度限制 */
 .message-textarea {
   max-height: 200rpx;
-  padding: 16rpx 32rpx;
+  padding: 16rpx 16rpx 0;
   border-radius: 44rpx;
   transition: all 0.3s ease;
   resize: none;

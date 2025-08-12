@@ -595,55 +595,6 @@
   padding: 16rpx;
 }
 
-/* 按钮基础样式 */
-.btn {
-  padding: 16rpx;
-  border-radius: 8rpx;
-  text-align: center;
-  font-weight: 500;
-  font-size: 32rpx;
-}
-
-.btn-primary {
-  padding: 16rpx;
-  border-radius: 8rpx;
-  text-align: center;
-  font-weight: 500;
-  font-size: 32rpx;
-  background-color: var(--color-primary);
-  color: #ffffff;
-}
-
-.btn-secondary {
-  padding: 16rpx;
-  border-radius: 8rpx;
-  text-align: center;
-  font-weight: 500;
-  font-size: 32rpx;
-  background-color: var(--color-secondary);
-  color: #ffffff;
-}
-
-.btn-success {
-  padding: 16rpx;
-  border-radius: 8rpx;
-  text-align: center;
-  font-weight: 500;
-  font-size: 32rpx;
-  background-color: var(--color-success);
-  color: #ffffff;
-}
-
-.btn-danger {
-  padding: 16rpx;
-  border-radius: 8rpx;
-  text-align: center;
-  font-weight: 500;
-  font-size: 32rpx;
-  background-color: var(--color-danger);
-  color: #ffffff;
-}
-
 /* 文本样式组合 */
 .text-heading {
   font-size: 48rpx;

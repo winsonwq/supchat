@@ -1,20 +1,28 @@
 <!-- 输入区域 -->
-<view class="input-container w-full bg-white border-t border-gray-200 p-6 relative" style="padding-bottom: calc(24rpx + {{ bottomSafeHeight }}px);">
-  <!-- 输入框容器 -->
-  <view class="w-full mb-4 relative">
-    <textarea
-      class="message-textarea w-full text-base border-2 border-gray-200 bg-gray-50 overflow-y-auto"
-      placeholder="{{ isStreaming ? 'AI正在回复中...' : '你有什么想知道的，快来问问我' }}"
-      value="{{ inputMessage }}"
-      bindinput="onInputChange"
-      bindconfirm="onConfirm"
-      confirm-type="send"
-      disabled="{{ isLoading }}"
-      auto-height="true"
-      maxlength="1000"
-      show-confirm-bar="false"
-      cursor-spacing="20"
-    />
+<view class="input-container w-full bg-white border-t border-gray-200 p-6 relative" style="padding-bottom: calc({{ bottomSafeHeight }}px);">
+
+  <view class="flex flex-col gap-4 mb-4 border border-solid border-gray-300 rounded-2xl p-6">
+    <view class="w-full">
+      <textarea
+        class="message-textarea w-full text-base overflow-y-auto"
+        placeholder="{{ isStreaming ? 'AI正在回复中...' : '你有什么想知道的，快来问问我' }}"
+        value="{{ inputMessage }}"
+        bindinput="onInputChange"
+        bindconfirm="onConfirm"
+        confirm-type="send"
+        disabled="{{ isLoading }}"
+        auto-height="true"
+        maxlength="1000"
+        show-confirm-bar="false"
+        cursor-spacing="20"
+      />
+    </view>
+    <view class="w-full flex align-center">
+      <button class="btn btn-tiny" catchtap="onEditConfig" data-id="{{ item.id }}">
+        <svg-icon name="server" size="32"></svg-icon>
+        MCP 服务
+      </button>
+    </view>
   </view>
   
   <!-- 底部提示文字 -->
