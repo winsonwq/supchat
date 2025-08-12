@@ -1,5 +1,6 @@
 
 import { AIConfigStorage } from '../storage/ai-config-storage.js'
+import { ChatHistoryStorageFactory } from '../storage/chat-history-storage-interface.js'
 import {
   transformToOpenRouterTool,
   executeToolCall,
@@ -55,6 +56,7 @@ export class AIService {
   private static instance: AIService
   private messages: Message[] = []
   private currentRequestTask: WxRequestTask | null = null
+  private chatHistoryStorage = ChatHistoryStorageFactory.getInstance()
 
   static getInstance(): AIService {
     if (!AIService.instance) {
@@ -70,12 +72,20 @@ export class AIService {
     tool_call_id?: string,
     tool_calls?: ToolCall[],
   ) {
-    this.messages.push({
+    const message = {
       role,
       content: content || '',
       tool_call_id,
       tool_calls,
-    })
+    }
+    
+    this.messages.push(message)
+    
+    // 同时保存到聊天历史存储
+    const activeSession = this.chatHistoryStorage.getActiveSession()
+    if (activeSession) {
+      this.chatHistoryStorage.addMessage(activeSession.id, message)
+    }
   }
 
   // 获取所有消息（包括系统消息）
@@ -93,6 +103,61 @@ export class AIService {
   // 清空消息历史
   clearMessages() {
     this.messages = []
+    // 同时清空当前会话的消息
+    const activeSession = this.chatHistoryStorage.getActiveSession()
+    if (activeSession) {
+      this.chatHistoryStorage.updateSession(activeSession.id, { messages: [] })
+    }
+  }
+
+  // 创建新的聊天会话
+  createNewChat(): any {
+    // 创建新的会话
+    const newSession = this.chatHistoryStorage.createSession()
+    // 清空当前消息
+    this.messages = []
+    return newSession
+  }
+
+  // 加载指定的聊天会话
+  loadChatSession(sessionId: string): boolean {
+    const session = this.chatHistoryStorage.getSessionById(sessionId)
+    if (!session) {
+      return false
+    }
+
+    // 设置会话为活跃
+    this.chatHistoryStorage.setActiveSession(sessionId)
+    
+    // 加载会话消息，确保类型兼容
+    this.messages = session.messages.map(msg => ({
+      role: msg.role,
+      content: msg.content,
+      tool_call_id: msg.tool_call_id,
+      tool_calls: msg.tool_calls
+    })) as Message[]
+    
+    return true
+  }
+
+  // 获取所有聊天会话
+  getAllChatSessions() {
+    return this.chatHistoryStorage.getAllSessions()
+  }
+
+  // 删除聊天会话
+  deleteChatSession(sessionId: string): boolean {
+    return this.chatHistoryStorage.deleteSession(sessionId)
+  }
+
+  // 获取当前活跃会话
+  getCurrentSession() {
+    return this.chatHistoryStorage.getActiveSession()
+  }
+
+  // 更新会话
+  updateSession(sessionId: string, updates: any): boolean {
+    return this.chatHistoryStorage.updateSession(sessionId, updates)
   }
 
   // 获取当前激活的AI配置

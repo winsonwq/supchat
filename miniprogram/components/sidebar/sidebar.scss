@@ -47,10 +47,42 @@
   background-color: #fafafa;
 }
 
+.sidebar-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .sidebar-title {
   font-size: 18px;
   font-weight: 600;
   color: #333;
+}
+
+.edit-mode-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+}
+
+.edit-mode-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.edit-mode-btn--active {
+  background-color: #e3f2fd;
+}
+
+.edit-mode-btn--active:hover {
+  background-color: #bbdefb;
 }
 
 /* 侧边栏内容 */
@@ -60,29 +92,51 @@
   overflow-y: auto;
 }
 
-.topics-list {
+.chat-sessions-list {
   padding: 0 8px;
 }
 
-.topic-item {
+.chat-session-item {
   padding: 12px 12px;
   margin: 4px 0;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s ease;
   border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.topic-item:hover {
+.chat-session-item:hover {
   background-color: #f5f5f5;
 }
 
-.topic-item--active {
+.chat-session-item--active {
   background-color: #e6f3ff;
   border-color: #1976d2;
 }
 
-.topic-title {
+.chat-session-item--edit-mode {
+  cursor: default;
+  opacity: 0.8;
+}
+
+.chat-session-item--edit-mode:hover {
+  background-color: transparent;
+}
+
+.chat-session-item--edit-mode.chat-session-item--active {
+  background-color: #e6f3ff;
+  opacity: 1;
+}
+
+.chat-session-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-session-title {
   font-size: 14px;
   color: #333;
   line-height: 1.4;
@@ -92,9 +146,46 @@
   white-space: nowrap;
 }
 
-.topic-time {
+.chat-session-time {
   font-size: 12px;
   color: #999;
+}
+
+.chat-session-actions {
+  margin-left: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.chat-session-item:hover .chat-session-actions {
+  opacity: 1;
+}
+
+.chat-session-actions--visible {
+  opacity: 1;
+}
+
+.delete-session-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+}
+
+.delete-session-btn:hover {
+  background-color: #ffeaea;
+  transform: scale(1.05);
+}
+
+.delete-session-btn:active {
+  transform: scale(0.95);
 }
 
 .empty-state {

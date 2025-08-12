@@ -5,25 +5,49 @@
 <view class="sidebar {{isOpen ? 'sidebar--open' : ''}}" style="{{s.sidebarPaddingTop}}">
   <!-- 侧边栏头部 -->
   <view class="sidebar-header">
-    <text class="sidebar-title">聊天记录</text>
+    <view class="sidebar-title-row">
+      <text class="sidebar-title">聊天记录</text>
+      <view 
+        class="edit-mode-btn {{isEditMode ? 'edit-mode-btn--active' : ''}}" 
+        bindtap="toggleEditMode"
+      >
+        <svg-icon 
+          name="{{isEditMode ? 'check' : 'edit'}}" 
+          size="32" 
+          color="{{isEditMode ? '#1976d2' : '#666'}}" 
+        />
+      </view>
+    </view>
   </view>
 
-  <!-- 话题列表 -->
+  <!-- 聊天会话列表 -->
   <scroll-view class="sidebar-content" scroll-y="true">
-    <view class="topics-list">
+    <view class="chat-sessions-list">
       <view 
-        wx:for="{{topics}}" 
+        wx:for="{{sortedChatSessions}}" 
         wx:key="id" 
-        class="topic-item {{currentTopicId === item.id ? 'topic-item--active' : ''}}"
-        bindtap="selectTopic"
-        data-id="{{item.id}}"
+        class="chat-session-item {{!isEditMode && currentSessionId === item.id ? 'chat-session-item--active' : ''}} {{isEditMode ? 'chat-session-item--edit-mode' : ''}}"
+        bindtap="{{!isEditMode ? 'selectChatSession' : ''}}"
+        data-session-id="{{item.id}}"
       >
-        <view class="topic-title">{{item.title}}</view>
-        <view class="topic-time">{{item.lastMessageTime}}</view>
+        <view class="chat-session-content">
+          <view class="chat-session-title">{{item.title}}</view>
+          <view class="chat-session-time">{{formatTime(item.updatedAt)}}</view>
+        </view>
+        <view class="chat-session-actions {{isEditMode ? 'chat-session-actions--visible' : ''}}">
+          <view 
+            wx:if="{{isEditMode}}"
+            class="delete-session-btn" 
+            bindtap="deleteChatSession" 
+            data-session-id="{{item.id}}"
+          >
+            <svg-icon name="delete" size="32" color="#ff4757" />
+          </view>
+        </view>
       </view>
       
       <!-- 空状态 -->
-      <view wx:if="{{topics.length === 0}}" class="empty-state">
+      <view wx:if="{{sortedChatSessions.length === 0}}" class="empty-state">
         <text class="empty-text">暂无聊天记录</text>
       </view>
     </view>

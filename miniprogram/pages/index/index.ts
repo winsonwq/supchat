@@ -5,6 +5,7 @@ import { ToolCall, TowxmlNode, WxEvent } from '../../lib/mcp/types.js'
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
 import { UserInfoStorage } from '../../lib/storage/user-info-storage'
 import { UserInfo } from '../../lib/types/user-info'
+import { ChatSession } from '../../lib/types/chat-history'
 const app = getApp()
 
 Component({
@@ -21,8 +22,8 @@ Component({
 
     // 侧边栏相关数据
     sidebarOpen: false,
-    topics: [] as any[],
-    currentTopicId: '',
+    chatSessions: [] as ChatSession[], // 聊天会话列表
+    currentSessionId: '', // 当前会话ID
     userInfo: {
       name: '用户',
       avatar: ''
@@ -38,8 +39,8 @@ Component({
       this.loadMessageHistory()
       // 计算 viewport 高度
       this.calculateViewportHeight()
-      // 初始化话题数据
-      this.initTopics()
+      // 初始化聊天会话
+      this.initChatSessions()
       // 加载用户信息
       this.loadUserInfo()
     },
@@ -109,29 +110,31 @@ Component({
       this.scrollToLatestMessage()
     },
 
-    // 初始化话题数据（示例数据）
-    initTopics() {
-      const sampleTopics = [
-        {
-          id: 'topic-1',
-          title: '关于 AI 的讨论',
-          lastMessageTime: '2小时前'
-        },
-        {
-          id: 'topic-2', 
-          title: '小程序开发问题',
-          lastMessageTime: '昨天'
-        },
-        {
-          id: 'topic-3',
-          title: 'TypeScript 学习',
-          lastMessageTime: '3天前'
+    // 初始化聊天会话
+    initChatSessions() {
+      const aiService = this.getAIService()
+      const sessions = aiService.getAllChatSessions()
+      
+      // 如果没有会话，创建一个新的默认会话
+      if (sessions.length === 0) {
+        const newSession = aiService.createNewChat()
+        this.setData({
+          chatSessions: [newSession],
+          currentSessionId: newSession.id
+        })
+      } else {
+        // 找到活跃会话
+        const activeSession = sessions.find(session => session.isActive)
+        this.setData({
+          chatSessions: sessions,
+          currentSessionId: activeSession?.id || sessions[0].id
+        })
+        
+        // 加载活跃会话的消息
+        if (activeSession) {
+          this.loadMessageHistory()
         }
-      ]
-
-      this.setData({
-        topics: sampleTopics
-      })
+      }
     },
 
     // 加载用户信息
@@ -404,10 +407,17 @@ Component({
     clearChat() {
       wx.showModal({
         title: '确认清空',
-        content: '确定要清空所有聊天记录吗？',
+        content: '确定要清空当前会话的所有聊天记录吗？',
         success: (res) => {
           if (res.confirm) {
-            this.getAIService().clearMessages()
+            const aiService = this.getAIService()
+            aiService.clearMessages()
+            
+            // 更新当前会话的消息为空
+            if (this.data.currentSessionId) {
+              aiService.updateSession(this.data.currentSessionId, { messages: [] })
+            }
+            
             this.setData({
               messages: [],
             })
@@ -435,39 +445,135 @@ Component({
       })
     },
 
-    // 选择话题
-    selectTopic(e: any) {
-      const { topicId } = e.detail
-      console.log('选择话题:', topicId)
+    // 选择聊天会话
+    selectChatSession(e: any) {
+      const { sessionId } = e.detail
+      console.log('选择会话:', sessionId)
       
-      // 这里可以根据 topicId 加载对应的聊天记录
-      this.setData({
-        currentTopicId: topicId,
-        sidebarOpen: false
-      })
+      const aiService = this.getAIService()
+      const success = aiService.loadChatSession(sessionId)
       
-      // TODO: 实现切换话题的逻辑
-      wx.showToast({
-        title: '切换话题功能待实现',
-        icon: 'none'
-      })
+      if (success) {
+        // 重新加载消息历史
+        this.loadMessageHistory()
+        
+        this.setData({
+          currentSessionId: sessionId,
+          sidebarOpen: false
+        })
+        
+        wx.showToast({
+          title: '已切换会话',
+          icon: 'success'
+        })
+      } else {
+        wx.showToast({
+          title: '切换会话失败',
+          icon: 'error'
+        })
+      }
     },
 
     // 创建新话题
     createNewTopic() {
       console.log('创建新话题')
       
-      // 清空当前聊天
-      this.getAIService().clearMessages()
+      const aiService = this.getAIService()
+      const newSession = aiService.createNewChat()
+      
+      // 更新会话列表
+      const sessions = aiService.getAllChatSessions()
+      
       this.setData({
         messages: [],
-        currentTopicId: '',
+        chatSessions: sessions,
+        currentSessionId: newSession.id,
         sidebarOpen: false
       })
       
       wx.showToast({
         title: '已创建新话题',
         icon: 'success'
+      })
+    },
+
+    // 处理新建聊天事件
+    onNewChat() {
+      const aiService = this.getAIService()
+      const newSession = aiService.createNewChat()
+      
+      // 更新会话列表
+      const sessions = aiService.getAllChatSessions()
+      
+      this.setData({
+        messages: [],
+        chatSessions: sessions,
+        currentSessionId: newSession.id,
+        sidebarOpen: false
+      })
+      
+      wx.showToast({
+        title: '已开始新聊天',
+        icon: 'success'
+      })
+    },
+
+    // 删除聊天会话
+    deleteChatSession(e: any) {
+      console.log('主页收到删除事件:', e)
+      const { sessionId } = e.detail
+      console.log('要删除的会话ID:', sessionId)
+      
+      wx.showModal({
+        title: '确认删除',
+        content: '确定要删除这个聊天会话吗？删除后无法恢复。',
+        success: (res) => {
+          if (res.confirm) {
+            console.log('用户确认删除')
+            const aiService = this.getAIService()
+            const success = aiService.deleteChatSession(sessionId)
+            
+            if (success) {
+              console.log('删除成功')
+              // 更新会话列表
+              const sessions = aiService.getAllChatSessions()
+              
+              // 如果删除的是当前会话，需要切换到其他会话
+              if (sessionId === this.data.currentSessionId) {
+                if (sessions.length > 0) {
+                  const newActiveSession = sessions[0]
+                  aiService.loadChatSession(newActiveSession.id)
+                  this.loadMessageHistory()
+                  this.setData({
+                    currentSessionId: newActiveSession.id
+                  })
+                } else {
+                  // 如果没有其他会话，创建一个新的
+                  const newSession = aiService.createNewChat()
+                  this.setData({
+                    messages: [],
+                    currentSessionId: newSession.id
+                  })
+                }
+              }
+              
+              this.setData({
+                chatSessions: sessions
+              })
+              
+              wx.showToast({
+                title: '已删除',
+                icon: 'success'
+              })
+            } else {
+              console.log('删除失败')
+              wx.showToast({
+                title: '删除失败',
+                icon: 'error'
+              })
+            }
+          }
+        }
       })
     },
 

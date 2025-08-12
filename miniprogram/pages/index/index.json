@@ -4,6 +4,7 @@
     "sidebar": "/components/sidebar/sidebar",
     "towxml":"/towxml/towxml",
     "message-input": "/components/message-input/message-input",
-    "message-item": "/components/message-item/message-item"
+    "message-item": "/components/message-item/message-item",
+    "svg-icon": "/components/svg-icon/svg-icon"
   }
 }

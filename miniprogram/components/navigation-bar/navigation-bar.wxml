@@ -52,6 +52,11 @@
       <block wx:else>
         <slot name="left"></slot>
       </block>
+      
+      <!-- 导航按钮 slot -->
+      <block wx:if="{{showNaviButton}}">
+        <slot name="naviButton"></slot>
+      </block>
     </view>
 
     <!-- 标题 -->

@@ -1,6 +1,7 @@
 import getSafeArea from '../../lib/utils/safe-area'
 import { UserInfoStorage } from '../../lib/storage/user-info-storage'
 import { UserInfo } from '../../lib/types/user-info'
+import { ChatSession } from '../../lib/types/chat-history'
 
 Component({
   /**
@@ -11,11 +12,11 @@ Component({
       type: Boolean,
       value: false,
     },
-    topics: {
+    chatSessions: {
       type: Array,
       value: [],
     },
-    currentTopicId: {
+    currentSessionId: {
       type: String,
       value: '',
     },
@@ -33,6 +34,8 @@ Component({
    */
   data: {
     localUserInfo: null as UserInfo | null,
+    isEditMode: false,
+    sortedChatSessions: [] as ChatSession[],
   },
 
   lifetimes: {
@@ -52,6 +55,25 @@ Component({
     },
   },
 
+  observers: {
+    'chatSessions': function(chatSessions: ChatSession[]) {
+      // 按最新更新时间倒序排序
+      const sorted = [...chatSessions].sort((a, b) => b.updatedAt - a.updatedAt)
+      
+      // 如果当前在编辑模式且会话数量减少，说明有会话被删除，自动退出编辑模式
+      if (this.data.isEditMode && chatSessions.length < this.data.sortedChatSessions.length) {
+        console.log('检测到会话删除，自动退出编辑模式')
+        this.setData({
+          isEditMode: false
+        })
+      }
+      
+      this.setData({
+        sortedChatSessions: sorted
+      })
+    }
+  },
+
   /**
    * 组件的方法列表
    */
@@ -61,15 +83,101 @@ Component({
       this.triggerEvent('close', {}, {})
     },
 
-    // 选择话题
-    selectTopic(e: any) {
-      const topicId = e.currentTarget.dataset.id
-      this.triggerEvent('selectTopic', { topicId }, {})
+    // 切换编辑模式
+    toggleEditMode() {
+      console.log('切换编辑模式，当前状态:', this.data.isEditMode)
+      const newEditMode = !this.data.isEditMode
+      this.setData({
+        isEditMode: newEditMode
+      })
+      console.log('编辑模式已切换到:', newEditMode)
+    },
+
+    // 选择聊天会话
+    selectChatSession(e: any) {
+      if (this.data.isEditMode) {
+        return // 编辑模式下不响应点击
+      }
+      const sessionId = e.currentTarget.dataset.sessionId
+      this.triggerEvent('selectChatSession', { sessionId }, {})
     },
 
     // 创建新话题
     createNewTopic() {
       this.triggerEvent('createNewTopic', {}, {})
+    },
+
+    // 删除聊天会话
+    deleteChatSession(e: any) {
+      console.log('删除聊天会话被调用', e)
+      console.log('事件类型:', e.type)
+      console.log('事件目标:', e.currentTarget)
+      console.log('事件详情:', e.detail)
+      
+      const sessionId = e.currentTarget.dataset.sessionId
+      console.log('要删除的会话ID:', sessionId)
+      
+      if (!sessionId) {
+        console.error('会话ID为空，无法删除')
+        wx.showToast({
+          title: '删除失败：会话ID为空',
+          icon: 'error'
+        })
+        return
+      }
+      
+      // 直接触发删除事件，让父组件处理确认和删除逻辑
+      this.triggerEvent('deleteChatSession', { sessionId }, {})
+      console.log('删除事件已触发')
+      
+      // 注意：不在这里退出编辑模式，让父组件在删除成功后通知
+      // 这样可以保持编辑模式直到用户确认删除
+    },
+
+    // 阻止事件冒泡的空方法
+    catchTap() {
+      // 空方法，仅用于阻止事件冒泡
+    },
+
+    // 删除成功后的回调，退出编辑模式
+    onDeleteSuccess() {
+      console.log('删除成功，退出编辑模式')
+      this.setData({
+        isEditMode: false
+      })
+    },
+
+    // 格式化时间
+    formatTime(timestamp: number): string {
+      const now = Date.now()
+      const diff = now - timestamp
+      
+      // 小于1分钟
+      if (diff < 60000) {
+        return '刚刚'
+      }
+      
+      // 小于1小时
+      if (diff < 3600000) {
+        const minutes = Math.floor(diff / 60000)
+        return `${minutes}分钟前`
+      }
+      
+      // 小于24小时
+      if (diff < 86400000) {
+        const hours = Math.floor(diff / 3600000)
+        return `${hours}小时前`
+      }
+      
+      // 小于7天
+      if (diff < 604800000) {
+        const days = Math.floor(diff / 86400000)
+        return `${days}天前`
+      }
+      
+      // 超过7天，显示具体日期
+      const date = new Date(timestamp)
+      return `${date.getMonth() + 1}月${date.getDate()}日`
     },
 
     // 加载用户信息

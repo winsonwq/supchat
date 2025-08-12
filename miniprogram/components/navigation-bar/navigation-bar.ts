@@ -57,6 +57,11 @@ Component({
       type: Boolean,
       value: false
     },
+    // 是否显示导航按钮
+    showNaviButton: {
+      type: Boolean,
+      value: true
+    },
   },
   /**
    * 组件的初始数据

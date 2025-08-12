@@ -41,6 +41,7 @@
   align-items: center;
   height: 100%;
   box-sizing: border-box;
+  gap: 12px;
 }
 
 .weui-navigation-bar__btn_goback_wrapper {
@@ -119,4 +120,23 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* 新建聊天按钮样式 */
+.weui-navigation-bar__buttons_newchat {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.weui-navigation-bar__btn_newchat_wrapper {
+  padding: 11px 18px 11px 16px;
+  margin: -11px -18px -11px -16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weui-navigation-bar__btn_newchat_wrapper.weui-active {
+  opacity: 0.5;
 }
