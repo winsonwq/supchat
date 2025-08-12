@@ -27,14 +27,4 @@
       bindtap="onMCPSettings"
     />
   </settings-group>
-
-  <!-- 其他设置分组 -->
-  <settings-group title="其他" description="应用相关设置">
-    <settings-menu-item
-      icon="user"
-      title="关于"
-      description="应用版本和信息"
-      bindtap="onAbout"
-    />
-  </settings-group>
 </scroll-view>

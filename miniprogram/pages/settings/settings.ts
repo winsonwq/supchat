@@ -35,15 +35,5 @@ Page({
     wx.navigateTo({
       url: '/pages/mcp-list/mcp-list'
     })
-  },
-
-  /**
-   * 关于页面
-   */
-  onAbout() {
-    wx.showToast({
-      title: '功能开发中...',
-      icon: 'none'
-    })
   }
 })

@@ -27,69 +27,6 @@
   border-bottom: 2rpx solid #f0f0f0;
 }
 
-/* 开关组件样式 */
-.switch-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 24rpx;
-}
-
-.switch-label {
-  flex: 1;
-}
-
-.label-text {
-  display: block;
-  font-size: 28rpx;
-  color: #333333;
-  font-weight: 500;
-  margin-bottom: 8rpx;
-}
-
-.label-helper {
-  display: block;
-  font-size: 24rpx;
-  color: #666666;
-  line-height: 1.4;
-}
-
-.switch-control {
-  flex-shrink: 0;
-  transform: scale(1.2);
-}
-
-/* 使用提示区域 */
-.tips-section {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border: 1rpx solid #e2e8f0;
-}
-
-.tips-content {
-  display: flex;
-  flex-direction: column;
-  gap: 24rpx;
-}
-
-.tip-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 16rpx;
-}
-
-.tip-icon {
-  font-size: 32rpx;
-  flex-shrink: 0;
-  line-height: 1;
-}
-
-.tip-text {
-  font-size: 26rpx;
-  color: #475569;
-  line-height: 1.5;
-  flex: 1;
-}
-
 /* 底部按钮区域 */
 .bottom-actions {
   position: fixed;

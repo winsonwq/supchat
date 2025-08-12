@@ -103,46 +103,6 @@
       />
     </view>
 
-    <!-- 状态设置 -->
-    <view class="form-section">
-      <view class="section-title">状态设置</view>
-      
-      <view class="switch-item">
-        <view class="switch-label">
-          <text class="label-text">启用配置</text>
-          <text class="label-helper">启用后可在 AI 对话中使用此 MCP 服务</text>
-        </view>
-        <switch 
-          class="switch-control"
-          checked="{{ form.isEnabled }}"
-          bindchange="onSwitchChange"
-          data-field="isEnabled"
-          color="#667eea"
-        />
-      </view>
-    </view>
-
-    <!-- 使用提示 -->
-    <view class="form-section tips-section">
-      <view class="section-title">使用提示</view>
-      
-      <view class="tips-content">
-        <view class="tip-item">
-          <view class="tip-icon">💡</view>
-          <text class="tip-text">配置保存后，系统会自动测试连接并获取可用工具</text>
-        </view>
-        
-        <view class="tip-item">
-          <view class="tip-icon">🔧</view>
-          <text class="tip-text">只有启用的 MCP 配置才会在 AI 对话中生效</text>
-        </view>
-        
-        <view class="tip-item">
-          <view class="tip-icon">🌐</view>
-          <text class="tip-text">确保服务器地址可访问且认证信息正确</text>
-        </view>
-      </view>
-    </view>
   </view>
 
   <!-- 底部按钮 -->
