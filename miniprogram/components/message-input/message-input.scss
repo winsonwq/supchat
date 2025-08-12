@@ -12,9 +12,8 @@
 
 /* 输入框样式 - 需要特殊的圆角和高度限制 */
 .message-textarea {
-  min-height: 88rpx;
   max-height: 200rpx;
-  padding: 24rpx 32rpx;
+  padding: 16rpx 32rpx;
   border-radius: 44rpx;
   transition: all 0.3s ease;
   resize: none;
@@ -37,24 +36,4 @@
 .message-textarea::placeholder {
   color: #9ca3af; /* text-gray-400 */
   font-size: 32rpx; /* text-base */
-}
-
-/* 清空按钮样式 */
-.message-input__clear {
-  position: absolute;
-  top: 12rpx;
-  right: 12rpx;
-  width: 64rpx;
-  height: 64rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background-color: #e5e7eb; /* bg-gray-200 */
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.message-input__clear:hover {
-  background-color: #d1d5db; /* bg-gray-300 */
 }

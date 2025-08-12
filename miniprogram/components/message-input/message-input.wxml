@@ -15,10 +15,6 @@
       show-confirm-bar="false"
       cursor-spacing="20"
     />
-    <!-- 清空按钮 -->
-    <view wx:if="{{ inputMessage && !isLoading }}" class="message-input__clear" bindtap="onClear">
-      <svg-icon name="clear" size="32" color="gray"></svg-icon>
-    </view>
   </view>
   
   <!-- 底部提示文字 -->
