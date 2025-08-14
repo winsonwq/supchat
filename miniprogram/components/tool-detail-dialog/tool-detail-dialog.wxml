@@ -24,6 +24,24 @@
       </view>
     </view>
     
+    <!-- 工具状态 -->
+    <view class="tool-section">
+      <view class="section-title">工具状态</view>
+      <view class="section-content">
+        <view class="tool-status">
+          <text class="status-label">启用状态:</text>
+          <text class="status-value {{ tool.isEnabled !== false ? 'status-enabled' : 'status-disabled' }}">
+            {{ tool.isEnabled !== false ? '已启用' : '已禁用' }}
+          </text>
+        </view>
+        <!-- 调试信息 -->
+        <view class="debug-info" wx:if="{{ tool._configName }}">
+          <text class="debug-text">来源配置: {{ tool._configName }}</text>
+          <text class="debug-text">配置ID: {{ tool._configId }}</text>
+        </view>
+      </view>
+    </view>
+    
     <!-- 输入参数 -->
     <view class="tool-section" wx:if="{{ tool.inputSchema }}">
       <view class="section-title">输入参数</view>

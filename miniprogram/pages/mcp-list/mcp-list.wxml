@@ -26,12 +26,12 @@
         class="config-item"
       >
         <!-- 配置基本信息 -->
-        <view 
-          class="config-content clickable"
-          bindtap="onEditConfig"
-          data-id="{{ item.id }}"
-        >
-          <view class="config-main">
+        <view class="config-content">
+          <view 
+            class="config-main clickable"
+            bindtap="onEditConfig"
+            data-id="{{ item.id }}"
+          >
             <view class="config-header">
               <view class="status-indicator {{ item.isOnline ? 'status-online' : 'status-offline' }}"></view>
               <text class="config-name">{{ item.name }}</text>

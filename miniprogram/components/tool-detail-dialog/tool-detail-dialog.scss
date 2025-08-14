@@ -1,100 +1,120 @@
 /* tool-detail-dialog.scss */
 .tool-detail-content {
-  min-width: 500rpx;
-}
-
-/* 工具部分 */
-.tool-section {
-  margin-bottom: 32rpx;
-}
-
-.tool-section:last-child {
-  margin-bottom: 0;
-}
-
-.section-title {
-  font-size: 26rpx;
-  font-weight: 600;
-  color: #666666;
-  margin-bottom: 12rpx;
-  text-transform: uppercase;
-  letter-spacing: 0.5rpx;
-}
-
-.section-content {
-  background-color: #f8f9fa;
-  border-radius: 12rpx;
   padding: 20rpx;
-  border: 1rpx solid #e9ecef;
-}
-
-/* 工具名称 */
-.tool-name {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #333333;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  background-color: #e3f2fd;
-  padding: 8rpx 16rpx;
-  border-radius: 8rpx;
-  border: 1rpx solid #bbdefb;
-}
-
-/* 工具描述 */
-.tool-description {
-  font-size: 26rpx;
-  color: #555555;
-  line-height: 1.6;
-  white-space: pre-wrap;
-}
-
-/* 输入参数 */
-.schema-info {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.schema-type {
-  font-size: 24rpx;
-  color: #666666;
-  font-weight: 500;
-}
-
-.schema-properties {
-  display: flex;
-  flex-direction: column;
-  gap: 12rpx;
-}
-
-.property-item {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  padding: 12rpx 16rpx;
-  background-color: #ffffff;
-  border-radius: 8rpx;
-  border: 1rpx solid #e5e7eb;
-}
-
-.property-name {
-  font-size: 24rpx;
-  font-weight: 600;
-  color: #333333;
-  min-width: 120rpx;
-}
-
-.property-type {
-  font-size: 22rpx;
-  color: #6b7280;
-  background-color: #f3f4f6;
-  padding: 4rpx 12rpx;
-  border-radius: 6rpx;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-}
-
-.property-required {
-  color: #ef4444;
-  font-weight: 600;
-  font-size: 24rpx;
+  
+  .tool-section {
+    margin-bottom: 30rpx;
+    
+    .section-title {
+      font-size: 28rpx;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 15rpx;
+    }
+    
+    .section-content {
+      .tool-name {
+        font-size: 32rpx;
+        font-weight: 500;
+        color: #2c3e50;
+      }
+      
+      .tool-description {
+        font-size: 28rpx;
+        color: #666;
+        line-height: 1.5;
+      }
+      
+      .tool-status {
+        display: flex;
+        align-items: center;
+        gap: 15rpx;
+        margin-bottom: 15rpx;
+        
+        .status-label {
+          font-size: 28rpx;
+          color: #666;
+        }
+        
+        .status-value {
+          font-size: 28rpx;
+          font-weight: 500;
+          padding: 8rpx 16rpx;
+          border-radius: 20rpx;
+          
+          &.status-enabled {
+            color: #27ae60;
+            background-color: #d5f4e6;
+          }
+          
+          &.status-disabled {
+            color: #e74c3c;
+            background-color: #fadbd8;
+          }
+        }
+      }
+      
+      .debug-info {
+        background-color: #f8f9fa;
+        padding: 15rpx;
+        border-radius: 8rpx;
+        border-left: 4rpx solid #3498db;
+        
+        .debug-text {
+          display: block;
+          font-size: 24rpx;
+          color: #7f8c8d;
+          line-height: 1.4;
+          margin-bottom: 5rpx;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+      
+      .schema-info {
+        .schema-type {
+          display: block;
+          font-size: 26rpx;
+          color: #666;
+          margin-bottom: 15rpx;
+        }
+        
+        .schema-properties {
+          .property-item {
+            display: flex;
+            align-items: center;
+            gap: 15rpx;
+            padding: 10rpx 0;
+            border-bottom: 1rpx solid #f0f0f0;
+            
+            &:last-child {
+              border-bottom: none;
+            }
+            
+            .property-name {
+              font-size: 26rpx;
+              color: #2c3e50;
+              font-weight: 500;
+              min-width: 120rpx;
+            }
+            
+            .property-type {
+              font-size: 24rpx;
+              color: #7f8c8d;
+              background-color: #ecf0f1;
+              padding: 4rpx 8rpx;
+              border-radius: 4rpx;
+            }
+            
+            .property-required {
+              color: #e74c3c;
+              font-weight: bold;
+            }
+          }
+        }
+      }
+    }
+  }
 }

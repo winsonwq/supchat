@@ -65,7 +65,12 @@ Page({
     this.setData({ configs: configsWithShowTools })
     
     // 检查在线状态和工具信息
-    this.checkConfigsStatus()
+    this.checkConfigsStatus().then(() => {
+      // 数据加载完成后进行一致性检查
+      setTimeout(() => {
+        this.checkDataConsistency()
+      }, 1000)
+    })
   },
 
   /**
@@ -181,14 +186,29 @@ Page({
    * 合并新工具列表与现有状态，保持开启/关闭状态
    */
   mergeToolsWithExistingState(existingTools: MCPTool[], newTools: MCPTool[]): MCPTool[] {
+    console.log('合并工具状态:', {
+      existingTools: existingTools.length,
+      newTools: newTools.length,
+      existingToolNames: existingTools.map(t => t.name),
+      newToolNames: newTools.map(t => t.name)
+    })
+    
     return newTools.map(newTool => {
       // 查找现有工具，保持其状态
       const existingTool = existingTools.find(tool => tool.name === newTool.name)
       
-      return {
+      const mergedTool = {
         ...newTool,
-        isEnabled: existingTool ? existingTool.isEnabled : true // 新工具默认为开启状态
+        // 如果现有工具存在，保持其启用状态；否则默认为启用
+        isEnabled: existingTool ? existingTool.isEnabled : true
       }
+      
+      console.log(`工具 ${newTool.name} 状态合并:`, {
+        existing: existingTool?.isEnabled,
+        new: mergedTool.isEnabled
+      })
+      
+      return mergedTool
     })
   },
 
@@ -335,11 +355,39 @@ Page({
   onShowToolDetail(e: WxEvent) {
     const { configId, toolName } = e.currentTarget.dataset
     if (!configId || !toolName) return
+    
+    // 从当前页面状态获取最新的配置和工具信息
     const targetConfig = this.data.configs.find(c => c.id === configId)
-    const targetTool = targetConfig?.tools?.find(t => t.name === toolName) || null
+    if (!targetConfig) {
+      console.error(`未找到配置 ${configId}`)
+      return
+    }
+    
+    const targetTool = targetConfig.tools?.find(t => t.name === toolName)
+    if (!targetTool) {
+      console.error(`未找到工具 ${toolName} 在配置 ${configId} 中`)
+      return
+    }
+    
+    // 确保工具信息包含完整的状态
+    const toolWithState = {
+      ...targetTool,
+      // 确保isEnabled字段存在且正确
+      isEnabled: targetTool.isEnabled !== false,
+      // 添加配置信息用于调试
+      _configName: targetConfig.name,
+      _configId: configId
+    }
+    
+    console.log('显示工具详情:', {
+      toolName,
+      configName: targetConfig.name,
+      tool: toolWithState
+    })
+    
     this.setData({
       toolDialogVisible: true,
-      selectedTool: targetTool
+      selectedTool: toolWithState
     })
   },
 
@@ -486,6 +534,32 @@ Page({
         message
       }
     }
+  },
+
+  /**
+   * 检查数据一致性（调试用）
+   */
+  checkDataConsistency() {
+    const { configs } = this.data
+    console.log('=== 数据一致性检查 ===')
+    
+    configs.forEach((config, index) => {
+      console.log(`配置 ${index + 1}: ${config.name}`)
+      console.log(`  - 在线状态: ${config.isOnline}`)
+      console.log(`  - 启用状态: ${config.isEnabled}`)
+      console.log(`  - 工具数量: ${config.toolCount}`)
+      console.log(`  - 实际工具: ${config.tools?.length || 0}`)
+      
+      if (config.tools) {
+        config.tools.forEach((tool, toolIndex) => {
+          console.log(`    工具 ${toolIndex + 1}: ${tool.name}`)
+          console.log(`      - 启用状态: ${tool.isEnabled}`)
+          console.log(`      - 描述: ${tool.description}`)
+        })
+      }
+    })
+    
+    console.log('=== 数据一致性检查完成 ===')
   }
 })
 

@@ -134,6 +134,24 @@
   gap: 8rpx;
 }
 
+/* 可点击的配置主要信息样式 */
+.config-main.clickable {
+  cursor: pointer;
+  user-select: none;
+  padding: 8rpx;
+  border-radius: 8rpx;
+  transition: all 0.2s ease;
+}
+
+.config-main.clickable:hover {
+  background-color: #f8f9fa;
+}
+
+.config-main.clickable:active {
+  background-color: #e9ecef;
+  transform: scale(0.98);
+}
+
 .config-header {
   display: flex;
   justify-content: space-between;
