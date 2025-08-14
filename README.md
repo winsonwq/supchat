@@ -1,269 +1,298 @@
-# SupChat - Intelligent AI Assistant WeChat Mini-Program
+# SupChat - 智能AI助手微信小程序
 
-🤖 An intelligent AI assistant WeChat mini-program with MCP (Model Context Protocol) tool calling support, providing seamless AI interaction experience with integrated tools.
+> 🚧 **项目状态：开发中** 🚧
+> 
+> 本项目目前正在积极开发中，功能可能不完整或存在变化。欢迎参与贡献和反馈！
 
-[中文文档](docs/README_zh.md) | [AI Services](docs/AI_SERVICES.md) | [Features](#features) | [Getting Started](#getting-started) | [Tools](#mcp-tools) | [Development](#development)
+🤖 基于MCP（模型上下文协议）工具调用支持的智能AI助手微信小程序，提供无缝的AI交互体验和集成工具。
 
-## Features
+## 项目优势与愿景
 
-- 🤖 **Intelligent AI Conversations** - Powered by Claude 3.5 Sonnet with streaming responses
-- 🔧 **MCP Tool Calling** - Extensible tool system supporting various utilities
-- 📱 **Native WeChat Experience** - Built with WeChat Mini-Program framework
-- 📸 **Photo Selection Tool** - Seamlessly access camera and photo albums
-- 🌤️ **Weather Query Tool** - Real-time weather information
-- 🔄 **Streaming Responses** - Real-time AI response rendering
-- 📝 **Markdown Support** - Rich text formatting in conversations
-- 🎨 **Modern UI** - Clean and intuitive interface design
+SupChat 是首个在微信小程序中完整实现 MCP（模型上下文协议）的智能AI助手项目。我们深度集成微信生态，提供原生小程序体验，支持多种实用工具的智能调用。项目采用 TypeScript 全栈开发，具备流式响应、Markdown渲染、多会话管理等先进特性，通过本地数据存储和用户确认机制保障隐私安全。我们的愿景是构建微信生态中最智能的AI助手平台，建立开放的AI工具生态系统，让每个人都能在微信中享受智能化的数字生活体验。
 
-## Getting Started
+[English Documentation](README_EN.md) | [功能特性](#功能特性) | [快速开始](#快速开始) | [MCP工具](#mcp工具)
 
-### Prerequisites
+## 功能特性
 
-- WeChat Developer Tools
+- 🤖 **智能AI对话** - 基于Claude 3.5 Sonnet，支持流式响应
+- 🔧 **MCP工具调用** - 可扩展的工具系统，支持7种实用工具
+- 📱 **微信原生体验** - 基于微信小程序框架开发
+- 📸 **照片选择工具** - 无缝访问相机和相册
+- 🌤️ **天气查询工具** - 实时天气信息查询
+- 📍 **位置获取工具** - 获取用户当前位置信息
+- 📱 **设备信息工具** - 获取设备系统信息
+- 🌐 **网络状态工具** - 检测网络连接状态
+- 📁 **文件选择工具** - 选择聊天会话中的文件
+- 📱 **扫码工具** - 支持二维码、条形码等多种格式
+- 🔄 **流式响应** - 实时AI回复渲染
+- 📝 **Markdown支持** - 对话中的富文本格式化
+- 💬 **多会话管理** - 支持多个聊天会话
+- 🎨 **现代UI** - 简洁直观的界面设计
+- ⚙️ **灵活配置** - 支持多种AI服务配置
+
+## 快速开始
+
+### 环境要求
+
+- 微信开发者工具
 - Node.js 18+
-- TypeScript knowledge
+- TypeScript基础
 
-### Installation
+### 安装步骤
 
-1. Clone the repository:
+1. 克隆仓库：
 ```bash
 git clone <repository-url>
 cd supchat
 ```
 
-2. Install dependencies:
+2. 安装依赖：
 ```bash
 npm install
 ```
 
-3. Configure API settings:
+3. 配置API设置：
 
-**Method 1: Quick Setup Script (Easiest)**
+**方法一：快速配置脚本（推荐）**
 ```bash
-# Run the configuration wizard
+# 运行配置向导
 npm run setup
-# or
+# 或
 node setup-config.js
 
-# Follow the instructions to get your API key and configure
+# 按照提示获取API密钥并配置
 ```
 
-**Method 2: Manual Setup**
+**方法二：手动配置**
 ```bash
-# Copy the example config file
+# 复制示例配置文件
 cp miniprogram/lib/config/local.config.example.js miniprogram/lib/config/local.config.js
 
-# Edit the file and add your real API key
-# The local.config.js file is git-ignored for security
+# 编辑文件并添加您的真实API密钥
+# local.config.js 文件已被git忽略，确保安全
 ```
 
-**Method 3: Environment Variables**
+**方法三：环境变量**
 ```bash
-# Copy the environment template
+# 复制环境变量模板
 cp env.example .env.local
 
-# Edit .env.local and fill in your API keys
+# 编辑 .env.local 并填入您的API密钥
 ```
 
-**Supported AI Services:**
-- **OpenRouter** (Recommended): [https://openrouter.ai/](https://openrouter.ai/) - Access multiple AI models
-- **OpenAI**: [https://platform.openai.com/](https://platform.openai.com/) - GPT models  
-- **Anthropic**: [https://console.anthropic.com/](https://console.anthropic.com/) - Claude models
-- **Custom Services**: Any service compatible with OpenAI API format
+**支持的AI服务：**
+- **OpenRouter**（推荐）：[https://openrouter.ai/](https://openrouter.ai/) - 支持多种AI模型
+- **OpenAI**：[https://platform.openai.com/](https://platform.openai.com/) - GPT系列模型
+- **Anthropic**：[https://console.anthropic.com/](https://console.anthropic.com/) - Claude系列模型
+- **自定义服务**：任何兼容OpenAI API格式的服务
 
-**Configuration Steps:**
-1. Choose your preferred AI service
-2. Get API key from the service provider
-3. Edit the config file and set: `AI_API_KEY`, `AI_HOST`, `AI_MODEL`
-4. Save and restart WeChat Developer Tools
+**配置步骤：**
+1. 选择您要使用的AI服务
+2. 从服务提供商获取API密钥
+3. 编辑配置文件，设置：`AI_API_KEY`、`AI_HOST`、`AI_MODEL`
+4. 保存并重启微信开发者工具
 
-4. Open with WeChat Developer Tools:
-   - Launch WeChat Developer Tools
-   - Import project
-   - Start developing
+4. 使用微信开发者工具：
+   - 启动微信开发者工具
+   - 导入项目
+   - 开始开发
 
-## MCP Tools
+## MCP工具
 
-### What is MCP Tool Calling?
+### 什么是MCP工具调用？
 
-MCP (Model Context Protocol) tool calling allows the AI assistant to automatically invoke various tools during conversations to complete tasks, such as:
-- Opening photo albums or camera
-- Querying weather information
-- Performing file operations
-- Calling external APIs
+MCP（模型上下文协议）工具调用允许AI助手在对话过程中自动调用各种工具来完成任务，比如：
+- 打开相册或相机
+- 查询天气信息
+- 获取位置信息
+- 检测设备状态
+- 选择文件
+- 扫描二维码
+- 检查网络状态
 
-### Available Tools
+### 当前支持的工具
 
-#### 1. Photo Selection Tool (`openPhoto`)
-**Description**: Access camera or photo album to select images
+#### 1. 照片选择工具 (`openPhoto`)
+**功能描述**：访问相机或相册选择图片
 
-**Parameters**:
-- `sourceType`: 'album' | 'camera' (image source)
-- `count`: Maximum number of images to select (1-9)
-- `sizeType`: 'original' | 'compressed' (image size)
+**参数说明**：
+- `sourceType`: 'album' | 'camera' （图片来源）
+- `count`: 最多选择的图片张数 (1-9)
+- `sizeType`: 'original' | 'compressed' （图片尺寸）
 
-**Usage Example**:
+**使用示例**：
 ```
-User: "Please help me select a photo from my album"
-AI: "I'll help you open the photo album"
-[Automatically calls openPhoto tool]
-```
-
-#### 2. Weather Query Tool (`getWeather`)
-**Description**: Get weather information for specified cities
-
-**Parameters**:
-- `city`: City name
-- `date`: Query date (optional, defaults to today)
-
-**Usage Example**:
-```
-User: "What's the weather like in Beijing today?"
-AI: "Let me check the weather for you"
-[Automatically calls getWeather tool]
+用户：请帮我从相册选择一张照片
+AI：好的，我来帮您打开相册
+[自动调用 openPhoto 工具]
 ```
 
-### Tool Calling Flow
+#### 2. 天气查询工具 (`getWeather`)
+**功能描述**：获取指定城市的天气信息
 
-1. **AI Analysis**: AI analyzes user request to determine if tools are needed
-2. **Tool Invocation**: AI automatically calls appropriate tools
-3. **User Confirmation**: Some tools (like photo selection) require user confirmation
-4. **Operation Execution**: Tool performs the specific operation
-5. **Result Return**: Tool execution results are returned to AI
-6. **Final Response**: AI provides final response based on tool results
+**参数说明**：
+- `city`: 城市名称
+- `date`: 查询日期（可选，默认为今天）
 
-## Development
-
-### Project Structure
-
+**使用示例**：
 ```
-miniprogram/
-├── lib/
-│   ├── services/
-│   │   ├── ai.ts              # AI service core
-│   │   └── http.ts            # HTTP utilities
-│   ├── mcp/
-│   │   ├── index.ts           # MCP module entry
-│   │   ├── utils.ts           # Tool calling utilities
-│   │   ├── types.ts           # Type definitions
-│   │   └── tools/
-│   │       ├── index.ts       # Tool registration
-│   │       ├── photo.ts       # Photo selection tool
-│   │       └── weather.ts     # Weather query tool
-│   ├── utils/
-│   │   ├── markdown.ts        # Markdown utilities
-│   │   └── util.ts            # Common utilities
-│   └── config/
-│       └── api.ts             # API configuration
-├── components/
-│   ├── message-input/         # Message input component
-│   ├── message-item/          # Message display component
-│   └── navigation-bar/        # Navigation bar component
-└── pages/
-    └── index/                 # Main chat page
+用户：北京今天天气怎么样？
+AI：让我为您查询天气信息
+[自动调用 getWeather 工具]
 ```
 
-### Creating New Tools
+#### 3. 位置获取工具 (`getLocation`)
+**功能描述**：获取用户当前位置信息
 
-To add a new MCP tool, follow these steps:
+**参数说明**：
+- `type`: 'wgs84' | 'gcj02' （坐标类型）
+- `isHighAccuracy`: 是否开启高精度定位
+- `highAccuracyExpireTime`: 超时时间（毫秒）
 
-1. **Create Tool File**: Create a new tool file in `miniprogram/lib/mcp/tools/`
-
-2. **Define Tool Configuration**:
-```typescript
-import { ToolBaseConfig } from '../types.js'
-
-// Tool parameter schema
-const myToolInputSchema = {
-  type: 'object',
-  properties: {
-    param1: {
-      type: 'string',
-      description: 'Parameter description'
-    }
-  },
-  required: ['param1']
-}
-
-// Tool handler function
-async function myToolHandler(args: any): Promise<any> {
-  // Implement tool logic
-  return {
-    success: true,
-    data: { /* result data */ }
-  }
-}
-
-// Tool configuration
-export const myTool: ToolBaseConfig = {
-  name: 'myTool',
-  description: 'Tool description',
-  inputSchema: myToolInputSchema,
-  chineseName: '中文名称',
-  needUserConfirm: false, // Whether user confirmation is needed
-  handler: myToolHandler
-}
+**使用示例**：
+```
+用户：我在哪里？
+AI：让我为您获取当前位置
+[自动调用 getLocation 工具]
 ```
 
-3. **Register Tool**: Register in `miniprogram/lib/mcp/tools/index.ts`:
-```typescript
-export { myTool } from './myTool.js'
+#### 4. 设备信息工具 (`getDeviceInfo`)
+**功能描述**：获取设备系统信息
 
-export const allTools: ToolBaseConfig[] = [
-  // ... other tools
-  myTool,
-]
+**参数说明**：
+- `includeSystemInfo`: 是否包含系统信息
+- `includeDeviceInfo`: 是否包含设备信息
+- `includeAppInfo`: 是否包含应用信息
+
+**使用示例**：
+```
+用户：我的设备信息是什么？
+AI：让我为您获取设备信息
+[自动调用 getDeviceInfo 工具]
 ```
 
-### Core Components
+#### 5. 网络状态工具 (`getNetworkStatus`)
+**功能描述**：检测网络连接状态
 
-- **AIService**: AI service management, handles streaming responses and tool calling
-- **MCP Module**: Tool calling protocol implementation
-- **Tool System**: Extensible tool framework
+**参数说明**：
+- `includeDetailedInfo`: 是否包含详细网络信息
 
-## API Reference
-
-### AIService
-
-Main service for handling AI conversations and tool calling.
-
-```typescript
-// Send message with streaming response
-await aiService.sendMessage(message, {
-  onData: (chunk) => { /* handle streaming data */ },
-  onComplete: () => { /* handle completion */ },
-  onError: (error) => { /* handle errors */ }
-})
+**使用示例**：
+```
+用户：我的网络状态怎么样？
+AI：让我为您检查网络状态
+[自动调用 getNetworkStatus 工具]
 ```
 
-### MCP Utils
+#### 6. 文件选择工具 (`chooseFile`)
+**功能描述**：选择聊天会话中的文件
 
-Utilities for tool calling and management.
+**参数说明**：
+- `count`: 最多选择的文件个数 (1-100)
+- `type`: 'all' | 'video' | 'image' | 'file' （文件类型）
+- `extension`: 文件扩展名过滤数组
 
-```typescript
-// Execute tool
-await executeToolCall(toolCall, tools)
-
-// Validate tool arguments
-const isValid = validateToolArguments(args, schema)
+**使用示例**：
+```
+用户：请帮我选择一个文件
+AI：好的，我来帮您选择文件
+[自动调用 chooseFile 工具]
 ```
 
-## Notes
+#### 7. 扫码工具 (`scanCode`)
+**功能描述**：扫描二维码、条形码等
 
-1. **User Confirmation**: Some tools (like photo selection) require user confirmation before execution
-2. **Error Handling**: Tool call failures display appropriate error messages
-3. **Streaming Responses**: Supports real-time display of AI responses and tool calling process
-4. **Network Requirements**: Ensure stable network connection for tool calling functionality
+**参数说明**：
+- `scanType`: 扫码类型数组 ['qrCode', 'barCode', 'datamatrix', 'pdf417']
+- `autoZoom`: 是否自动放大
+- `onlyFromCamera`: 是否只能从相机扫码
 
-## Contributing
+**使用示例**：
+```
+用户：请帮我扫描这个二维码
+AI：好的，我来帮您扫描
+[自动调用 scanCode 工具]
+```
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+### 工具调用流程
 
-## License
+1. **AI分析** - AI分析用户请求，判断是否需要调用工具
+2. **工具调用** - AI自动调用相应的工具
+3. **用户确认** - 某些工具（如照片选择、位置获取）需要用户确认
+4. **执行操作** - 工具执行具体操作
+5. **返回结果** - 工具执行结果返回给AI
+6. **最终回复** - AI根据工具执行结果给出最终回复
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 页面功能
+
+### 主要页面
+
+- **首页 (index)** - 主聊天界面，支持多会话管理
+- **设置 (settings)** - 应用设置入口
+- **AI设置 (ai-settings)** - AI服务配置
+- **AI配置 (ai-config)** - 详细的AI参数配置
+- **MCP设置 (mcp-settings)** - MCP服务器管理
+- **MCP列表 (mcp-list)** - 查看所有MCP服务器
+- **MCP详情 (mcp-detail)** - 查看MCP服务器详情
+- **MCP编辑 (mcp-edit)** - 编辑MCP服务器配置
+- **MCP添加 (mcp-add)** - 添加新的MCP服务器
+
+### 核心功能
+
+- **多会话管理** - 支持创建、切换、删除聊天会话
+- **消息历史** - 自动保存和加载聊天历史
+- **流式响应** - 实时显示AI回复过程
+- **工具调用** - 自动调用相关工具完成任务
+- **Markdown渲染** - 支持富文本格式显示
+- **用户信息管理** - 保存用户偏好设置
+
+## 注意事项
+
+1. **用户确认**：某些工具（如照片选择、位置获取）需要用户确认才能执行
+2. **错误处理**：工具调用失败时会显示相应错误信息
+3. **流式响应**：支持实时显示AI回复和工具调用过程
+4. **网络要求**：确保网络连接正常，工具调用需要网络支持
+5. **权限管理**：某些工具可能需要用户授权相应权限
+6. **数据存储**：聊天历史会自动保存到本地存储
+
+## 故障排除
+
+### 常见问题
+
+**Q: API调用失败怎么办？**
+A: 检查 `miniprogram/lib/config/api.ts` 中的API密钥配置是否正确。
+
+**Q: 工具调用没有响应？**
+A: 确保网络连接正常，检查控制台是否有错误信息。
+
+**Q: 照片选择失败？**
+A: 检查是否授权了相机和相册权限。
+
+**Q: 位置获取失败？**
+A: 检查是否授权了位置权限，确保GPS已开启。
+
+**Q: 扫码功能不工作？**
+A: 检查是否授权了相机权限。
+
+## 贡献指南
+
+1. Fork 这个仓库
+2. 创建您的功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交您的更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 打开一个 Pull Request
+
+## 开源协议
+
+本项目基于 MIT 协议开源 - 查看 [LICENSE](LICENSE) 文件了解详情。
+
+## 联系方式
+
+如有问题或建议，欢迎提交 Issue 或 Pull Request。
+
+---
+
+*感谢您使用 SupChat！希望这个项目能为您带来优秀的AI交互体验。*
+
+---
 
