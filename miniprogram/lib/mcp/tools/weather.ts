@@ -1,41 +1,71 @@
-import {
-  ToolBaseConfig,
-  ToolCallResult,
-  WeatherData,
-} from '../types.js'
+import { ToolBaseConfig, ToolCallResult, WeatherData } from '../types.js'
+import { BaseComponent } from '../components/base-component.js'
 
-class WeatherCard {
+class WeatherCard extends BaseComponent {
   private data: WeatherData
 
   constructor(data: WeatherData) {
+    super()
     this.data = data
   }
 
   refresh() {
     console.log('刷新天气数据')
   }
+
   share() {
     console.log('分享天气数据')
   }
+
   detail() {
     console.log('查看天气详情')
   }
 
-  render() {
+  render(): string {
     return `
-<div class="weather-container bg-gradient-to-br from-blue-50 to-indigo-100 p-4 rounded-xl">
-    <button class="weather-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition-colors" 
-            data-action="refresh">
-      🔄 刷新 ${this.data.city}
-    </button>
-    <button class="weather-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition-colors" 
-            data-action="share">
-      📤 分享
-    </button>
-    <button class="weather-btn bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm transition-colors" 
-            data-action="detail">
-      📊 详情
-    </button>
+<div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-800">${this.data.city} 天气</h3>
+        <span class="text-sm text-gray-500">${this.data.updateTime}</span>
+    </div>
+    
+    <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="text-center">
+            <div class="text-3xl font-bold text-blue-600">${this.data.temperature.current}°C</div>
+            <div class="text-sm text-gray-600">当前温度</div>
+        </div>
+        <div class="text-center">
+            <div class="text-lg font-medium text-gray-800">${this.data.weather}</div>
+            <div class="text-sm text-gray-600">天气状况</div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-3 gap-2 mb-4 text-sm">
+        <div class="text-center">
+            <div class="font-medium text-gray-700">${this.data.temperature.high}°C</div>
+            <div class="text-gray-500">最高</div>
+        </div>
+        <div class="text-center">
+            <div class="font-medium text-gray-700">${this.data.temperature.low}°C</div>
+            <div class="text-gray-500">最低</div>
+        </div>
+        <div class="text-center">
+            <div class="font-medium text-gray-700">${this.data.humidity}%</div>
+            <div class="text-gray-500">湿度</div>
+        </div>
+    </div>
+    
+    <div class="flex space-x-2">
+        <button class="flex-1" data-action="refresh">
+            🔄 刷新
+        </button>
+        <button class="flex-1" data-action="share">
+            📤 分享
+        </button>
+        <button class="flex-1" data-action="detail">
+            📊 详情
+        </button>
+    </div>
 </div> 
     `
   }
@@ -74,13 +104,9 @@ async function getWeatherHandler(
   const date = (args.date as string) || 'today'
 
   return new Promise((resolve) => {
-    // 生成天气数据
     const weatherData = generateMockWeatherData(city, date)
-
-    // 创建天气卡片组件
     const weatherCard = new WeatherCard(weatherData)
 
-    // 模拟网络延迟
     setTimeout(() => {
       const result = weatherCard
       resolve({

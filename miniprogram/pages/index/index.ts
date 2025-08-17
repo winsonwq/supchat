@@ -1,11 +1,12 @@
 // index.ts
 import { AIService, Message, StreamCallback } from '../../lib/services/ai.js'
-import { StreamContentType } from '../../lib/mcp/types.js'
+import { RenderNode, StreamContentType } from '../../lib/mcp/types.js'
 import { ToolCall, TowxmlNode, WxEvent } from '../../lib/mcp/types.js'
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
 import { UserInfoStorage } from '../../lib/storage/user-info-storage'
 import { UserInfo } from '../../lib/types/user-info'
 import { ChatSession } from '../../lib/types/chat-history'
+import { BaseComponent } from '../../lib/mcp/components/base-component.js'
 const app = getApp()
 
 Component({
@@ -172,17 +173,13 @@ Component({
     },
 
     // 处理消息内容，使用 towxml 解析 Markdown
-    processMessageContent(content: string): TowxmlNode | undefined {
-      console.log(1111111111, content)
-      if (!content) return undefined
-      console.log('处理消息内容:', content)
-
+    processMessageContent(content: RenderNode): TowxmlNode | undefined {
       try {
-        // 使用 towxml 解析 Markdown 内容
-        const towxmlNodes = app.towxml(content.render ? content.render() : content, 'html', {
+        const html =
+          content instanceof BaseComponent ? content.render() : content
+        const towxmlNodes = app.towxml(html, 'html', {
           events: {
             tap: (e: WxEvent) => {
-              console.log('tap事件触发:', e)
               this.handleComponentEvent(content, e)
             },
           },
@@ -195,9 +192,10 @@ Component({
       }
     },
 
-    handleComponentEvent(content: any, e: WxEvent) {
+    handleComponentEvent(content: RenderNode, e: WxEvent) {
+      // @ts-ignore
       const eventName = e.currentTarget.dataset.data.attrs['data-action']
-      content[eventName].bind(content)()
+      ;(content as any)[eventName].bind(content)()
     },
 
     // 输入框变化
@@ -317,7 +315,7 @@ Component({
 
     // 更新助手消息内容
     updateAssistantMessage(
-      content: string,
+      content: RenderNode,
       toolCalls?: ToolCall[],
       currentToolCall?: ToolCall,
     ) {

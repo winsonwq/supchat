@@ -1,5 +1,15 @@
 // MCP Tools 类型定义
 
+// 可渲染组件接口
+export interface RenderableComponent {
+  render(): string
+}
+
+export type RenderNode =
+  | string
+  | RenderableComponent
+  | Array<string | RenderableComponent>
+
 // 工具基础配置接口
 export interface ToolBaseConfig {
   name: string
@@ -21,9 +31,9 @@ export interface OpenRouterTool {
   }
 }
 
-// 工具调用结果
+// 工具调用结果 - 可以是字符串、组件实例或组件数组
 export interface ToolCallResult {
-  data?: string
+  data: RenderNode
 }
 
 // 工具调用请求
@@ -125,19 +135,19 @@ export interface ParsedToolCallMessage {
   toolName: string
   result?: unknown
   error?: string
-  isCalling?: boolean  // 标识是否正在调用工具
+  isCalling?: boolean // 标识是否正在调用工具
 }
 
 // 流式内容类型枚举
 export enum StreamContentType {
-  NORMAL = 'normal',        // 普通内容
-  TOOL = 'tool',            // 工具调用消息
-  ERROR = 'error'           // 错误消息
+  NORMAL = 'normal', // 普通内容
+  TOOL = 'tool', // 工具调用消息
+  ERROR = 'error', // 错误消息
 }
 
 // 流式内容对象
 export interface StreamContent {
-  content: string
+  content: RenderNode
   type: StreamContentType
   isComplete: boolean
   toolCalls?: ToolCall[]

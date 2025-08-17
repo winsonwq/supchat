@@ -1,5 +1,6 @@
 // 聊天历史存储服务
 import { ChatSession, ChatMessage, ChatHistoryStorage } from '../types/chat-history'
+import { RenderNode } from '../mcp/types'
 
 const STORAGE_KEY = 'chat_history'
 const ACTIVE_SESSION_KEY = 'active_session_id'
@@ -283,7 +284,12 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
   /**
    * 根据消息内容生成标题
    */
-  private generateTitle(content: string): string {
+  private generateTitle(content: RenderNode): string {
+    // 确保 content 是字符串类型
+    if (typeof content !== 'string') {
+      return '新对话'
+    }
+    
     // 取前20个字符作为标题，如果超过20个字符则截断并添加省略号
     const maxLength = 20
     if (content.length <= maxLength) {

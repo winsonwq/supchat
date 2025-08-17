@@ -26,7 +26,6 @@ export const allTools: ToolBaseConfig[] = [
   getDeviceInfoTool,
   getNetworkStatusTool,
   scanCodeTool,
-  // 在这里添加更多工具
 ]
 
 // 根据名称获取工具

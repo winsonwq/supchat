@@ -1,4 +1,4 @@
-import { ToolCallResult, StreamContent, StreamContentType, ToolCall } from '../mcp/types.js'
+import { ToolCallResult, StreamContent, StreamContentType, ToolCall, RenderNode } from '../mcp/types.js'
 
 export const formatTime = (date: Date) => {
   const year = date.getFullYear()
@@ -35,9 +35,8 @@ export function isToolCallMessage(content: string): boolean {
   return content.startsWith('执行工具:') || content.startsWith('工具调用失败:') || content.startsWith('正在调用工具:')
 }
 
-// 创建 StreamContent 工具函数
 export function createStreamContent(
-  content: string,
+  content: RenderNode,
   type: StreamContentType = StreamContentType.NORMAL,
   isComplete: boolean = false,
   toolCalls?: ToolCall[],
@@ -50,30 +49,4 @@ export function createStreamContent(
     toolCalls,
     currentToolCall
   }
-}
-
-// 创建普通内容
-export function createNormalContent(
-  content: string, 
-  isComplete: boolean = false, 
-  toolCalls?: ToolCall[]
-): StreamContent {
-  return createStreamContent(content, StreamContentType.NORMAL, isComplete, toolCalls)
-}
-
-// 创建工具调用内容
-export function createToolContent(
-  content: string, 
-  isComplete: boolean = false,
-  currentToolCall?: ToolCall
-): StreamContent {
-  return createStreamContent(content, StreamContentType.TOOL, isComplete, undefined, currentToolCall)
-}
-
-// 创建错误内容
-export function createErrorContent(
-  content: string, 
-  isComplete: boolean = true
-): StreamContent {
-  return createStreamContent(content, StreamContentType.ERROR, isComplete)
 }

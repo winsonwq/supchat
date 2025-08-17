@@ -1,5 +1,8 @@
 // 聊天历史相关类型定义
 
+// 使用MCP的ToolCall类型，保持一致性
+import { ToolCall, RenderNode } from '../mcp/types'
+
 export interface ChatSession {
   id: string
   title: string // 会话标题，通常是第一条用户消息的摘要
@@ -12,14 +15,11 @@ export interface ChatSession {
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant' | 'system' | 'tool'
-  content: string
+  content: RenderNode
   tool_call_id?: string
   tool_calls?: ToolCall[]
   timestamp: number // 消息时间戳
 }
-
-// 使用MCP的ToolCall类型，保持一致性
-import { ToolCall } from '../mcp/types'
 
 export interface ChatHistoryStorage {
   // 获取所有聊天会话

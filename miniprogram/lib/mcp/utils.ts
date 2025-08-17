@@ -1,4 +1,5 @@
 import { ToolBaseConfig, OpenRouterTool, ToolCallResult, AIResponse, ToolCall } from './types.js'
+import { ComponentRenderer } from './components/component-renderer.js'
 
 // 转换工具为OpenRouter格式
 export function transformToOpenRouterTool(tool: ToolBaseConfig): OpenRouterTool {
@@ -93,18 +94,25 @@ export function buildToolCallResponse(
   
   const toolResults = toolCalls.map((call, index) => {
     const result = results[index]
-    const content = result instanceof Error
-      ? `错误: ${result.message}`
-      : JSON.stringify(result.data, null, 2)
+    let content: string
+    
+    if (result instanceof Error) {
+      content = `错误: ${result.message}`
+    } else if (result.data) {
+      // 使用组件渲染器处理结果
+      content = ComponentRenderer.render(result.data)
+    } else {
+      content = '工具执行完成，无返回数据'
+    }
     
     console.log(`工具调用 ${call.function.name} 响应:`, content)
     
     return {
       tool_call_id: call.id,
       role: 'tool' as const,
-      content: content
+      content
     }
   })
-
+  
   return toolResults
 }
