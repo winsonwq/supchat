@@ -1,4 +1,7 @@
 import getSafeArea from './lib/utils/safe-area'
+// 确保组件注册模块被加载
+import './lib/mcp/components/component-registry.js'
+
 const safeAreaData = getSafeArea()
 
 // app.ts
@@ -20,5 +23,8 @@ App<IAppOption>({
         // 发送 res.code 到后台换取 openId, sessionKey, unionId
       },
     })
+    
+    // 确保组件注册完成
+    console.log('应用启动完成，组件注册状态:', (globalThis as any).__componentRegistry__)
   },
 })

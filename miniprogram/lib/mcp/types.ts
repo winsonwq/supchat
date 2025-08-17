@@ -5,10 +5,17 @@ export interface RenderableComponent {
   render(): string
 }
 
+export interface SerializableComponentData {
+  componentType: string
+  componentId: string
+  data: any
+}
+
 export type RenderNode =
   | string
   | RenderableComponent
   | Array<string | RenderableComponent>
+  | SerializableComponentData
 
 // 工具基础配置接口
 export interface ToolBaseConfig {

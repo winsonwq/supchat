@@ -27,12 +27,11 @@ import {
   StreamContentType,
   RenderNode,
 } from '../mcp/types.js'
-import { ComponentRenderer } from '../mcp/components/component-renderer.js'
 
 // 消息类型定义
 export interface Message {
   role: 'user' | 'assistant' | 'system' | 'tool'
-  content: RenderNode
+  content: RenderNode 
   towxmlNodes?: TowxmlNode // 存储 towxml 解析后的节点
   tool_call_id?: string // 工具调用ID
   tool_calls?: ToolCall[] // 存储工具调用信息
@@ -458,6 +457,9 @@ export class AIService {
       // 构建工具调用响应消息
       const toolResponses = buildToolCallResponse(toolCalls, toolResults)
 
+      // 保存工具调用结果到聊天历史（使用原始数据）
+      this.saveToolCallResults(toolResponses)
+
       // 发送工具调用结果给AI，获取最终回复
       await this.sendToolResultsToAI(toolResponses, onStream)
     } catch (error) {
@@ -470,6 +472,19 @@ export class AIService {
         ),
       )
     }
+  }
+
+  // 保存工具调用结果到聊天历史
+  private saveToolCallResults(toolResponses: any[]) {
+    toolResponses.forEach(response => {
+      if (response.originalData) {
+        // 使用原始数据保存到聊天历史，而不是渲染后的HTML字符串
+        this.addMessage('tool', response.originalData, response.tool_call_id)
+      } else {
+        // 如果没有原始数据，使用渲染后的内容
+        this.addMessage('tool', response.content, response.tool_call_id)
+      }
+    })
   }
 
   // 执行所有工具调用
@@ -503,7 +518,9 @@ export class AIService {
         const result = await toolManager.executeTool(call.function.name, args)
         toolResults.push(result)
 
-        this.addMessage('tool', result.data, call.id)
+        // 移除这里的addMessage调用，现在在saveToolCallResults中统一处理
+        // this.addMessage('tool', result.data, call.id)
+        
         onStream(
           createStreamContent(result.data, StreamContentType.TOOL, false),
         )
@@ -757,6 +774,8 @@ export class AIService {
 
           // 使用工具管理器执行工具
           const result = await toolManager.executeTool(call.function.name, args)
+          
+          // 直接保存原始数据，不进行渲染
           this.addMessage('tool', result.data, call.id)
         } catch (error) {
           console.error(`工具调用 ${call.function.name} 失败:`, error)

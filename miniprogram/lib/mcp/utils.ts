@@ -89,28 +89,40 @@ export function buildToolCallResponse(
   tool_call_id: string
   role: 'tool'
   content: string
+  originalData?: any // 添加原始数据字段，用于保存到聊天历史
 }> {
   console.log('构建工具调用响应:', { toolCalls, results })
   
   const toolResults = toolCalls.map((call, index) => {
     const result = results[index]
     let content: string
+    let originalData: any = null
     
     if (result instanceof Error) {
       content = `错误: ${result.message}`
     } else if (result.data) {
-      // 使用组件渲染器处理结果
-      content = ComponentRenderer.render(result.data)
+      // 保存原始数据，用于聊天历史存储
+      originalData = result.data
+      
+      // 使用组件渲染器处理结果，但只用于显示
+      if (typeof result.data === 'object' && result.data !== null && 'render' in result.data) {
+        // 如果是组件实例，调用render方法获取HTML字符串用于显示
+        content = result.data.render()
+      } else {
+        // 如果不是组件实例，直接使用数据
+        content = ComponentRenderer.render(result.data)
+      }
     } else {
       content = '工具执行完成，无返回数据'
     }
     
-    console.log(`工具调用 ${call.function.name} 响应:`, content)
+    console.log(`工具调用 ${call.function.name} 响应:`, { content, originalData })
     
     return {
       tool_call_id: call.id,
       role: 'tool' as const,
-      content
+      content,
+      originalData // 返回原始数据
     }
   })
   

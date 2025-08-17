@@ -1,6 +1,14 @@
 // 聊天历史存储服务
-import { ChatSession, ChatMessage, ChatHistoryStorage } from '../types/chat-history'
+import {
+  ChatSession,
+  ChatMessage,
+  ChatHistoryStorage,
+} from '../types/chat-history'
 import { RenderNode } from '../mcp/types'
+import { BaseComponent } from '../mcp/components/base-component.js'
+
+// 确保组件已注册
+import '../mcp/components/component-registry.js'
 
 const STORAGE_KEY = 'chat_history'
 const ACTIVE_SESSION_KEY = 'active_session_id'
@@ -22,10 +30,19 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
     try {
       const data = wx.getStorageSync(STORAGE_KEY)
       if (!data) return []
-      
+
       const sessions = JSON.parse(data) as ChatSession[]
+      // 反序列化所有会话的消息内容
+      const deserializedSessions = sessions.map((session) => ({
+        ...session,
+        messages: session.messages.map((message) => ({
+          ...message,
+          content: this.deserializeContent(message.content),
+        })),
+      }))
+
       // 按最后更新时间排序，最新的在前面
-      return sessions.sort((a, b) => b.updatedAt - a.updatedAt)
+      return deserializedSessions.sort((a, b) => b.updatedAt - a.updatedAt)
     } catch (error) {
       console.error('获取聊天历史失败:', error)
       return []
@@ -37,7 +54,17 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
    */
   getSessionById(sessionId: string): ChatSession | null {
     const sessions = this.getAllSessions()
-    return sessions.find(session => session.id === sessionId) || null
+    const session = sessions.find((session) => session.id === sessionId) || null
+
+    if (session) {
+      // 反序列化所有消息内容
+      session.messages = session.messages.map((message) => ({
+        ...message,
+        content: this.deserializeContent(message.content),
+      }))
+    }
+
+    return session
   }
 
   /**
@@ -46,25 +73,25 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
   createSession(title?: string): ChatSession {
     const now = Date.now()
     const sessionId = this.generateSessionId()
-    
+
     const newSession: ChatSession = {
       id: sessionId,
       title: title || '新对话',
       messages: [],
       createdAt: now,
       updatedAt: now,
-      isActive: true
+      isActive: true,
     }
 
     // 将其他会话设置为非活跃
     this.deactivateOtherSessions()
-    
+
     // 保存新会话
     this.saveSessions([...this.getAllSessions(), newSession])
-    
+
     // 设置新会话为活跃会话
     this.setActiveSessionId(sessionId)
-    
+
     return newSession
   }
 
@@ -74,8 +101,10 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
   updateSession(sessionId: string, updates: Partial<ChatSession>): boolean {
     try {
       const sessions = this.getAllSessions()
-      const sessionIndex = sessions.findIndex(session => session.id === sessionId)
-      
+      const sessionIndex = sessions.findIndex(
+        (session) => session.id === sessionId,
+      )
+
       if (sessionIndex === -1) {
         return false
       }
@@ -84,7 +113,7 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
       sessions[sessionIndex] = {
         ...sessions[sessionIndex],
         ...updates,
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
       }
 
       this.saveSessions(sessions)
@@ -101,8 +130,10 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
   deleteSession(sessionId: string): boolean {
     try {
       const sessions = this.getAllSessions()
-      const filteredSessions = sessions.filter(session => session.id !== sessionId)
-      
+      const filteredSessions = sessions.filter(
+        (session) => session.id !== sessionId,
+      )
+
       if (filteredSessions.length === sessions.length) {
         return false // 会话不存在
       }
@@ -128,19 +159,28 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
   /**
    * 添加消息到会话
    */
-  addMessage(sessionId: string, message: Omit<ChatMessage, 'id' | 'timestamp'>): boolean {
+  addMessage(
+    sessionId: string,
+    message: Omit<ChatMessage, 'id' | 'timestamp'>,
+  ): boolean {
     try {
       const sessions = this.getAllSessions()
-      const sessionIndex = sessions.findIndex(session => session.id === sessionId)
-      
+      const sessionIndex = sessions.findIndex(
+        (session) => session.id === sessionId,
+      )
+
       if (sessionIndex === -1) {
         return false
       }
 
+      // 序列化消息内容，处理组件实例
+      const serializedContent = this.serializeContent(message.content)
+
       const newMessage: ChatMessage = {
         ...message,
+        content: serializedContent,
         id: this.generateMessageId(),
-        timestamp: Date.now()
+        timestamp: Date.now(),
       }
 
       // 添加消息到会话
@@ -148,7 +188,10 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
       sessions[sessionIndex].updatedAt = Date.now()
 
       // 如果是第一条用户消息，自动生成标题
-      if (message.role === 'user' && sessions[sessionIndex].messages.length === 1) {
+      if (
+        message.role === 'user' &&
+        sessions[sessionIndex].messages.length === 1
+      ) {
         sessions[sessionIndex].title = this.generateTitle(message.content)
       }
 
@@ -177,22 +220,24 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
   setActiveSession(sessionId: string): boolean {
     try {
       const sessions = this.getAllSessions()
-      const sessionIndex = sessions.findIndex(session => session.id === sessionId)
-      
+      const sessionIndex = sessions.findIndex(
+        (session) => session.id === sessionId,
+      )
+
       if (sessionIndex === -1) {
         return false
       }
 
       // 将其他会话设置为非活跃
       this.deactivateOtherSessions()
-      
+
       // 设置指定会话为活跃
       sessions[sessionIndex].isActive = true
       sessions[sessionIndex].updatedAt = Date.now()
-      
+
       this.saveSessions(sessions)
       this.setActiveSessionId(sessionId)
-      
+
       return true
     } catch (error) {
       console.error('设置活跃会话失败:', error)
@@ -260,9 +305,9 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
    */
   private deactivateOtherSessions(): void {
     const sessions = this.getAllSessions()
-    const updatedSessions = sessions.map(session => ({
+    const updatedSessions = sessions.map((session) => ({
       ...session,
-      isActive: false
+      isActive: false,
     }))
     this.saveSessions(updatedSessions)
   }
@@ -289,12 +334,125 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
     if (typeof content !== 'string') {
       return '新对话'
     }
-    
+
     // 取前20个字符作为标题，如果超过20个字符则截断并添加省略号
     const maxLength = 20
     if (content.length <= maxLength) {
       return content
     }
     return content.substring(0, maxLength) + '...'
+  }
+
+  /**
+   * 序列化消息内容，将组件实例转换为可存储的格式
+   */
+  private serializeContent(content: RenderNode): any {
+    if (typeof content === 'string') {
+      return content
+    }
+
+    if (Array.isArray(content)) {
+      return content.map((item) => this.serializeContent(item))
+    }
+
+    if (
+      typeof content === 'object' &&
+      content !== null &&
+      'renderForMiniProgram' in content
+    ) {
+      // 优先使用微信小程序友好的格式
+      return (content as any).renderForMiniProgram()
+    }
+
+    if (
+      typeof content === 'object' &&
+      content !== null &&
+      'serialize' in content
+    ) {
+      return (content as any).serialize()
+    }
+
+    // 如果是其他类型的对象，尝试转换为字符串
+    return JSON.stringify(content)
+  }
+
+  /**
+   * 反序列化消息内容，将存储的格式转换为可渲染的格式
+   */
+  private deserializeContent(content: any): RenderNode {
+    if (typeof content === 'string') {
+      return content
+    }
+
+    if (Array.isArray(content)) {
+      const deserializedArray = content.map((item) =>
+        this.deserializeContent(item),
+      )
+      // 确保数组中的每个元素都是正确的类型
+      return deserializedArray as RenderNode
+    }
+
+    if (
+      typeof content === 'object' &&
+      content !== null &&
+      content.componentType  // 统一使用 componentType 字段
+    ) {
+      // 使用 componentType 字段
+      const componentType = content.componentType
+      
+      // 尝试使用BaseComponent的通用反序列化方法
+      try {
+        console.log('=== 开始反序列化组件 ===')
+        console.log('组件数据:', content)
+        console.log('组件类型:', componentType)
+        console.log('组件ID:', content.componentId)
+        console.log('全局注册表:', (globalThis as any).__componentRegistry__)
+        console.log(
+          '可用组件类型:',
+          Object.keys((globalThis as any).__componentRegistry__ || {}),
+        )
+
+        // 检查组件类型是否已注册
+        const registry = (globalThis as any).__componentRegistry__
+        if (registry && registry[componentType]) {
+          console.log(`✅ 找到组件类型 ${componentType} 的注册`)
+          const result = BaseComponent.deserialize(content)
+          console.log('✅ 反序列化成功:', result)
+          return result
+        } else {
+          console.warn(`⚠️ 组件类型 ${componentType} 未在注册表中找到`)
+
+          try {
+            if (
+              typeof (globalThis as any).__componentRegistry__?.[componentType]
+                ?.deserialize === 'function'
+            ) {
+              const componentClass = (globalThis as any)
+                .__componentRegistry__[componentType]
+              const component = componentClass.deserialize(content)
+              console.log('✅ 组件静态反序列化成功')
+              return component
+            }
+          } catch (importError) {
+            console.error('❌ 手动恢复组件失败:', importError)
+          }
+
+          // 如果自动反序列化失败，返回HTML字符串
+          return content.html || JSON.stringify(content)
+        }
+      } catch (error) {
+        console.error('❌ 自动反序列化失败:', error)
+        console.error('组件类型:', componentType)
+        console.error(
+          '可用组件类型:',
+          Object.keys((globalThis as any).__componentRegistry__ || {}),
+        )
+
+        // 如果自动反序列化失败，返回HTML字符串
+        return content.html || JSON.stringify(content)
+      }
+    }
+
+    return content
   }
 }

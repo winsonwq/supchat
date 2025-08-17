@@ -1,29 +1,15 @@
 import { ToolBaseConfig, ToolCallResult, WeatherData } from '../types.js'
 import { BaseComponent } from '../components/base-component.js'
 
-class WeatherCard extends BaseComponent {
-  private data: WeatherData
+export class WeatherCard extends BaseComponent {
 
   constructor(data: WeatherData) {
-    super()
-    this.data = data
-  }
-
-  refresh() {
-    console.log('刷新天气数据')
-  }
-
-  share() {
-    console.log('分享天气数据')
-  }
-
-  detail() {
-    console.log('查看天气详情')
+    super(data)
   }
 
   render(): string {
     return `
-<div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+<div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-4" data-component-id="${this.componentId}" data-component-type="weather">
     <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-semibold text-gray-800">${this.data.city} 天气</h3>
         <span class="text-sm text-gray-500">${this.data.updateTime}</span>
@@ -56,18 +42,31 @@ class WeatherCard extends BaseComponent {
     </div>
     
     <div class="flex space-x-2">
-        <button class="flex-1" data-action="refresh">
+        <button class="flex-1 weather-action-btn" data-action="refresh" data-component-id="${this.componentId}">
             🔄 刷新
         </button>
-        <button class="flex-1" data-action="share">
+        <button class="flex-1 weather-action-btn" data-action="share" data-component-id="${this.componentId}">
             📤 分享
         </button>
-        <button class="flex-1" data-action="detail">
+        <button class="flex-1 weather-action-btn" data-action="detail" data-component-id="${this.componentId}">
             📊 详情
         </button>
     </div>
 </div> 
     `
+  }
+
+  // 实现具体的操作方法（基类会自动调用）
+  refresh() {
+    console.log('刷新天气数据')
+  }
+
+  share() {
+    console.log('分享天气数据')
+  }
+
+  detail() {
+    console.log('查看天气详情')
   }
 }
 

@@ -98,16 +98,16 @@ Component({
     // 加载消息历史
     loadMessageHistory() {
       const history = this.getAIService().getMessageHistory()
-      // 处理消息内容，使用 towxml 解析 Markdown
-      const processedHistory = history.map((msg: Message) => ({
-        ...msg,
-        towxmlNodes: this.processMessageContent(msg.content),
-      }))
+      const processedHistory = history.map((msg: Message) => {
+        return {
+          ...msg,
+          towxmlNodes: this.processMessageContent(msg.content),
+        }
+      })
 
       this.setData({
         messages: processedHistory,
       })
-      // 加载历史后滚动到最新消息
       this.scrollToLatestMessage()
     },
 
