@@ -143,3 +143,42 @@ export interface StreamContent {
   toolCalls?: ToolCall[]
   currentToolCall?: ToolCall
 }
+
+// 天气相关类型定义
+export interface WeatherData {
+  city: string
+  date: string
+  temperature: {
+    current: number
+    high: number
+    low: number
+  }
+  weather: string
+  humidity: number
+  wind: {
+    direction: string
+    speed: number
+  }
+  airQuality: string
+  updateTime: string
+}
+
+export interface WeatherCardProps {
+  data: WeatherData
+}
+
+export interface WeatherCardComponent {
+  render: () => {
+    html: string
+    events: {
+      selector: string
+      action: string
+      handler: (eventContext?: any) => void
+    }[]
+  }
+  handlers: {
+    refresh: () => void
+    share: () => void
+    detail: () => void
+  }
+}

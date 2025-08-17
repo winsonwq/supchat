@@ -26,15 +26,15 @@ Component({
     currentSessionId: '', // 当前会话ID
     userInfo: {
       name: '用户',
-      avatar: ''
-    }
+      avatar: '',
+    },
   },
 
   lifetimes: {
     attached() {
       // 计算安全区域和导航栏高度
       this.calculateSafeAreaPadding()
-      
+
       // 页面加载时初始化并加载消息历史
       this.loadMessageHistory()
       // 计算 viewport 高度
@@ -62,9 +62,9 @@ Component({
     // 计算安全区域顶部间距
     calculateSafeAreaPadding() {
       const topPadding = getNavigationHeight()
-      
+
       this.setData({
-        chatScrollTopPadding: topPadding
+        chatScrollTopPadding: topPadding,
       })
     },
 
@@ -114,22 +114,22 @@ Component({
     initChatSessions() {
       const aiService = this.getAIService()
       const sessions = aiService.getAllChatSessions()
-      
+
       // 如果没有会话，创建一个新的默认会话
       if (sessions.length === 0) {
         const newSession = aiService.createNewChat()
         this.setData({
           chatSessions: [newSession],
-          currentSessionId: newSession.id
+          currentSessionId: newSession.id,
         })
       } else {
         // 找到活跃会话
-        const activeSession = sessions.find(session => session.isActive)
+        const activeSession = sessions.find((session) => session.isActive)
         this.setData({
           chatSessions: sessions,
-          currentSessionId: activeSession?.id || sessions[0].id
+          currentSessionId: activeSession?.id || sessions[0].id,
         })
-        
+
         // 加载活跃会话的消息
         if (activeSession) {
           this.loadMessageHistory()
@@ -144,8 +144,8 @@ Component({
         this.setData({
           userInfo: {
             name: userInfo.name,
-            avatar: userInfo.avatar || ''
-          }
+            avatar: userInfo.avatar || '',
+          },
         })
       }
     },
@@ -157,30 +157,33 @@ Component({
         this.setData({
           userInfo: {
             name: userInfo.name,
-            avatar: userInfo.avatar || ''
-          }
+            avatar: userInfo.avatar || '',
+          },
         })
       } else {
         // 用户信息被清除
         this.setData({
           userInfo: {
             name: '用户',
-            avatar: ''
-          }
+            avatar: '',
+          },
         })
       }
     },
 
     // 处理消息内容，使用 towxml 解析 Markdown
     processMessageContent(content: string): TowxmlNode | undefined {
+      console.log(1111111111, content)
       if (!content) return undefined
+      console.log('处理消息内容:', content)
 
       try {
         // 使用 towxml 解析 Markdown 内容
-        const towxmlNodes = app.towxml(content, 'markdown', {
+        const towxmlNodes = app.towxml(content.render ? content.render() : content, 'html', {
           events: {
             tap: (e: WxEvent) => {
-              console.log('tap', e)
+              console.log('tap事件触发:', e)
+              this.handleComponentEvent(content, e)
             },
           },
         })
@@ -190,6 +193,11 @@ Component({
         // 如果解析失败，返回纯文本的 towxml 节点
         return app.towxml(content, 'text')
       }
+    },
+
+    handleComponentEvent(content: any, e: WxEvent) {
+      const eventName = e.currentTarget.dataset.data.attrs['data-action']
+      content[eventName].bind(content)()
     },
 
     // 输入框变化
@@ -248,7 +256,8 @@ Component({
 
         // 定义流式响应回调
         const onStream: StreamCallback = (streamContent) => {
-          const { content, type, isComplete, toolCalls, currentToolCall } = streamContent
+          const { content, type, isComplete, toolCalls, currentToolCall } =
+            streamContent
 
           // 处理当前工具调用显示
           if (currentToolCall) {
@@ -412,12 +421,14 @@ Component({
           if (res.confirm) {
             const aiService = this.getAIService()
             aiService.clearMessages()
-            
+
             // 更新当前会话的消息为空
             if (this.data.currentSessionId) {
-              aiService.updateSession(this.data.currentSessionId, { messages: [] })
+              aiService.updateSession(this.data.currentSessionId, {
+                messages: [],
+              })
             }
-            
+
             this.setData({
               messages: [],
             })
@@ -434,14 +445,14 @@ Component({
     // 切换侧边栏
     toggleSidebar() {
       this.setData({
-        sidebarOpen: !this.data.sidebarOpen
+        sidebarOpen: !this.data.sidebarOpen,
       })
     },
 
     // 关闭侧边栏
     closeSidebar() {
       this.setData({
-        sidebarOpen: false
+        sidebarOpen: false,
       })
     },
 
@@ -449,27 +460,27 @@ Component({
     selectChatSession(e: any) {
       const { sessionId } = e.detail
       console.log('选择会话:', sessionId)
-      
+
       const aiService = this.getAIService()
       const success = aiService.loadChatSession(sessionId)
-      
+
       if (success) {
         // 重新加载消息历史
         this.loadMessageHistory()
-        
+
         this.setData({
           currentSessionId: sessionId,
-          sidebarOpen: false
+          sidebarOpen: false,
         })
-        
+
         wx.showToast({
           title: '已切换会话',
-          icon: 'success'
+          icon: 'success',
         })
       } else {
         wx.showToast({
           title: '切换会话失败',
-          icon: 'error'
+          icon: 'error',
         })
       }
     },
@@ -477,23 +488,23 @@ Component({
     // 创建新话题
     createNewTopic() {
       console.log('创建新话题')
-      
+
       const aiService = this.getAIService()
       const newSession = aiService.createNewChat()
-      
+
       // 更新会话列表
       const sessions = aiService.getAllChatSessions()
-      
+
       this.setData({
         messages: [],
         chatSessions: sessions,
         currentSessionId: newSession.id,
-        sidebarOpen: false
+        sidebarOpen: false,
       })
-      
+
       wx.showToast({
         title: '已创建新话题',
-        icon: 'success'
+        icon: 'success',
       })
     },
 
@@ -501,20 +512,20 @@ Component({
     onNewChat() {
       const aiService = this.getAIService()
       const newSession = aiService.createNewChat()
-      
+
       // 更新会话列表
       const sessions = aiService.getAllChatSessions()
-      
+
       this.setData({
         messages: [],
         chatSessions: sessions,
         currentSessionId: newSession.id,
-        sidebarOpen: false
+        sidebarOpen: false,
       })
-      
+
       wx.showToast({
         title: '已开始新聊天',
-        icon: 'success'
+        icon: 'success',
       })
     },
 
@@ -523,7 +534,7 @@ Component({
       console.log('主页收到删除事件:', e)
       const { sessionId } = e.detail
       console.log('要删除的会话ID:', sessionId)
-      
+
       wx.showModal({
         title: '确认删除',
         content: '确定要删除这个聊天会话吗？删除后无法恢复。',
@@ -532,12 +543,12 @@ Component({
             console.log('用户确认删除')
             const aiService = this.getAIService()
             const success = aiService.deleteChatSession(sessionId)
-            
+
             if (success) {
               console.log('删除成功')
               // 更新会话列表
               const sessions = aiService.getAllChatSessions()
-              
+
               // 如果删除的是当前会话，需要切换到其他会话
               if (sessionId === this.data.currentSessionId) {
                 if (sessions.length > 0) {
@@ -545,46 +556,46 @@ Component({
                   aiService.loadChatSession(newActiveSession.id)
                   this.loadMessageHistory()
                   this.setData({
-                    currentSessionId: newActiveSession.id
+                    currentSessionId: newActiveSession.id,
                   })
                 } else {
                   // 如果没有其他会话，创建一个新的
                   const newSession = aiService.createNewChat()
                   this.setData({
                     messages: [],
-                    currentSessionId: newSession.id
+                    currentSessionId: newSession.id,
                   })
                 }
               }
-              
+
               this.setData({
-                chatSessions: sessions
+                chatSessions: sessions,
               })
-              
+
               wx.showToast({
                 title: '已删除',
-                icon: 'success'
+                icon: 'success',
               })
             } else {
               console.log('删除失败')
               wx.showToast({
                 title: '删除失败',
-                icon: 'error'
+                icon: 'error',
               })
             }
           }
-        }
+        },
       })
     },
 
     // 打开设置页面
     openSettings() {
       this.setData({
-        sidebarOpen: false
+        sidebarOpen: false,
       })
-      
+
       wx.navigateTo({
-        url: '/pages/settings/settings'
+        url: '/pages/settings/settings',
       })
     },
   },
