@@ -7,6 +7,32 @@ import { UserInfoStorage } from '../../lib/storage/user-info-storage'
 import { UserInfo } from '../../lib/types/user-info'
 import { ChatSession } from '../../lib/types/chat-history'
 import { BaseComponent } from '../../lib/mcp/components/base-component.js'
+
+// 延迟导入 ComponentManager，避免初始化时的循环依赖问题
+let componentManagerInstance: any = null
+
+// 安全地获取 ComponentManager 实例
+function getComponentManager() {
+  if (!componentManagerInstance) {
+    try {
+      // 尝试从全局获取（如果已经在其他地方初始化）
+      const globalComponentManager = (globalThis as any).__ComponentManagerInstance__
+      if (globalComponentManager) {
+        componentManagerInstance = globalComponentManager
+        console.log('从全局获取 ComponentManager 成功')
+        return componentManagerInstance
+      }
+      
+      console.warn('ComponentManager 未找到，跳过组件管理功能')
+      return null
+    } catch (error) {
+      console.error('获取 ComponentManager 失败:', error)
+      return null
+    }
+  }
+  return componentManagerInstance
+}
+
 const app = getApp()
 
 Component({
@@ -175,12 +201,23 @@ Component({
     // 处理消息内容，使用 towxml 解析 Markdown
     processMessageContent(content: RenderNode): TowxmlNode | undefined {
       try {
-        const html =
-          content instanceof BaseComponent ? content.render() : content
+        let html: string
+        
+        if (content instanceof BaseComponent) {
+          // 注册组件到管理器
+          const componentManager = getComponentManager()
+          if (componentManager) {
+            componentManager.registerComponent(content)
+          }
+          html = content.render()
+        } else {
+          html = content as string
+        }
+        
         const towxmlNodes = app.towxml(html, 'html', {
           events: {
             tap: (e: WxEvent) => {
-              this.handleComponentEvent(content, e)
+              this.handleComponentEvent(e)
             },
           },
         })
@@ -192,10 +229,29 @@ Component({
       }
     },
 
-    handleComponentEvent(content: RenderNode, e: WxEvent) {
-      // @ts-ignore
-      const eventName = e.currentTarget.dataset.data.attrs['data-action']
-      ;(content as any)[eventName].bind(content)()
+    handleComponentEvent(e: WxEvent) {
+      try {
+        // 从事件对象中获取组件ID和事件名称
+        // @ts-ignore
+        const eventData = e.currentTarget.dataset.data.attrs || {}
+        const componentId = eventData['data-component-id']
+        const eventName = eventData['data-action']
+        
+        if (!componentId || !eventName) {
+          console.warn('事件对象中缺少组件ID或事件名称:', { componentId, eventName, eventData })
+          return
+        }
+        
+        // 使用组件管理器处理事件
+        const componentManager = getComponentManager()
+        const success = componentManager?.handleComponentEvent?.(componentId, eventName, e)
+        
+        if (!success) {
+          console.warn(`组件事件处理失败: ${componentId}.${eventName}`)
+        }
+      } catch (error) {
+        console.error('处理组件事件时发生错误:', error)
+      }
     },
 
     // 输入框变化

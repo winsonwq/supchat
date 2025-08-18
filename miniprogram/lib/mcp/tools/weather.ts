@@ -2,14 +2,11 @@ import { ToolBaseConfig, ToolCallResult, WeatherData } from '../types.js'
 import { BaseComponent } from '../components/base-component.js'
 
 export class WeatherCard extends BaseComponent {
-
-  constructor(data: WeatherData) {
-    super(data)
-  }
-
-  render(): string {
+  static componentType = 'weather'
+  
+  render() {
     return `
-<div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-4" data-component-id="${this.componentId}" data-component-type="weather">
+<div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-4" ${this.getComponentAttributes()}>
     <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-semibold text-gray-800">${this.data.city} 天气</h3>
         <span class="text-sm text-gray-500">${this.data.updateTime}</span>
@@ -42,13 +39,13 @@ export class WeatherCard extends BaseComponent {
     </div>
     
     <div class="flex space-x-2">
-        <button class="flex-1 weather-action-btn" data-action="refresh" data-component-id="${this.componentId}">
+        <button class="flex-1 weather-action-btn" ${this.bindEvent('refresh')}>
             🔄 刷新
         </button>
-        <button class="flex-1 weather-action-btn" data-action="share" data-component-id="${this.componentId}">
+        <button class="flex-1 weather-action-btn" ${this.bindEvent('share')}>
             📤 分享
         </button>
-        <button class="flex-1 weather-action-btn" data-action="detail" data-component-id="${this.componentId}">
+        <button class="flex-1 weather-action-btn" ${this.bindEvent('detail')}>
             📊 详情
         </button>
     </div>
@@ -107,10 +104,7 @@ async function getWeatherHandler(
     const weatherCard = new WeatherCard(weatherData)
 
     setTimeout(() => {
-      const result = weatherCard
-      resolve({
-        data: result,
-      })
+      resolve({ data: weatherCard })
     }, 1000)
   })
 }

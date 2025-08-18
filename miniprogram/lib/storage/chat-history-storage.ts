@@ -5,7 +5,7 @@ import {
   ChatHistoryStorage,
 } from '../types/chat-history'
 import { RenderNode } from '../mcp/types'
-import { BaseComponent } from '../mcp/components/base-component.js'
+import { ComponentManager } from '../mcp/components/component-manager.js'
 
 // 确保组件已注册
 import '../mcp/components/component-registry.js'
@@ -291,9 +291,19 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
 
   /**
    * 设置活跃会话ID
+   * 切换会话时会清理旧的组件实例，避免内存泄漏和事件冲突
    */
   private setActiveSessionId(sessionId: string): void {
     try {
+      // 清理 ComponentManager 中的旧组件实例
+      const componentManager = ComponentManager.getInstance()
+      const oldCount = componentManager.getComponentCount()
+      componentManager.clear()
+      
+      if (oldCount > 0) {
+        console.log(`🧹 会话切换：清理了 ${oldCount} 个旧组件实例`)
+      }
+      
       wx.setStorageSync(ACTIVE_SESSION_KEY, sessionId)
     } catch (error) {
       console.error('设置活跃会话ID失败:', error)
@@ -400,14 +410,15 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
       // 使用 componentType 字段
       const componentType = content.componentType
 
-      // 使用BaseComponent的通用反序列化方法
+      // 使用 ComponentManager 反序列化并注册组件
       try {
         console.log('=== 开始反序列化组件 ===')
         console.log('组件数据:', content)
         console.log('组件类型:', componentType)
 
-        const result = BaseComponent.deserialize(content)
-        console.log('✅ 反序列化成功:', result)
+        const componentManager = ComponentManager.getInstance()
+        const result = componentManager.deserializeAndRegister(content)
+        console.log('✅ 反序列化并注册成功:', result)
         return result
       } catch (error) {
         console.error('❌ 反序列化失败:', error)

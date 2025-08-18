@@ -58,17 +58,6 @@ export abstract class BaseComponent implements RenderableComponent {
   }
 
   /**
-   * 获取组件元数据，用于持久化
-   */
-  getMetaData(): Record<string, any> {
-    return {
-      componentType: this.componentType,  // 统一使用 componentType 字段
-      componentId: this.componentId,
-      data: this.data
-    }
-  }
-
-  /**
    * 序列化组件，用于持久化
    */
   serialize(): Record<string, any> {
@@ -78,6 +67,22 @@ export abstract class BaseComponent implements RenderableComponent {
       data: this.data,
       html: this.render()
     }
+  }
+
+  /**
+   * 生成包含组件ID的事件属性字符串
+   * 用于在 render 方法中方便地添加事件属性
+   */
+  protected bindEvent(action: string): string {
+    return `data-component-id="${this.componentId}" data-action="${action}"`
+  }
+
+  /**
+   * 生成组件根元素的属性字符串
+   * 包含组件ID和类型信息
+   */
+  protected getComponentAttributes(): string {
+    return `data-component-id="${this.componentId}" data-component-type="${this.componentType}"`
   }
 
   /**
