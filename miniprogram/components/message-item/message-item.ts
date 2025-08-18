@@ -1,5 +1,5 @@
 // message-item.ts
-import { Message } from '../../lib/services/ai.js'
+import { Message } from '../../lib/types/message.js' // 使用新的消息类型定义
 import { ComponentEventManager } from '../../lib/mcp/components/component-event-manager.js'
 
 Component({

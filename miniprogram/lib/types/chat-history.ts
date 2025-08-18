@@ -1,24 +1,23 @@
 // 聊天历史相关类型定义
 
-// 使用MCP的ToolCall类型，保持一致性
-import { ToolCall, RenderNode } from '../mcp/types'
+// 使用新的消息类型定义
+import { RenderMessage } from './message'
 
 export interface ChatSession {
   id: string
   title: string // 会话标题，通常是第一条用户消息的摘要
-  messages: ChatMessage[]
+  messages: RenderMessage[] // 使用新的渲染消息类型
   createdAt: number // 创建时间戳
   updatedAt: number // 最后更新时间戳
   isActive: boolean // 是否为当前活跃会话
 }
 
-export interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant' | 'system' | 'tool'
-  content: RenderNode
-  tool_call_id?: string
-  tool_calls?: ToolCall[]
-  timestamp: number // 消息时间戳
+/**
+ * @deprecated 使用 RenderMessage 替代
+ * 为了向后兼容保留的旧消息类型
+ */
+export interface ChatMessage extends RenderMessage {
+  // 保持向后兼容
 }
 
 export interface ChatHistoryStorage {
@@ -38,7 +37,7 @@ export interface ChatHistoryStorage {
   deleteSession(sessionId: string): boolean
   
   // 添加消息到会话
-  addMessage(sessionId: string, message: Omit<ChatMessage, 'id' | 'timestamp'>): boolean
+  addMessage(sessionId: string, message: Omit<RenderMessage, 'id' | 'timestamp'>): boolean
   
   // 获取当前活跃会话
   getActiveSession(): ChatSession | null

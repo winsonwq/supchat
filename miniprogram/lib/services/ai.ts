@@ -27,15 +27,15 @@ import {
   StreamContentType,
   RenderNode,
 } from '../mcp/types.js'
-
-// 消息类型定义
-export interface Message {
-  role: 'user' | 'assistant' | 'system' | 'tool'
-  content: RenderNode 
-  towxmlNodes?: TowxmlNode // 存储 towxml 解析后的节点
-  tool_call_id?: string // 工具调用ID
-  tool_calls?: ToolCall[] // 存储工具调用信息
-}
+import {
+  AIMessage,
+  AIMessageHistory,
+  RenderMessage,
+  RenderMessageHistory,
+  MessageConverter,
+  MessageBuilder,
+  Message // 向后兼容的类型
+} from '../types/message.js'
 
 // 流式响应回调类型
 export type StreamCallback = (streamContent: StreamContent) => void
@@ -51,7 +51,7 @@ interface RequestConfig {
 // AI服务类
 export class AIService {
   private static instance: AIService
-  private messages: Message[] = []
+  private renderMessages: RenderMessageHistory = [] // 内部渲染消息
   private currentRequestTask: WxRequestTask | null = null
   private chatHistoryStorage = ChatHistoryStorageFactory.getInstance()
 
@@ -69,37 +69,44 @@ export class AIService {
     tool_call_id?: string,
     tool_calls?: ToolCall[],
   ) {
-    const message = {
+    const renderMessage: RenderMessage = {
+      id: MessageConverter.generateMessageId(),
       role,
       content: content || '',
+      plainContent: MessageConverter.extractPlainText(content || ''),
       tool_call_id,
       tool_calls,
+      timestamp: Date.now(),
     }
 
-    this.messages.push(message)
+    this.renderMessages.push(renderMessage)
 
     // 同时保存到聊天历史存储
     const activeSession = this.chatHistoryStorage.getActiveSession()
     if (activeSession) {
-      this.chatHistoryStorage.addMessage(activeSession.id, message)
+      this.chatHistoryStorage.addMessage(activeSession.id, renderMessage)
     }
   }
 
-  // 获取所有消息（包括系统消息）
-  getMessages(): Message[] {
-    return [
-      {
-        role: 'system',
-        content:
-          '你是一个有用的AI助手，请用简洁友好的方式回答用户的问题。你可以使用可用的工具来帮助用户。当需要使用工具时，请直接调用相应的工具。',
-      },
-      ...this.messages,
-    ]
+  // 获取所有消息（包括系统消息） - 用于 AI 通信
+  getMessagesForAI(): AIMessageHistory {
+    const systemMessage: AIMessage = {
+      role: 'system',
+      content: '你是一个有用的AI助手，请用简洁友好的方式回答用户的问题。你可以使用可用的工具来帮助用户。当需要使用工具时，请直接调用相应的工具。',
+    }
+    
+    const aiMessages = MessageConverter.renderToAIHistory(this.renderMessages)
+    return [systemMessage, ...aiMessages]
+  }
+
+  // 获取所有消息（用于渲染）
+  getMessages(): RenderMessageHistory {
+    return [...this.renderMessages]
   }
 
   // 清空消息历史
   clearMessages() {
-    this.messages = []
+    this.renderMessages = []
     // 同时清空当前会话的消息
     const activeSession = this.chatHistoryStorage.getActiveSession()
     if (activeSession) {
@@ -112,7 +119,7 @@ export class AIService {
     // 创建新的会话
     const newSession = this.chatHistoryStorage.createSession()
     // 清空当前消息
-    this.messages = []
+    this.renderMessages = []
     return newSession
   }
 
@@ -126,13 +133,8 @@ export class AIService {
     // 设置会话为活跃
     this.chatHistoryStorage.setActiveSession(sessionId)
 
-    // 加载会话消息，确保类型兼容
-    this.messages = session.messages.map((msg) => ({
-      role: msg.role,
-      content: msg.content,
-      tool_call_id: msg.tool_call_id,
-      tool_calls: msg.tool_calls,
-    })) as Message[]
+    // 加载会话消息
+    this.renderMessages = [...session.messages]
 
     return true
   }
@@ -207,7 +209,7 @@ export class AIService {
       headers,
       data: {
         model: aiConfig.model,
-        messages: this.getMessages(),
+        messages: this.getMessagesForAI(), // 使用 AI 格式的消息
         tools: allAvailableTools,
         tool_choice: 'auto',
         stream: isStream,
@@ -795,9 +797,13 @@ export class AIService {
     return this.sendMessageNonStream(userMessage)
   }
 
-  // 获取消息历史（不包括系统消息）
+  // 获取消息历史（不包括系统消息） - 向后兼容
   getMessageHistory(): Message[] {
-    return [...this.messages]
+    // 转换为旧格式以保持向后兼容
+    return this.renderMessages.map(msg => ({
+      ...msg,
+      towxmlNodes: msg.towxmlNodes
+    })) as Message[]
   }
 
   // 取消当前请求

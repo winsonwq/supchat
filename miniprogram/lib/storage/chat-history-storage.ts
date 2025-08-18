@@ -1,10 +1,10 @@
 // 聊天历史存储服务
 import {
   ChatSession,
-  ChatMessage,
   ChatHistoryStorage,
 } from '../types/chat-history'
 import { RenderNode } from '../mcp/types'
+import { RenderMessage, MessageConverter } from '../types/message'
 import { ComponentManager } from '../mcp/components/component-manager.js'
 
 // 确保组件已注册
@@ -161,7 +161,7 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
    */
   addMessage(
     sessionId: string,
-    message: Omit<ChatMessage, 'id' | 'timestamp'>,
+    message: Omit<RenderMessage, 'id' | 'timestamp'>,
   ): boolean {
     try {
       const sessions = this.getAllSessions()
@@ -176,10 +176,11 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
       // 序列化消息内容，处理组件实例
       const serializedContent = this.serializeContent(message.content)
 
-      const newMessage: ChatMessage = {
+      const newMessage: RenderMessage = {
         ...message,
         content: serializedContent,
-        id: this.generateMessageId(),
+        plainContent: message.plainContent || MessageConverter.extractPlainText(message.content),
+        id: MessageConverter.generateMessageId(),
         timestamp: Date.now(),
       }
 
@@ -329,28 +330,21 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
 
-  /**
-   * 生成消息ID
-   */
-  private generateMessageId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  }
+
 
   /**
    * 根据消息内容生成标题
    */
   private generateTitle(content: RenderNode): string {
-    // 确保 content 是字符串类型
-    if (typeof content !== 'string') {
-      return '新对话'
-    }
-
+    // 提取纯文本内容
+    const plainText = MessageConverter.extractPlainText(content)
+    
     // 取前20个字符作为标题，如果超过20个字符则截断并添加省略号
     const maxLength = 20
-    if (content.length <= maxLength) {
-      return content
+    if (plainText.length <= maxLength) {
+      return plainText
     }
-    return content.substring(0, maxLength) + '...'
+    return plainText.substring(0, maxLength) + '...'
   }
 
   /**

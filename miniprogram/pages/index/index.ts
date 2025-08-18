@@ -1,36 +1,24 @@
 // index.ts
-import { AIService, Message, StreamCallback } from '../../lib/services/ai.js'
+import { AIService, StreamCallback } from '../../lib/services/ai.js'
 import { RenderNode, StreamContentType } from '../../lib/mcp/types.js'
 import { ToolCall, TowxmlNode, WxEvent } from '../../lib/mcp/types.js'
+import { RenderMessage, Message } from '../../lib/types/message' // 使用新的消息类型
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
 import { UserInfoStorage } from '../../lib/storage/user-info-storage'
 import { UserInfo } from '../../lib/types/user-info'
 import { ChatSession } from '../../lib/types/chat-history'
 import { BaseComponent } from '../../lib/mcp/components/base-component.js'
 
-// 延迟导入 ComponentManager，避免初始化时的循环依赖问题
-let componentManagerInstance: any = null
+import { ComponentManager } from '../../lib/mcp/components/component-manager.js'
 
-// 安全地获取 ComponentManager 实例
-function getComponentManager() {
-  if (!componentManagerInstance) {
-    try {
-      // 尝试从全局获取（如果已经在其他地方初始化）
-      const globalComponentManager = (globalThis as any).__ComponentManagerInstance__
-      if (globalComponentManager) {
-        componentManagerInstance = globalComponentManager
-        console.log('从全局获取 ComponentManager 成功')
-        return componentManagerInstance
-      }
-      
-      console.warn('ComponentManager 未找到，跳过组件管理功能')
-      return null
-    } catch (error) {
-      console.error('获取 ComponentManager 失败:', error)
-      return null
-    }
+// 获取 ComponentManager 实例
+function getComponentManager(): ComponentManager | null {
+  try {
+    return ComponentManager.getInstance()
+  } catch (error) {
+    console.error('获取 ComponentManager 失败:', error)
+    return null
   }
-  return componentManagerInstance
 }
 
 const app = getApp()
@@ -124,7 +112,7 @@ Component({
     // 加载消息历史
     loadMessageHistory() {
       const history = this.getAIService().getMessageHistory()
-      const processedHistory = history.map((msg: Message) => {
+      const processedHistory = history.map((msg: RenderMessage) => {
         return {
           ...msg,
           towxmlNodes: this.processMessageContent(msg.content),
@@ -204,14 +192,11 @@ Component({
         let html: string
         
         if (content instanceof BaseComponent) {
-          // 注册组件到管理器
           const componentManager = getComponentManager()
-          if (componentManager) {
-            componentManager.registerComponent(content)
-          }
+          componentManager?.registerComponent(content)
           html = content.render()
         } else {
-          html = content as string
+          html = String(content)
         }
         
         const towxmlNodes = app.towxml(html, 'html', {
@@ -224,27 +209,23 @@ Component({
         return towxmlNodes
       } catch (error) {
         console.error('towxml解析错误:', error)
-        // 如果解析失败，返回纯文本的 towxml 节点
-        return app.towxml(content, 'text')
+        return app.towxml(String(content), 'text')
       }
     },
 
     handleComponentEvent(e: WxEvent) {
       try {
-        // 从事件对象中获取组件ID和事件名称
-        // @ts-ignore
-        const eventData = e.currentTarget.dataset.data.attrs || {}
+        const eventData = (e.currentTarget as any)?.dataset?.data?.attrs || {}
         const componentId = eventData['data-component-id']
         const eventName = eventData['data-action']
         
         if (!componentId || !eventName) {
-          console.warn('事件对象中缺少组件ID或事件名称:', { componentId, eventName, eventData })
+          console.warn('事件对象中缺少组件ID或事件名称:', { componentId, eventName })
           return
         }
         
-        // 使用组件管理器处理事件
         const componentManager = getComponentManager()
-        const success = componentManager?.handleComponentEvent?.(componentId, eventName, e)
+        const success = componentManager?.handleComponentEvent(componentId, eventName, e)
         
         if (!success) {
           console.warn(`组件事件处理失败: ${componentId}.${eventName}`)
@@ -283,16 +264,22 @@ Component({
       try {
         // 添加用户消息到界面
         const userMessage: Message = {
+          id: `msg_${Date.now()}_user`,
           role: 'user',
           content: message,
+          plainContent: message,
           towxmlNodes: this.processMessageContent(message),
+          timestamp: Date.now(),
         }
 
         // 添加空的助手消息占位符
         const assistantMessage: Message = {
+          id: `msg_${Date.now()}_assistant`,
           role: 'assistant',
           content: '',
+          plainContent: '',
           towxmlNodes: undefined,
+          timestamp: Date.now(),
         }
 
         const newMessages = [
@@ -325,9 +312,12 @@ Component({
           if (type === StreamContentType.TOOL) {
             // 添加工具调用消息作为独立消息
             const toolMessage: Message = {
+              id: `msg_${Date.now()}_tool`,
               role: 'tool',
               content: content,
+              plainContent: typeof content === 'string' ? content : '',
               towxmlNodes: this.processMessageContent(content),
+              timestamp: Date.now(),
             }
 
             const updatedMessages = [...this.data.messages, toolMessage]
