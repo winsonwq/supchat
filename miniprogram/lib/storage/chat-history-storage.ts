@@ -395,60 +395,24 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
     if (
       typeof content === 'object' &&
       content !== null &&
-      content.componentType  // 统一使用 componentType 字段
+      content.componentType // 统一使用 componentType 字段
     ) {
       // 使用 componentType 字段
       const componentType = content.componentType
-      
-      // 尝试使用BaseComponent的通用反序列化方法
+
+      // 使用BaseComponent的通用反序列化方法
       try {
         console.log('=== 开始反序列化组件 ===')
         console.log('组件数据:', content)
         console.log('组件类型:', componentType)
-        console.log('组件ID:', content.componentId)
-        console.log('全局注册表:', (globalThis as any).__componentRegistry__)
-        console.log(
-          '可用组件类型:',
-          Object.keys((globalThis as any).__componentRegistry__ || {}),
-        )
 
-        // 检查组件类型是否已注册
-        const registry = (globalThis as any).__componentRegistry__
-        if (registry && registry[componentType]) {
-          console.log(`✅ 找到组件类型 ${componentType} 的注册`)
-          const result = BaseComponent.deserialize(content)
-          console.log('✅ 反序列化成功:', result)
-          return result
-        } else {
-          console.warn(`⚠️ 组件类型 ${componentType} 未在注册表中找到`)
-
-          try {
-            if (
-              typeof (globalThis as any).__componentRegistry__?.[componentType]
-                ?.deserialize === 'function'
-            ) {
-              const componentClass = (globalThis as any)
-                .__componentRegistry__[componentType]
-              const component = componentClass.deserialize(content)
-              console.log('✅ 组件静态反序列化成功')
-              return component
-            }
-          } catch (importError) {
-            console.error('❌ 手动恢复组件失败:', importError)
-          }
-
-          // 如果自动反序列化失败，返回HTML字符串
-          return content.html || JSON.stringify(content)
-        }
+        const result = BaseComponent.deserialize(content)
+        console.log('✅ 反序列化成功:', result)
+        return result
       } catch (error) {
-        console.error('❌ 自动反序列化失败:', error)
-        console.error('组件类型:', componentType)
-        console.error(
-          '可用组件类型:',
-          Object.keys((globalThis as any).__componentRegistry__ || {}),
-        )
+        console.error('❌ 反序列化失败:', error)
 
-        // 如果自动反序列化失败，返回HTML字符串
+        // 如果反序列化失败，返回HTML字符串作为降级方案
         return content.html || JSON.stringify(content)
       }
     }
