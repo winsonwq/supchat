@@ -360,6 +360,94 @@
 .bg-blue-alpha-10 { background-color: rgba(59, 130, 246, 0.1); }
 .bg-white-alpha-80 { background-color: rgba(255, 255, 255, 0.8); }
 
+/* ===== 渐变背景 (Gradients) ===== */
+/* 通过 from-* 与 to-* 设置起止色，方向使用 bg-gradient-to-? */
+
+page,
+:root {
+  --gradient-from: transparent;
+  --gradient-to: transparent;
+}
+
+/* 方向 */
+.bg-gradient-to-t { background-image: linear-gradient(0deg, var(--gradient-from), var(--gradient-to)); }
+.bg-gradient-to-tr { background-image: linear-gradient(45deg, var(--gradient-from), var(--gradient-to)); }
+.bg-gradient-to-r { background-image: linear-gradient(90deg, var(--gradient-from), var(--gradient-to)); }
+.bg-gradient-to-br { background-image: linear-gradient(135deg, var(--gradient-from), var(--gradient-to)); }
+.bg-gradient-to-b { background-image: linear-gradient(180deg, var(--gradient-from), var(--gradient-to)); }
+.bg-gradient-to-bl { background-image: linear-gradient(225deg, var(--gradient-from), var(--gradient-to)); }
+.bg-gradient-to-l { background-image: linear-gradient(270deg, var(--gradient-from), var(--gradient-to)); }
+.bg-gradient-to-tl { background-image: linear-gradient(315deg, var(--gradient-from), var(--gradient-to)); }
+
+/* 起止色映射 - 与上方颜色系统保持一致 */
+/* 基础色 */
+.from-transparent { --gradient-from: transparent; }
+.to-transparent { --gradient-to: transparent; }
+.from-current { --gradient-from: currentColor; }
+.to-current { --gradient-to: currentColor; }
+.from-black { --gradient-from: #000000; }
+.to-black { --gradient-to: #000000; }
+.from-white { --gradient-from: #ffffff; }
+.to-white { --gradient-to: #ffffff; }
+
+/* Gray 50-900 */
+.from-gray-50 { --gradient-from: #f9fafb; }
+.to-gray-50 { --gradient-to: #f9fafb; }
+.from-gray-100 { --gradient-from: #f3f4f6; }
+.to-gray-100 { --gradient-to: #f3f4f6; }
+.from-gray-200 { --gradient-from: #e5e7eb; }
+.to-gray-200 { --gradient-to: #e5e7eb; }
+.from-gray-300 { --gradient-from: #d1d5db; }
+.to-gray-300 { --gradient-to: #d1d5db; }
+.from-gray-400 { --gradient-from: #9ca3af; }
+.to-gray-400 { --gradient-to: #9ca3af; }
+.from-gray-500 { --gradient-from: #6b7280; }
+.to-gray-500 { --gradient-to: #6b7280; }
+.from-gray-600 { --gradient-from: #4b5563; }
+.to-gray-600 { --gradient-to: #4b5563; }
+.from-gray-700 { --gradient-from: #374151; }
+.to-gray-700 { --gradient-to: #374151; }
+.from-gray-800 { --gradient-from: #1f2937; }
+.to-gray-800 { --gradient-to: #1f2937; }
+.from-gray-900 { --gradient-from: #111827; }
+.to-gray-900 { --gradient-to: #111827; }
+
+/* Blue 系列 */
+.from-blue-50 { --gradient-from: #f0f8ff; }
+.to-blue-50 { --gradient-to: #f0f8ff; }
+.from-blue-500 { --gradient-from: #3b82f6; }
+.to-blue-500 { --gradient-to: #3b82f6; }
+.from-blue-600 { --gradient-from: #2563eb; }
+.to-blue-600 { --gradient-to: #2563eb; }
+
+/* Indigo（用于与蓝色渐变过渡）*/
+.from-indigo-100 { --gradient-from: #e0e7ff; }
+.to-indigo-100 { --gradient-to: #e0e7ff; }
+
+/* Red */
+.from-red-500 { --gradient-from: #ef4444; }
+.to-red-500 { --gradient-to: #ef4444; }
+.from-red-600 { --gradient-from: #dc2626; }
+.to-red-600 { --gradient-to: #dc2626; }
+
+/* Green */
+.from-green-500 { --gradient-from: #10b981; }
+.to-green-500 { --gradient-to: #10b981; }
+.from-green-600 { --gradient-from: #059669; }
+.to-green-600 { --gradient-to: #059669; }
+
+/* Yellow */
+.from-yellow-500 { --gradient-from: #eab308; }
+.to-yellow-500 { --gradient-to: #eab308; }
+.from-yellow-600 { --gradient-from: #ca8a04; }
+.to-yellow-600 { --gradient-to: #ca8a04; }
+
+/* Purple */
+.from-purple-500 { --gradient-from: #a855f7; }
+.to-purple-500 { --gradient-to: #a855f7; }
+.from-purple-600 { --gradient-from: #9333ea; }
+.to-purple-600 { --gradient-to: #9333ea; }
+
 /* ===== 边框 (Borders) ===== */
 
 /* 边框宽度 */

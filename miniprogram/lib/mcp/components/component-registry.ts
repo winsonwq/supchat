@@ -1,6 +1,6 @@
 // 组件注册文件 - 用于自动反序列化
 import { ComponentRegistry } from './base-component.js'
-import { WeatherCard } from '../tools/weather.js'
+import { WeatherCard } from './weathercard/index.js'
 
 // 获取组件注册表实例
 const registry = ComponentRegistry.getInstance()

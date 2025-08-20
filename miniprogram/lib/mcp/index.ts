@@ -13,7 +13,7 @@ export { allTools, getToolByName, getAllToolNames } from './tools/index.js'
 
 import { ComponentRegistry } from './components/base-component.js'
 import { ComponentManager } from './components/component-manager.js'
-import { WeatherCard } from './tools/weather.js'
+import { WeatherCard } from './components/weathercard/index.js'
 
 // 确保管理器都已初始化
 const registry = ComponentRegistry.getInstance()
