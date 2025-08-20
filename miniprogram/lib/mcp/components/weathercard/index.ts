@@ -5,9 +5,9 @@ export class WeatherCard extends BaseComponent {
 
   render() {
     return `
-<div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 rounded-xl shadow-md" ${this.getComponentAttributes()}>
+<div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-xl shadow-md" ${this.getComponentAttributes()}>
     <div class="flex items-center justify-between mb-4">
-        <h3 class="text-xl font-semibold text-gray-900 leading-snug">${this.data.city} 天气</h3>
+        <span class="text-xl font-semibold text-gray-900 leading-snug">${this.data.city} 天气</span>
         <span class="text-sm text-gray-500 leading-normal">${this.data.updateTime}</span>
     </div>
     

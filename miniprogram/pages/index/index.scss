@@ -13,10 +13,7 @@ page {
 .chat-scroll-view {
   flex: 1;
   overflow: hidden;
-  padding-bottom: 130px;
 }
-
-/* 消息相关样式已移至 message-item 组件 */
 
 /* 代码块样式 */
 .markdown-content .code-block {
