@@ -33,40 +33,38 @@
   enhanced="true"
   show-scrollbar="false"
 >
-  <view class="flex flex-col gap-4 p-6">
-    <!-- 欢迎消息 -->
-    <view wx:if="{{ messages.length === 0 }}" class="flex justify-center py-10">
-      <view class="p-10 rounded-2xl text-center">
-        <text class="text-lg font-bold mb-5"
-          >欢迎使用AI助手</text
-        >
-        <text class="block text-sm leading-normal"
-          >我是你的AI助手，有什么可以帮助你的吗？</text
-        >
-      </view>
+  <!-- 欢迎消息 -->
+  <view wx:if="{{ messages.length === 0 }}" class="flex justify-center py-10">
+    <view class="p-10 rounded-2xl text-center">
+      <text class="text-lg font-bold mb-5"
+        >欢迎使用AI助手</text
+      >
+      <text class="block text-sm leading-normal"
+        >我是你的AI助手，有什么可以帮助你的吗？</text
+      >
     </view>
-
-    <!-- 消息列表 -->
-    <message-item
-      wx:for="{{ messages }}"
-      wx:key="index"
-      message="{{ item }}"
-      messageIndex="{{ index }}"
-      isLast="{{ index === messages.length - 1 }}"
-      isStreaming="{{ isStreaming }}"
-      scrollViewHeight="{{ scrollViewHeight }}"
-    />
-
-    <!-- 加载状态（仅在非流式模式下显示） -->
-    <message-item
-      wx:if="{{ isLoading && !isStreaming }}"
-      message="{{ emptyMessage }}"
-      messageIndex="{{ -1 }}"
-      isLast="{{ false }}"
-      isStreaming="{{ false }}"
-      isLoading="{{ true }}"
-    />
   </view>
+
+  <!-- 消息列表 - 直接在 scroll-view 中循环 -->
+  <message-item
+    wx:for="{{ messages }}"
+    wx:key="index"
+    message="{{ item }}"
+    messageIndex="{{ index }}"
+    isLast="{{ index === messages.length - 1 }}"
+    isStreaming="{{ isStreaming }}"
+    scrollViewHeight="{{ scrollViewHeight }}"
+  />
+
+  <!-- 加载状态（仅在非流式模式下显示） -->
+  <message-item
+    wx:if="{{ isLoading && !isStreaming }}"
+    message="{{ emptyMessage }}"
+    messageIndex="{{ -1 }}"
+    isLast="{{ false }}"
+    isStreaming="{{ false }}"
+    isLoading="{{ true }}"
+  />
 </scroll-view>
 
 <!-- 输入组件 -->

@@ -13,6 +13,17 @@ page {
 .chat-scroll-view {
   flex: 1;
   overflow: hidden;
+  background-color: #f5f5f5;
+  padding: 0;
+}
+
+/* 聊天滚动区域内的消息间距 */
+.chat-scroll-view > view {
+  margin-bottom: 16px;
+}
+
+.chat-scroll-view > view:last-child {
+  margin-bottom: 0;
 }
 
 /* 代码块样式 */

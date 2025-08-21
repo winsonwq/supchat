@@ -1,11 +1,53 @@
 <!-- 消息卡片组件 -->
 <view 
+  wx:if="{{ message.role === 'user' }}"
+  class="sticky-user-message"
+  style="position: sticky; top: 0; z-index: 10;"
+>
+  <view 
+    id="message-{{ messageIndex }}"
+    class="p-6 space-y-4 bg-white text-gray-800 rounded-lg overflow-hidden shadow-md"
+  >
+    <!-- 卡片头部 -->
+    <view class="flex items-center justify-between">
+      <text class="card-title text-xs font-medium text-gray-600">用户</text>
+    </view>
+    
+    <!-- 工具调用信息 - 循环渲染当前调用的工具 -->
+    <view wx:if="{{ message.tool_calls && message.tool_calls.length > 0 }}">
+      <view class="mb-2">
+        <text class="text-sm font-medium text-blue-600">正在调用工具: </text>
+      </view>
+      <view wx:for="{{ message.tool_calls }}" wx:key="id" wx:for-item="toolCall" class="flex flex-col my-4 rounded border p-3">
+        <view class="font-medium text-blue-700">{{toolCall.function.name}}</view>
+        <view class="break-all leading-140 mt-1">
+          <text class="text-xs text-gray-500">{{ toolCall.function.arguments }}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 卡片内容 -->
+    <view>
+      <!-- 消息内容 -->
+      <block wx:if="{{ message.content || message.towxmlNodes }}">
+        <!-- 使用 towxml 渲染 Markdown 内容 -->
+        <towxml wx:if="{{ message.towxmlNodes }}" nodes="{{ message.towxmlNodes }}" />
+        <!-- 如果没有 towxml 节点，显示原始文本 -->
+        <text wx:else class="text-sm leading-relaxed whitespace-pre-wrap break-words">{{ message.content }}</text>
+      </block>
+    </view>
+  </view>
+</view>
+
+<!-- 非用户消息的普通渲染 -->
+<view 
+  wx:else
   id="message-{{ messageIndex }}"
-  class="p-6 space-y-4 {{ isLoading ? 'text-gray-800' : message.role === 'user' ? 'bg-white text-gray-800 rounded-lg overflow-hidden shadow-md' : message.role === 'tool' ? 'text-gray-800 rounded-lg overflow-hidden' : 'text-gray-800' }}"
+  class="p-6 space-y-4 {{ isLoading ? 'text-gray-800' : message.role === 'tool' ? 'text-gray-800 rounded-lg overflow-hidden' : 'text-gray-800' }}"
 >
   <!-- 卡片头部 -->
   <view class="flex items-center justify-between">
-    <text class="card-title text-xs font-medium text-gray-600">{{ isLoading ? 'AI助手' : message.role === 'user' ? '用户' : message.role === 'tool' ? '工具' : 'AI助手' }}</text>
+    <text class="card-title text-xs font-medium text-gray-600">{{ isLoading ? 'AI助手' : message.role === 'tool' ? '工具' : 'AI助手' }}</text>
   </view>
   
   <!-- 工具调用信息 - 循环渲染当前调用的工具 -->

@@ -4,6 +4,16 @@
 
 /* 所有可用工具类的样式已移至 WXML 中 */
 
+/* Sticky 用户消息样式 */
+.sticky-user-message {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  margin: 0 -6px;
+  padding: 0 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* 流式响应指示器动画 */
 .streaming-dot {
   animation: streaming-pulse 1.5s infinite ease-in-out;
