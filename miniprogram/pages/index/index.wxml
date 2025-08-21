@@ -24,14 +24,9 @@
 />
 
 <!-- 聊天历史区域 -->
-<scroll-view
+<view
   class="chat-scroll-view"
   style="padding-top: {{ chatScrollTopPadding }}px"
-  scroll-y="true"
-  scroll-into-view="{{ scrollToMessage }}"
-  scroll-with-animation="true"
-  enhanced="true"
-  show-scrollbar="false"
 >
   <!-- 欢迎消息 -->
   <view wx:if="{{ messages.length === 0 }}" class="flex justify-center py-10">
@@ -68,7 +63,7 @@
 
   <!-- 底部占位符，确保最后一个消息有足够的显示空间 -->
   <view class="bottom-placeholder" style="height: 50vh;"></view>
-</scroll-view>
+</view>
 
 <!-- 输入组件 -->
 <message-input

@@ -12,9 +12,10 @@ page {
 /* 聊天滚动区域 */
 .chat-scroll-view {
   flex: 1;
-  overflow: hidden;
+  overflow-y: auto; /* 改为 auto 以支持 sticky */
   background-color: #f5f5f5;
   padding: 0;
+  height: 100%; /* 确保有明确的高度 */
 }
 
 /* 底部占位符样式 */
@@ -97,8 +98,6 @@ page {
 }
 
 /* 加载动画已移至 message-item 组件 */
-
-
 
 /* 底部操作按钮 */
 .action-btn {

@@ -11,6 +11,10 @@
   border-radius: 12px;
   margin: 0 6px 16px 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* 确保 sticky 定位正常工作 */
+  position: sticky;
+  top: 8px;
+  z-index: 10;
 }
 
 /* 流式响应指示器动画 */
