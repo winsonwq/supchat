@@ -74,6 +74,7 @@ Component({
       const safeAreaData = getSafeArea()
       this.setData({
         ios: safeAreaData.ios,
+        isAndroid: safeAreaData.isAndroid,
         innerPaddingRight: `padding-right: ${safeAreaData.rightPadding}px`,
         leftWidth: `width: ${safeAreaData.leftWidth}px`,
         safeAreaTop: safeAreaData.isDevtools || safeAreaData.isAndroid 
