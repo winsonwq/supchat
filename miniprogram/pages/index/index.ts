@@ -417,7 +417,7 @@ Component({
             scrollToMessage: `message-${this.data.messages.length - 1}`,
           })
         }
-      }, 100)
+      }, 200) // 增加延迟时间，确保消息完全渲染
     },
 
     // 滚动到用户消息的顶部（智能滚动）

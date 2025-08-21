@@ -17,6 +17,13 @@ page {
   padding: 0;
 }
 
+/* 底部占位符样式 */
+.bottom-placeholder {
+  width: 100%;
+  background: transparent;
+  pointer-events: none;
+}
+
 /* 聊天滚动区域内的消息间距 */
 .chat-scroll-view > view {
   margin-bottom: 16px;

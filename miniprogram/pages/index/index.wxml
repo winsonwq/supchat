@@ -65,6 +65,9 @@
     isStreaming="{{ false }}"
     isLoading="{{ true }}"
   />
+
+  <!-- 底部占位符，确保最后一个消息有足够的显示空间 -->
+  <view class="bottom-placeholder" style="height: 50vh;"></view>
 </scroll-view>
 
 <!-- 输入组件 -->

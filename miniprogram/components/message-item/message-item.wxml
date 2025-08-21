@@ -1,8 +1,8 @@
 <!-- 消息卡片组件 -->
 <view 
   wx:if="{{ message.role === 'user' }}"
-  class="sticky-user-message"
-  style="position: sticky; top: 0; z-index: 10;"
+  class="user-message"
+  style="position: sticky; top: 8px; z-index: 10;"
 >
   <view 
     id="message-{{ messageIndex }}"
