@@ -1,59 +1,79 @@
 // message-item.ts
 import { Message } from '../../lib/types/message.js' // 使用新的消息类型定义
 import { ComponentEventManager } from '../../lib/mcp/components/component-event-manager.js'
+import { getNavigationHeight } from '../../lib/utils/navigation-height.js'
 
 Component({
-  /**
-   * 组件的属性列表
-   */
+  options: {
+    styleIsolation: 'apply-shared',
+    virtualHost: true,
+  },
   properties: {
     // 消息数据
     message: {
       type: Object,
-      value: {} as Message
+      value: {} as Message,
     },
     // 消息索引
     messageIndex: {
       type: Number,
-      value: 0
+      value: 0,
     },
     // 是否为最后一条消息
     isLast: {
       type: Boolean,
-      value: false
+      value: false,
     },
     // 是否正在流式响应
     isStreaming: {
       type: Boolean,
-      value: false
+      value: false,
     },
     // 是否为加载状态
     isLoading: {
       type: Boolean,
-      value: false
+      value: false,
     },
     // 聊天区域高度
     scrollViewHeight: {
       type: Number,
-      value: 0
-    }
+      value: 0,
+    },
   },
 
   /**
    * 组件的初始数据
    */
-  data: {
-  },
+  data: {},
 
   lifetimes: {
     attached() {
       // 组件初始化
       this.setupComponentEvents()
+
+      // 获取系统信息来计算viewport高度
+      const windowInfo = wx.getWindowInfo()
+      const navigationHeight = getNavigationHeight()
+      const bottomValue = windowInfo.safeArea.bottom - navigationHeight + 16
+      const observer = wx.createIntersectionObserver(this)
+
+      observer
+        .relativeToViewport({
+          bottom: -bottomValue,
+        })
+        .observe('.user-message', (res) => {
+          console.log(this.data.message.content, res)
+          const isSticky = res.intersectionRatio > 0
+          this.setData({
+            isSticky: isSticky,
+          })
+          console.log('元素是否吸顶:', isSticky)
+        })
     },
     detached() {
       // 组件销毁时清理事件
       this.cleanupComponentEvents()
-    }
+    },
   },
 
   /**
@@ -80,7 +100,7 @@ Component({
         this.setupStringContentEvents(content)
       } else if (typeof content === 'object' && content !== null) {
         if (Array.isArray(content)) {
-          content.forEach(item => this.processContentForComponents(item))
+          content.forEach((item) => this.processContentForComponents(item))
         } else if (content.getMetaData) {
           // 这是一个组件实例
           this.setupComponentInstance(content)
@@ -121,7 +141,7 @@ Component({
       eventManager.registerComponent(metadata.componentId, 'weather', {
         refresh: () => weatherComponent.refresh(),
         share: () => weatherComponent.share(),
-        detail: () => weatherComponent.detail()
+        detail: () => weatherComponent.detail(),
       })
     },
 
@@ -140,7 +160,7 @@ Component({
      */
     handleWeatherAction(componentId: string, action: string, event: any) {
       const eventManager = ComponentEventManager.getInstance()
-      
+
       if (eventManager.hasComponent(componentId)) {
         // 如果组件已注册，直接调用事件处理器
         eventManager.handleComponentEvent(componentId, action, event)
@@ -155,7 +175,7 @@ Component({
      */
     createDefaultWeatherHandlers(componentId: string, action: string) {
       const eventManager = ComponentEventManager.getInstance()
-      
+
       eventManager.registerComponent(componentId, 'weather', {
         refresh: () => {
           console.log(`刷新天气数据: ${componentId}`)
@@ -168,7 +188,7 @@ Component({
         detail: () => {
           console.log(`查看天气详情: ${componentId}`)
           wx.showToast({ title: '查看天气详情', icon: 'none' })
-        }
+        },
       })
 
       // 执行当前操作
@@ -216,11 +236,13 @@ Component({
     cleanupContentComponents(content: any) {
       if (typeof content === 'object' && content !== null) {
         if (Array.isArray(content)) {
-          content.forEach(item => this.cleanupContentComponents(item))
+          content.forEach((item) => this.cleanupContentComponents(item))
         } else if (content.getMetaData) {
           const metadata = content.getMetaData()
           if (metadata && metadata.componentId) {
-            ComponentEventManager.getInstance().unregisterComponent(metadata.componentId)
+            ComponentEventManager.getInstance().unregisterComponent(
+              metadata.componentId,
+            )
           }
         }
       }
@@ -248,7 +270,7 @@ Component({
     getCardClasses(): string {
       const { message } = this.data
       const baseClasses = 'message-card mb-2 mx-5'
-      
+
       switch (message.role) {
         case 'user':
           return `${baseClasses} user-card bg-white text-gray-800 rounded-lg overflow-hidden shadow-md`
@@ -265,7 +287,12 @@ Component({
      */
     shouldShowStreamingIndicator(): boolean {
       const { message, isStreaming, isLast } = this.data
-      return message.role === 'assistant' && isStreaming && isLast && !message.content
+      return (
+        message.role === 'assistant' &&
+        isStreaming &&
+        isLast &&
+        !message.content
+      )
     },
 
     /**
@@ -273,7 +300,12 @@ Component({
      */
     shouldShowStreamingCursor(): boolean {
       const { message, isStreaming, isLast } = this.data
-      return message.role === 'assistant' && isStreaming && isLast && !!message.content
+      return (
+        message.role === 'assistant' &&
+        isStreaming &&
+        isLast &&
+        !!message.content
+      )
     },
 
     /**
@@ -283,7 +315,5 @@ Component({
       const { message } = this.data
       return !!(message.tool_calls && message.tool_calls.length > 0)
     },
-
-
-  }
+  },
 })
