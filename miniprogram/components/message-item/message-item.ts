@@ -1,7 +1,6 @@
 // message-item.ts
 import { Message } from '../../lib/types/message.js' // 使用新的消息类型定义
 import { ComponentEventManager } from '../../lib/mcp/components/component-event-manager.js'
-import { getNavigationHeight } from '../../lib/utils/navigation-height.js'
 
 Component({
   options: {
@@ -50,25 +49,6 @@ Component({
     attached() {
       // 组件初始化
       this.setupComponentEvents()
-
-      // 获取系统信息来计算viewport高度
-      const windowInfo = wx.getWindowInfo()
-      const navigationHeight = getNavigationHeight()
-      const bottomValue = windowInfo.safeArea.bottom - navigationHeight + 16
-      const observer = wx.createIntersectionObserver(this)
-
-      observer
-        .relativeToViewport({
-          bottom: -bottomValue,
-        })
-        .observe('.user-message', (res) => {
-          console.log(this.data.message.content, res)
-          const isSticky = res.intersectionRatio > 0
-          this.setData({
-            isSticky: isSticky,
-          })
-          console.log('元素是否吸顶:', isSticky)
-        })
     },
     detached() {
       // 组件销毁时清理事件
