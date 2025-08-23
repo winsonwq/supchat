@@ -2,7 +2,8 @@
   "component": true,
   "usingComponents": {
     "towxml": "/towxml/towxml",
-    "svg-icon": "../svg-icon/svg-icon"
+    "svg-icon": "../svg-icon/svg-icon",
+    "generic-dialog": "../generic-dialog/generic-dialog"
   },
   "styleIsolation": "apply-shared"
 }
