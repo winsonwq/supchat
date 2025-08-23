@@ -43,7 +43,7 @@ page {
 page {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
+  line-height: 1.571;
   color: var(--color-text-primary);
   background-color: var(--color-bg-primary);
 }
@@ -106,9 +106,10 @@ button::after {
 }
 
 .h2w {
+  font-size: var(--font-size-sm) !important;
   background: none !important;
   font-weight: normal !important;
-  line-height: var(--line-height-base) !important;
+  line-height: 1.571 !important;
 
   &>.h2w__main {
     margin: 0 !important;

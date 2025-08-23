@@ -25,11 +25,6 @@ page {
   pointer-events: none;
 }
 
-/* 聊天滚动区域内的消息间距 */
-.chat-scroll-view > view {
-  margin-bottom: 16px;
-}
-
 .chat-scroll-view > view:last-child {
   margin-bottom: 0;
 }

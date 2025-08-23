@@ -1,7 +1,8 @@
 {
   "component": true,
   "usingComponents": {
-    "towxml": "/towxml/towxml"
+    "towxml": "/towxml/towxml",
+    "svg-icon": "../svg-icon/svg-icon"
   },
   "styleIsolation": "apply-shared"
 }

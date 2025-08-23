@@ -43,7 +43,13 @@ Component({
   /**
    * 组件的初始数据
    */
-  data: {},
+  data: {
+    // 工具参数弹窗相关数据
+    showToolParamsModal: false,
+    selectedToolCall: null as any,
+    selectedToolIndex: -1,
+    toolParamsFormatted: '',
+  },
 
   lifetimes: {
     attached() {
@@ -294,6 +300,91 @@ Component({
     hasToolCalls(): boolean {
       const { message } = this.data
       return !!(message.tool_calls && message.tool_calls.length > 0)
+    },
+
+    /**
+     * 显示工具参数弹窗
+     */
+    showToolParamsModal(event: any) {
+      const { toolIndex } = event.currentTarget.dataset
+      const { message } = this.data
+      
+      if (message.tool_calls && message.tool_calls[toolIndex]) {
+        const toolCall = message.tool_calls[toolIndex]
+        let formattedParams = ''
+        
+        try {
+          // 解析并格式化工具参数
+          const params = JSON.parse(toolCall.function.arguments)
+          formattedParams = JSON.stringify(params, null, 2)
+        } catch (error) {
+          // 如果解析失败，显示原始字符串
+          formattedParams = toolCall.function.arguments
+        }
+        
+        this.setData({
+          showToolParamsModal: true,
+          selectedToolCall: toolCall,
+          selectedToolIndex: toolIndex,
+          toolParamsFormatted: formattedParams,
+        })
+      }
+    },
+
+    /**
+     * 关闭工具参数弹窗
+     */
+    closeToolParamsModal() {
+      this.setData({
+        showToolParamsModal: false,
+        selectedToolCall: null,
+        selectedToolIndex: -1,
+        toolParamsFormatted: '',
+      })
+    },
+
+    /**
+     * 复制工具参数到剪贴板
+     */
+    copyToolParams() {
+      const { toolParamsFormatted } = this.data
+      
+      wx.setClipboardData({
+        data: toolParamsFormatted,
+        success: () => {
+          wx.showToast({
+            title: '已复制到剪贴板',
+            icon: 'success',
+            duration: 2000,
+          })
+        },
+        fail: () => {
+          wx.showToast({
+            title: '复制失败',
+            icon: 'none',
+            duration: 2000,
+          })
+        },
+      })
+    },
+
+    /**
+     * 格式化工具参数显示
+     */
+    formatToolParamsDisplay(params: string): string {
+      try {
+        const parsed = JSON.parse(params)
+        return JSON.stringify(parsed, null, 2)
+      } catch (error) {
+        return params
+      }
+    },
+
+    /**
+     * 阻止事件冒泡
+     */
+    stopPropagation() {
+      // 阻止事件冒泡，防止弹窗内容被点击时关闭
     },
   },
 })

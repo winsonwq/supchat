@@ -14,13 +14,15 @@
     
     <!-- 工具调用信息 - 循环渲染当前调用的工具 -->
     <view wx:if="{{ message.tool_calls && message.tool_calls.length > 0 }}">
-      <view class="mb-2">
-        <text class="text-sm font-medium text-blue-600">正在调用工具: </text>
+      <view class="mb-3 flex items-center space-x-2">
+        <text class="text-sm font-medium text-blue-600">正在调用工具</text>
       </view>
-      <view wx:for="{{ message.tool_calls }}" wx:key="id" wx:for-item="toolCall" class="flex flex-col my-4 rounded border p-3">
-        <view class="font-medium text-blue-700">{{toolCall.function.name}}</view>
-        <view class="break-all leading-140 mt-1">
-          <text class="text-xs text-gray-500">{{ toolCall.function.arguments }}</text>
+      <view wx:for="{{ message.tool_calls }}" wx:key="id" wx:for-item="toolCall" class="tool-call-item my-2">
+        <view class="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all duration-300">
+          <text class="font-semibold text-blue-800 text-sm">{{ toolCall.function.name }}</text>
+          <view class="cursor-pointer p-2 rounded-full hover:bg-blue-100 transition-colors duration-200" bindtap="showToolParamsModal" data-tool-index="{{ index }}">
+            <svg-icon name="info" class="w-4 h-4 text-blue-600 hover:text-blue-800" />
+          </view>
         </view>
       </view>
     </view>
@@ -51,13 +53,13 @@
   
   <!-- 工具调用信息 - 循环渲染当前调用的工具 -->
   <view wx:if="{{ message.tool_calls && message.tool_calls.length > 0 }}">
-    <view class="mb-2">
-      <text class="text-sm font-medium text-blue-600">正在调用工具: </text>
+    <view class="mb-3 flex items-center space-x-2">
+      <text class="text-sm font-medium text-blue-600">正在调用工具</text>
     </view>
-    <view wx:for="{{ message.tool_calls }}" wx:key="id" wx:for-item="toolCall" class="flex flex-col my-4 rounded border p-3">
-      <view class="font-medium text-blue-700">{{toolCall.function.name}}</view>
-      <view class="break-all leading-140 mt-1">
-        <text class="text-xs text-gray-500">{{ toolCall.function.arguments }}</text>
+    <view wx:for="{{ message.tool_calls }}" wx:key="id" wx:for-item="toolCall" class="tool-call-item my-2">
+      <view class="cursor-pointer flex items-center justify-between bg-gray-50 rounded-lg p-4 border border-gray-200" bindtap="showToolParamsModal" data-tool-index="{{ index }}">
+        <text class="font-medium text-gray-800 text-sm">{{ toolCall.function.name }}</text>
+        <svg-icon name="arrow-right" />
       </view>
     </view>
   </view>
@@ -113,25 +115,28 @@
               
               <view class="flex space-x-2">
                 <button 
-                  class="flex-1 bg-blue-500 text-white rounded px-3 py-2 text-sm" 
+                  class="flex-1 bg-blue-500 text-white rounded px-3 py-2 text-sm flex items-center justify-center space-x-1" 
                   data-component-id="{{ message.content.componentId }}"
                   bindtap="onWeatherRefresh"
                 >
-                  🔄 刷新
+                  <svg-icon name="refresh" class="w-4 h-4 text-white" />
+                  <text>刷新</text>
                 </button>
                 <button 
-                  class="flex-1 bg-green-500 text-white rounded px-3 py-2 text-sm" 
+                  class="flex-1 bg-green-500 text-white rounded px-3 py-2 text-sm flex items-center justify-center space-x-1" 
                   data-component-id="{{ message.content.componentId }}"
                   bindtap="onWeatherShare"
                 >
-                  📤 分享
+                  <svg-icon name="arrow-right" class="w-4 h-4 text-white" />
+                  <text>分享</text>
                 </button>
                 <button 
-                  class="flex-1 bg-purple-500 text-white rounded px-3 py-2 text-sm" 
+                  class="flex-1 bg-purple-500 text-white rounded px-3 py-2 text-sm flex items-center justify-center space-x-3" 
                   data-component-id="{{ message.content.componentId }}"
                   bindtap="onWeatherDetail"
                 >
-                  📊 详情
+                  <svg-icon name="settings" class="w-4 h-4 text-white" />
+                  <text>详情</text>
                 </button>
               </view>
             </view>
@@ -147,5 +152,38 @@
         </view>
       </block>
     </block>
+  </view>
+</view>
+
+<!-- 工具参数弹窗 -->
+<view wx:if="{{ showToolParamsModal }}" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" bindtap="closeToolParamsModal">
+  <view class="bg-white rounded-lg p-6 max-w-md w-full mx-4" catchtap="stopPropagation">
+    <view class="flex items-center justify-between mb-4">
+      <text class="text-lg font-semibold text-gray-800">工具参数</text>
+      <view class="cursor-pointer p-1" bindtap="closeToolParamsModal">
+        <svg-icon name="clear" class="w-5 h-5 text-gray-500" />
+      </view>
+    </view>
+    
+    <view class="mb-4">
+      <text class="text-sm font-medium text-gray-700 mb-2 block">工具名称</text>
+      <text class="text-sm text-gray-800 bg-gray-50 p-3 rounded border">{{ selectedToolCall.function.name }}</text>
+    </view>
+    
+    <view class="mb-4">
+      <text class="text-sm font-medium text-gray-700 mb-2 block">参数</text>
+      <view class="bg-gray-50 p-3 rounded border max-h-40 overflow-y-auto">
+        <text class="text-xs text-gray-800 font-mono whitespace-pre-wrap">{{ toolParamsFormatted }}</text>
+      </view>
+    </view>
+    
+    <view class="flex space-x-3">
+      <button class="flex-1 bg-blue-500 text-white rounded px-4 py-2 text-sm" bindtap="copyToolParams">
+        复制参数
+      </button>
+      <button class="flex-1 bg-gray-300 text-gray-700 rounded px-4 py-2 text-sm" bindtap="closeToolParamsModal">
+        关闭
+      </button>
+    </view>
   </view>
 </view>
