@@ -1,0 +1,37 @@
+<!-- 聊天历史区域 -->
+<view
+  class="chat-scroll-view"
+  style="padding-top: {{ chatScrollTopPadding }}px"
+>
+  <!-- 欢迎消息 -->
+  <view wx:if="{{ messages.length === 0 }}" class="flex justify-center py-10">
+    <view class="p-10 rounded-2xl text-center">
+      <text class="text-lg font-bold mb-5">欢迎使用AI助手</text>
+      <text class="block text-sm leading-normal">我是你的AI助手，有什么可以帮助你的吗？</text>
+    </view>
+  </view>
+
+  <!-- 消息列表 - 直接在 scroll-view 中循环 -->
+  <message-item
+    wx:for="{{ messages }}"
+    wx:key="index"
+    message="{{ item }}"
+    messageIndex="{{ index }}"
+    isLast="{{ index === messages.length - 1 }}"
+    isStreaming="{{ isStreaming }}"
+    scrollViewHeight="{{ scrollViewHeight }}"
+  />
+
+  <!-- 加载状态（仅在非流式模式下显示） -->
+  <message-item
+    wx:if="{{ isLoading && !isStreaming }}"
+    message="{{ emptyMessage }}"
+    messageIndex="{{ -1 }}"
+    isLast="{{ false }}"
+    isStreaming="{{ false }}"
+    isLoading="{{ true }}"
+  />
+
+  <!-- 底部占位符，确保最后一个消息有足够的显示空间 -->
+  <view class="bottom-placeholder" style="height: 50vh;"></view>
+</view>

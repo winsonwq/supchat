@@ -5,6 +5,7 @@
     "towxml":"/towxml/towxml",
     "message-input": "/components/message-input/message-input",
     "message-item": "/components/message-item/message-item",
+    "message-list": "/components/message-list/message-list",
     "svg-icon": "/components/svg-icon/svg-icon"
   }
 }

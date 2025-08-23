@@ -642,5 +642,24 @@ Component({
         url: '/pages/settings/settings',
       })
     },
+
+    // 处理消息列表滚动到最新消息事件
+    onScrollToLatest() {
+      this.scrollToLatestMessage()
+    },
+
+    // 处理消息点击事件
+    onMessageTap(e: any) {
+      const { messageIndex } = e.detail
+      console.log('消息点击:', messageIndex)
+      // 可以在这里添加消息点击的逻辑
+    },
+
+    // 处理消息长按事件
+    onMessageLongPress(e: any) {
+      const { messageIndex } = e.detail
+      console.log('消息长按:', messageIndex)
+      // 可以在这里添加消息长按的逻辑，比如显示操作菜单
+    },
   },
 })
