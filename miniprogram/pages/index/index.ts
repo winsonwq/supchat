@@ -8,6 +8,7 @@ import { UserInfoStorage } from '../../lib/storage/user-info-storage'
 import { UserInfo } from '../../lib/types/user-info'
 import { ChatSession } from '../../lib/types/chat-history'
 import { BaseComponent } from '../../lib/mcp/components/base-component.js'
+import { processMessageContent as processContentWithParser } from '../../lib/utils/content-parser.js'
 
 import { ComponentManager } from '../../lib/mcp/components/component-manager.js'
 
@@ -186,27 +187,19 @@ Component({
       }
     },
 
-    // 处理消息内容，使用 towxml 解析 Markdown
+    // 处理消息内容，使用智能内容类型判断和towxml解析
     processMessageContent(content: RenderNode): TowxmlNode | undefined {
       try {
-        let html: string
-        
+        // 如果是组件，需要先注册
         if (content instanceof BaseComponent) {
           const componentManager = getComponentManager()
           componentManager?.registerComponent(content)
-          html = content.render()
-        } else {
-          html = String(content)
         }
         
-        const towxmlNodes = app.towxml(html, 'html', {
-          events: {
-            tap: (e: WxEvent) => {
-              this.handleComponentEvent(e)
-            },
-          },
+        // 使用新的内容解析工具
+        return processContentWithParser(content, app, (e: WxEvent) => {
+          this.handleComponentEvent(e)
         })
-        return towxmlNodes
       } catch (error) {
         console.error('towxml解析错误:', error)
         return app.towxml(String(content), 'text')
