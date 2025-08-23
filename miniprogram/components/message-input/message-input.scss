@@ -10,12 +10,47 @@
   /* 安全区域通过 JS 动态设置 */
 }
 
+/* 输入模式切换 */
+.mode-switch-container {
+  display: flex;
+  justify-content: center;
+}
+
+.mode-switch {
+  display: flex;
+  background-color: #f3f4f6;
+  border-radius: 20rpx;
+  padding: 2rpx;
+  gap: 2rpx;
+}
+
+.mode-tab {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+  color: #6b7280;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.mode-tab.active {
+  background-color: #ffffff;
+  color: #3b82f6;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.mode-tab text {
+  font-weight: 500;
+}
+
 /* 输入框样式 - 需要特殊的圆角和高度限制 */
 .message-textarea {
   max-height: 200rpx;
   padding: 16rpx 16rpx 0;
   border-radius: 44rpx;
-  transition: all 0.3s ease;
   resize: none;
   word-wrap: break-word;
   box-sizing: border-box;
@@ -37,6 +72,108 @@
   color: #9ca3af; /* text-gray-400 */
   font-size: 32rpx; /* text-base */
 }
+
+/* 按钮样式 */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-tiny {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.btn-tiny:active {
+  background-color: #e5e7eb;
+}
+
+.btn-send {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  padding: 16rpx 24rpx;
+}
+
+.btn-send.active {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.btn-send:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.btn-voice-tip {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* 语音输入样式 */
+.voice-input-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.voice-button {
+  width: 100% !important;
+  height: 80rpx !important;
+  border-radius: 44rpx;
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.voice-button:active {
+  background-color: #2563eb;
+  transform: scale(0.98);
+}
+
+.voice-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.voice-button.recording {
+  background-color: #ef4444;
+  animation: pulse-red 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% {
+    background-color: #ef4444;
+  }
+  50% {
+    background-color: #dc2626;
+  }
+}
+
+.voice-button-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+
 
 /* MCP 列表 */
 .mcp-list {

@@ -1,7 +1,8 @@
 <!-- 输入区域 -->
 <view class="input-container w-full bg-white border-t border-gray-200 p-6 relative" style="padding-bottom: calc({{ bottomSafeHeight }}px);">
 
-  <view class="flex flex-col gap-4 mb-4 border border-solid border-gray-300 rounded-2xl p-6">
+  <!-- 文字输入模式 -->
+  <view class="flex flex-col gap-4 mb-4 border border-solid border-gray-300 rounded-2xl p-6" wx:if="{{ !isVoiceMode }}">
     <view class="w-full">
       <textarea
         class="message-textarea w-full text-base overflow-y-auto"
@@ -17,11 +18,83 @@
         cursor-spacing="20"
       />
     </view>
-    <view class="w-full flex align-center">
-      <button class="btn btn-tiny" catchtap="onOpenMcpSheet">
-        <svg-icon name="server" size="32"></svg-icon>
-        MCP 服务
-      </button>
+    <view class="w-full flex align-center justify-between">
+      <view class="flex align-center gap-4">
+        <!-- 输入模式切换按钮 -->
+        <view class="mode-switch">
+          <view 
+            class="mode-tab {{ !isVoiceMode ? 'active' : '' }}" 
+            bindtap="toggleInputMode"
+            data-mode="text"
+          >
+            <text>文字</text>
+          </view>
+          <view 
+            class="mode-tab {{ isVoiceMode ? 'active' : '' }}" 
+            bindtap="toggleInputMode"
+            data-mode="voice"
+          >
+            <text>语音</text>
+          </view>
+        </view>
+        <button class="btn btn-tiny" catchtap="onOpenMcpSheet">
+          <svg-icon name="server" size="32"></svg-icon>
+          MCP 服务
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 语音输入模式 -->
+  <view class="flex flex-col gap-4 mb-4 border border-solid border-gray-300 rounded-2xl p-6" wx:if="{{ isVoiceMode }}">
+    <view class="w-full">
+      <!-- 录音状态显示 -->
+      <view class="voice-input-area" wx:if="{{ isRecording }}">
+        <button 
+          class="voice-button recording"
+          disabled="{{ true }}"
+        >
+          <text class="voice-button-text">录制中...</text>
+        </button>
+      </view>
+      
+      <!-- 语音按钮 - 替换输入框位置 -->
+      <view class="voice-input-area" wx:if="{{ !isRecording }}">
+        <button 
+          class="voice-button"
+          bindtouchstart="startRecording"
+          bindtouchend="stopRecording"
+          bindtouchcancel="stopRecording"
+          disabled="{{ isLoading }}"
+        >
+          <text class="voice-button-text">按住说话</text>
+        </button>
+      </view>
+    </view>
+    <view class="w-full flex align-center justify-between">
+      <view class="flex align-center gap-4">
+        <!-- 输入模式切换按钮 -->
+        <view class="mode-switch">
+          <view 
+            class="mode-tab {{ !isVoiceMode ? 'active' : '' }}" 
+            bindtap="toggleInputMode"
+            data-mode="text"
+          >
+            <text>文字</text>
+          </view>
+          <view 
+            class="mode-tab {{ isVoiceMode ? 'active' : '' }}" 
+            bindtap="toggleInputMode"
+            data-mode="voice"
+          >
+            <text>语音</text>
+          </view>
+        </view>
+        <button class="btn btn-tiny" catchtap="onOpenMcpSheet">
+          <svg-icon name="server" size="32"></svg-icon>
+          MCP 服务
+        </button>
+      </view>
     </view>
   </view>
   

@@ -243,14 +243,16 @@ Component({
     },
 
     // 处理组件发送事件
-    onSendMessage() {
-      this.sendMessage()
+    onSendMessage(e: any) {
+      // 从事件中获取消息内容
+      const message = e.detail?.message || this.data.inputMessage.trim()
+      this.sendMessage(message)
     },
 
     // 发送消息（流式模式）
-    async sendMessage() {
-      const message = this.data.inputMessage.trim()
-      if (!message || this.data.isLoading) {
+    async sendMessage(message?: string) {
+      const messageContent = message || this.data.inputMessage.trim()
+      if (!messageContent || this.data.isLoading) {
         return
       }
 
@@ -266,9 +268,9 @@ Component({
         const userMessage: Message = {
           id: `msg_${Date.now()}_user`,
           role: 'user',
-          content: message,
-          plainContent: message,
-          towxmlNodes: this.processMessageContent(message),
+          content: messageContent,
+          plainContent: messageContent,
+          towxmlNodes: this.processMessageContent(messageContent),
           timestamp: Date.now(),
         }
 
@@ -345,7 +347,7 @@ Component({
         }
 
         // 发送流式消息
-        await this.getAIService().sendMessageStream(message, onStream)
+        await this.getAIService().sendMessageStream(messageContent, onStream)
       } catch (error) {
         console.error('发送消息失败:', error)
         wx.showToast({
