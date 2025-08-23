@@ -6,7 +6,7 @@
 >
   <view 
     id="message-{{ messageIndex }}"
-    class="p-6 space-y-4 bg-white text-gray-800 rounded-lg overflow-hidden shadow-md"
+    class="p-6 space-y-4 bg-white text-gray-800 rounded-lg overflow-hidden"
   >
     <!-- 卡片头部 -->
     <view class="flex items-center justify-between">
