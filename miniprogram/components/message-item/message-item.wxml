@@ -76,74 +76,8 @@
     <block wx:else>
       <!-- 消息内容 -->
       <block wx:if="{{ message.content || message.towxmlNodes }}">
-        <!-- 检查是否为组件内容 -->
-        <block wx:if="{{ message.content && message.content.type === 'weather' }}">
-          <!-- 天气组件内容 -->
-          <view class="weather-component-wrapper">
-            <!-- 使用微信小程序的view组件渲染天气信息 -->
-            <view class="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 rounded-lg">
-              <view class="flex items-center justify-between mb-4">
-                <text class="text-lg font-semibold text-gray-800">{{ message.content.miniProgramData.city }} 天气</text>
-                <text class="text-sm text-gray-500">{{ message.content.miniProgramData.updateTime }}</text>
-              </view>
-              
-              <view class="grid grid-cols-2 gap-4 mb-4">
-                <view class="text-center">
-                  <text class="text-3xl font-bold text-blue-600">{{ message.content.miniProgramData.temperature.current }}°C</text>
-                  <view class="text-sm text-gray-600">当前温度</view>
-                </view>
-                <view class="text-center">
-                  <text class="text-lg font-medium text-gray-800">{{ message.content.miniProgramData.weather }}</text>
-                  <view class="text-sm text-gray-600">天气状况</view>
-                </view>
-              </view>
-              
-              <view class="grid grid-cols-3 gap-2 mb-4 text-sm">
-                <view class="text-center">
-                  <text class="font-medium text-gray-700">{{ message.content.miniProgramData.temperature.high }}°C</text>
-                  <view class="text-gray-500">最高</view>
-                </view>
-                <view class="text-center">
-                  <text class="font-medium text-gray-700">{{ message.content.miniProgramData.temperature.low }}°C</text>
-                  <view class="text-gray-500">最低</view>
-                </view>
-                <view class="text-center">
-                  <text class="font-medium text-gray-700">{{ message.content.miniProgramData.humidity }}%</text>
-                  <view class="text-gray-500">湿度</view>
-                </view>
-              </view>
-              
-              <view class="flex space-x-2">
-                <button 
-                  class="flex-1 bg-blue-500 text-white rounded px-3 py-2 text-sm flex items-center justify-center space-x-1" 
-                  data-component-id="{{ message.content.componentId }}"
-                  bindtap="onWeatherRefresh"
-                >
-                  <svg-icon name="refresh" class="w-4 h-4 text-white" />
-                  <text>刷新</text>
-                </button>
-                <button 
-                  class="flex-1 bg-green-500 text-white rounded px-3 py-2 text-sm flex items-center justify-center space-x-1" 
-                  data-component-id="{{ message.content.componentId }}"
-                  bindtap="onWeatherShare"
-                >
-                  <svg-icon name="arrow-right" class="w-4 h-4 text-white" />
-                  <text>分享</text>
-                </button>
-                <button 
-                  class="flex-1 bg-purple-500 text-white rounded px-3 py-2 text-sm flex items-center justify-center space-x-3" 
-                  data-component-id="{{ message.content.componentId }}"
-                  bindtap="onWeatherDetail"
-                >
-                  <svg-icon name="settings" class="w-4 h-4 text-white" />
-                  <text>详情</text>
-                </button>
-              </view>
-            </view>
-          </view>
-        </block>
         <!-- 使用 towxml 渲染 Markdown 内容 -->
-        <towxml wx:elif="{{ message.towxmlNodes }}" nodes="{{ message.towxmlNodes }}" />
+        <towxml wx:if="{{ message.towxmlNodes }}" nodes="{{ message.towxmlNodes }}" />
         <!-- 如果没有 towxml 节点，显示原始文本 -->
         <text wx:else class="text-sm leading-relaxed whitespace-pre-wrap break-words">{{ message.content }}</text>
         <!-- 流式输入光标 -->
