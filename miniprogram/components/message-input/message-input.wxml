@@ -2,7 +2,7 @@
 <view class="input-container w-full bg-white border-t border-gray-200 p-6 relative" style="padding-bottom: calc({{ bottomSafeHeight }}px);">
 
   <!-- 文字输入模式 -->
-  <view class="flex flex-col gap-4 mb-4 border border-solid border-gray-300 rounded-2xl p-6" wx:if="{{ !isVoiceMode }}">
+  <view class="flex flex-col gap-4 mb-4 border border-solid border-gray-300 bg-white rounded-2xl p-6" wx:if="{{ !isVoiceMode }}">
     <view class="w-full">
       <textarea
         class="message-textarea w-full text-base overflow-y-auto"
@@ -46,7 +46,7 @@
   </view>
 
   <!-- 语音输入模式 -->
-  <view class="flex flex-col gap-4 mb-4 border border-solid border-gray-300 rounded-2xl p-6" wx:if="{{ isVoiceMode }}">
+  <view class="flex flex-col gap-4 mb-4 border border-solid border-gray-300 rounded-2xl p-6 bg-white" wx:if="{{ isVoiceMode }}">
     <view class="w-full">
       <!-- 录音状态显示 -->
       <view class="voice-input-area" wx:if="{{ isRecording }}">

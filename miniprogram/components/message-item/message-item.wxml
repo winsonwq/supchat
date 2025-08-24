@@ -5,7 +5,7 @@
 >
   <view 
     id="message-{{ messageIndex }}"
-    class="p-6 space-y-4 bg-white text-gray-800 rounded-lg overflow-hidden"
+    class="p-6 space-y-4 bg-gray-100 text-gray-800 rounded-lg overflow-hidden"
   >
     <!-- 卡片头部 -->
     <view class="flex items-center justify-between">
@@ -57,7 +57,7 @@
       <text class="text-sm font-medium text-blue-600">正在调用工具</text>
     </view>
     <view wx:for="{{ message.tool_calls }}" wx:key="id" wx:for-item="toolCall" class="tool-call-item my-2">
-      <view class="cursor-pointer flex items-center justify-between bg-white rounded-lg p-4 border border-gray-200" bindtap="showToolParamsModal" data-tool-index="{{ index }}">
+      <view class="cursor-pointer flex items-center justify-between bg-gray-100 rounded-lg p-4" bindtap="showToolParamsModal" data-tool-index="{{ index }}">
         <text class="font-medium text-gray-800 text-sm">{{ toolCall.function.name }}</text>
         <svg-icon name="arrow-right" />
       </view>
