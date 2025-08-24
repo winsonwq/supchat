@@ -2,9 +2,7 @@
 import { WxEvent } from '../../lib/mcp/types.js'
 import { MCPConfigStorage } from '../../lib/storage/mcp-config-storage'
 import getSafeArea from '../../lib/utils/safe-area'
-import voiceRecognition, {
-  VoiceRecognitionOptions,
-} from '../../lib/mcp/tools/voice'
+import wechatSI, { WechatSIOptions } from '../../lib/mcp/tools/wechat-si'
 
 Component({
   /**
@@ -43,6 +41,10 @@ Component({
     recorderManager: null as any, // 录音管理器
     // 控制 textarea 初始高度的标记
     textareaInitialHeight: false,
+    // 微信同声传译插件状态
+    wechatSIReady: false,
+    // 实时语音识别相关
+    isRealtimeRecognition: false, // 是否正在进行实时语音识别
   },
 
   /**
@@ -61,6 +63,8 @@ Component({
       this.loadMcpConfigs()
       // 初始化录音管理器
       this.initRecorderManager()
+      // 初始化微信同声传译插件
+      this.initWechatSI()
 
       // 调试信息
       console.log('🔧 组件初始化完成:', {
@@ -74,6 +78,8 @@ Component({
       if (this.data.recordingTimer) {
         clearInterval(this.data.recordingTimer)
       }
+      // 停止微信同声传译语音识别
+      wechatSI.stopVoiceRecognition()
     },
   },
 
@@ -143,13 +149,32 @@ Component({
       this.setData({ mcpConfigs: configs })
     },
     onToggleMcp(e: WxEvent) {
-      const id = e.currentTarget.dataset.id as string
+      const id = (e.currentTarget as any).dataset.id as string
       MCPConfigStorage.toggleConfigEnabled(id)
       this.loadMcpConfigs()
       this.triggerEvent('mcpchange', { id })
     },
 
     // 新增语音输入相关方法
+
+    /**
+     * 初始化微信同声传译插件
+     */
+    async initWechatSI() {
+      try {
+        console.log('🔧 正在初始化微信同声传译插件...')
+        const success = await wechatSI.getService().initialize()
+        
+        if (success) {
+          this.setData({ wechatSIReady: true })
+          console.log('✅ 微信同声传译插件初始化成功')
+        } else {
+          console.warn('⚠️ 微信同声传译插件初始化失败，将使用模拟语音识别')
+        }
+      } catch (error) {
+        console.error('❌ 初始化微信同声传译插件异常:', error)
+      }
+    },
 
     /**
      * 初始化录音管理器
@@ -229,13 +254,13 @@ Component({
       wx.authorize({
         scope: 'scope.record',
         success: () => {
-          this.data.recorderManager.start({
-            duration: 30000, // 最长录音30秒
-            sampleRate: 16000,
-            numberOfChannels: 1,
-            encodeBitRate: 48000,
-            format: 'mp3',
-          })
+          if (this.data.wechatSIReady) {
+            // 使用微信同声传译插件的实时语音识别
+            this.startWechatSIRecognition()
+          } else {
+            // 使用传统录音方式
+            this.startTraditionalRecording()
+          }
         },
         fail: () => {
           wx.showModal({
@@ -248,6 +273,76 @@ Component({
     },
 
     /**
+     * 使用微信同声传译插件的实时语音识别
+     */
+    async startWechatSIRecognition() {
+      try {
+        console.log('🎤 开始微信同声传译实时语音识别...')
+        
+        this.setData({ 
+          isRecording: true,
+          isRealtimeRecognition: true 
+        })
+        
+        this.startRecordingTimer()
+
+        const options: WechatSIOptions = {
+          lang: 'zh_CN',
+          duration: 30000,
+        }
+
+        console.log('🎤 调用语音识别，参数:', options)
+        
+        const result = await wechatSI.startRealtimeRecognition(options)
+        console.log('🎤 识别结果:', result)
+        
+        if (result.success && result.text) {
+          console.log('✅ 语音识别成功:', result.text)
+          
+          // 设置识别后的文字到输入框
+          this.setData({ inputMessage: result.text })
+          
+          // 自动发送识别后的消息
+          setTimeout(() => {
+            console.log('📤 自动发送语音识别消息:', result.text)
+            this.onSend()
+          }, 800)
+        } else {
+          console.warn('⚠️ 语音识别失败:', result.error)
+          wx.showToast({
+            title: '语音识别失败，请重试',
+            icon: 'error',
+          })
+        }
+      } catch (error) {
+        console.error('❌ 语音识别异常:', error)
+        wx.showToast({
+          title: '语音识别失败，请重试',
+          icon: 'error',
+        })
+      } finally {
+        this.setData({ 
+          isRecording: false,
+          isRealtimeRecognition: false 
+        })
+        this.stopRecordingTimer()
+      }
+    },
+
+    /**
+     * 使用传统录音方式
+     */
+    startTraditionalRecording() {
+      this.data.recorderManager.start({
+        duration: 30000, // 最长录音30秒
+        sampleRate: 16000,
+        numberOfChannels: 1,
+        encodeBitRate: 48000,
+        format: 'mp3',
+      })
+    },
+
+    /**
      * 停止录音
      */
     stopRecording() {
@@ -255,7 +350,13 @@ Component({
         return
       }
 
-      this.data.recorderManager.stop()
+      if (this.data.isRealtimeRecognition) {
+        // 停止微信同声传译实时识别
+        wechatSI.stopVoiceRecognition()
+      } else {
+        // 停止传统录音
+        this.data.recorderManager.stop()
+      }
     },
 
     /**
@@ -290,21 +391,43 @@ Component({
       wx.showLoading({ title: '正在识别语音...' })
 
       try {
-        // 调用真实的语音识别服务
-        const options: VoiceRecognitionOptions = {
-          audioPath: tempFilePath,
-          language: 'zh-CN',
-          format: 'mp3',
-        }
+        let recognizedText = ''
 
-        const result = await voiceRecognition.recognize(options)
+        if (this.data.wechatSIReady) {
+          // 使用微信同声传译插件进行语音识别
+          console.log('🎤 使用微信同声传译插件识别语音...')
+          
+          const options: WechatSIOptions = {
+            lang: 'zh_CN',
+            duration: 30000,
+          }
+
+          const result = await wechatSI.recognizeVoiceFromFile(tempFilePath, options)
+          
+          if (result.success && result.text) {
+            recognizedText = result.text
+            console.log('✅ 微信同声传译识别成功:', recognizedText)
+          } else {
+            console.warn('⚠️ 微信同声传译识别失败:', result.error)
+            wx.showToast({
+              title: '语音识别失败，请重试',
+              icon: 'error',
+            })
+            return
+          }
+        } else {
+          // 微信同声传译插件未就绪
+          console.log('🎤 微信同声传译插件未就绪')
+          wx.showToast({
+            title: '语音识别插件未就绪',
+            icon: 'error',
+          })
+          return
+        }
 
         wx.hideLoading()
 
-        if (result.success && result.text) {
-          // 在控制台输出识别的文字
-          console.log('🎤 语音识别结果:', result.text)
-
+        if (recognizedText) {
           // 显示识别结果
           wx.showToast({
             title: '语音识别成功',
@@ -313,20 +436,14 @@ Component({
           })
 
           // 设置识别后的文字到输入框
-          this.setData({ inputMessage: result.text })
+          this.setData({ inputMessage: recognizedText })
 
           // 延迟一下再自动发送，让用户看到识别结果
           setTimeout(() => {
-            console.log('📤 自动发送语音识别消息:', result.text)
+            console.log('📤 自动发送语音识别消息:', recognizedText)
             // 自动发送识别后的消息
             this.onSend()
           }, 800)
-        } else {
-          console.error('❌ 语音识别失败:', result.error)
-          wx.showToast({
-            title: result.error || '语音识别失败',
-            icon: 'error',
-          })
         }
       } catch (error) {
         wx.hideLoading()

@@ -108,14 +108,11 @@ export function isMarkdownContent(content: string): boolean {
  * @param content 内容字符串
  * @returns 内容类型
  */
-export function detectContentType(content: string): 'html' | 'markdown' | 'text' {
+export function detectContentType(content: string): 'html' | 'markdown' {
   if (isHtmlContent(content)) {
     return 'html'
-  } else if (isMarkdownContent(content)) {
-    return 'markdown'
-  } else {
-    return 'text'
-  }
+  } 
+  return 'markdown'
 }
 
 /**
@@ -132,7 +129,7 @@ export function processMessageContent(
 ): TowxmlNode | undefined {
   try {
     let html: string
-    let contentType: 'html' | 'markdown' | 'text'
+    let contentType: 'html' | 'markdown'
     
     if (content instanceof BaseComponent) {
       // 如果是组件，渲染为HTML
