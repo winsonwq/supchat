@@ -2,7 +2,9 @@
 import { WxEvent } from '../../lib/mcp/types.js'
 import { MCPConfigStorage } from '../../lib/storage/mcp-config-storage'
 import getSafeArea from '../../lib/utils/safe-area'
-import voiceRecognition, { VoiceRecognitionOptions } from '../../lib/mcp/tools/voice'
+import voiceRecognition, {
+  VoiceRecognitionOptions,
+} from '../../lib/mcp/tools/voice'
 
 Component({
   /**
@@ -12,18 +14,18 @@ Component({
     // 输入的消息内容
     inputMessage: {
       type: String,
-      value: ''
+      value: '',
     },
     // 是否正在加载
     isLoading: {
       type: Boolean,
-      value: false
+      value: false,
     },
     // 是否正在流式响应
     isStreaming: {
       type: Boolean,
-      value: false
-    }
+      value: false,
+    },
   },
 
   /**
@@ -38,7 +40,9 @@ Component({
     isRecording: false, // 是否正在录音
     recordingTime: 0, // 录音时长（秒）
     recordingTimer: null as any, // 录音计时器
-    recorderManager: null as any // 录音管理器
+    recorderManager: null as any, // 录音管理器
+    // 控制 textarea 初始高度的标记
+    textareaInitialHeight: false,
   },
 
   /**
@@ -49,19 +53,28 @@ Component({
       // 计算底部安全区域
       const safeArea = getSafeArea()
       this.setData({
-        bottomSafeHeight: safeArea.safeAreaBottom
+        bottomSafeHeight: safeArea.safeAreaBottom,
+        // 确保初始状态下 textarea 有正确的高度控制
+        textareaInitialHeight: false,
       })
       // 载入 MCP 配置
       this.loadMcpConfigs()
       // 初始化录音管理器
       this.initRecorderManager()
+
+      // 调试信息
+      console.log('🔧 组件初始化完成:', {
+        isVoiceMode: this.data.isVoiceMode,
+        bottomSafeHeight: this.data.bottomSafeHeight,
+        textareaInitialHeight: this.data.textareaInitialHeight,
+      })
     },
     detached() {
       // 清理录音计时器
       if (this.data.recordingTimer) {
         clearInterval(this.data.recordingTimer)
       }
-    }
+    },
   },
 
   /**
@@ -72,11 +85,19 @@ Component({
     onInputChange(e: WxEvent) {
       const value = e.detail.value || ''
       this.setData({
-        inputMessage: value
+        inputMessage: value,
       })
+
+      // 如果当前是初始高度状态，且有内容输入，则移除初始高度限制
+      if (this.data.textareaInitialHeight && value.trim()) {
+        this.setData({
+          textareaInitialHeight: false,
+        })
+      }
+
       // 触发输入变化事件
       this.triggerEvent('inputchange', {
-        value: value
+        value: value,
       })
     },
 
@@ -84,15 +105,18 @@ Component({
     onSend() {
       const message = this.properties.inputMessage.trim()
       if (!message || this.properties.isLoading) {
-        console.log('⚠️ 发送消息失败:', { message, isLoading: this.properties.isLoading })
+        console.log('⚠️ 发送消息失败:', {
+          message,
+          isLoading: this.properties.isLoading,
+        })
         return
       }
-      
+
       console.log('📤 发送消息:', message)
-      
+
       // 触发发送事件
       this.triggerEvent('send', {
-        message: message
+        message: message,
       })
     },
 
@@ -126,20 +150,20 @@ Component({
     },
 
     // 新增语音输入相关方法
-    
+
     /**
      * 初始化录音管理器
      */
     initRecorderManager() {
       const recorderManager = wx.getRecorderManager()
-      
+
       // 录音开始事件
       recorderManager.onStart(() => {
         console.log('🎙️ 录音开始')
         this.setData({ isRecording: true })
         this.startRecordingTimer()
       })
-      
+
       // 录音结束事件
       recorderManager.onStop((res) => {
         console.log('🛑 录音结束', res)
@@ -147,7 +171,7 @@ Component({
         this.stopRecordingTimer()
         this.handleVoiceResult(res)
       })
-      
+
       // 录音错误事件
       recorderManager.onError((res) => {
         console.error('❌ 录音错误', res)
@@ -155,10 +179,10 @@ Component({
         this.stopRecordingTimer()
         wx.showToast({
           title: '录音失败，请重试',
-          icon: 'error'
+          icon: 'error',
         })
       })
-      
+
       this.setData({ recorderManager })
     },
 
@@ -167,14 +191,29 @@ Component({
      */
     toggleInputMode() {
       const newMode = !this.data.isVoiceMode
-      this.setData({ 
-        isVoiceMode: newMode,
-        inputMessage: '' // 切换模式时清空输入
-      })
-      
-      // 触发模式切换事件
+
+      if (newMode) {
+        // 切换到语音模式
+        this.setData({
+          isVoiceMode: newMode,
+          inputMessage: '', // 切换模式时清空输入
+        })
+      } else {
+        this.setData({
+          isVoiceMode: newMode,
+          inputMessage: '',
+          textareaInitialHeight: true,
+        })
+
+        setTimeout(() => {
+          this.setData({
+            textareaInitialHeight: false,
+          })
+        }, 100)
+      }
+
       this.triggerEvent('modechange', {
-        mode: newMode ? 'voice' : 'text'
+        mode: newMode ? 'voice' : 'text',
       })
     },
 
@@ -185,7 +224,7 @@ Component({
       if (this.data.isRecording || this.properties.isLoading) {
         return
       }
-      
+
       // 检查录音权限
       wx.authorize({
         scope: 'scope.record',
@@ -195,16 +234,16 @@ Component({
             sampleRate: 16000,
             numberOfChannels: 1,
             encodeBitRate: 48000,
-            format: 'mp3'
+            format: 'mp3',
           })
         },
         fail: () => {
           wx.showModal({
             title: '需要录音权限',
             content: '请在设置中开启录音权限',
-            showCancel: false
+            showCancel: false,
           })
-        }
+        },
       })
     },
 
@@ -215,7 +254,7 @@ Component({
       if (!this.data.isRecording) {
         return
       }
-      
+
       this.data.recorderManager.stop()
     },
 
@@ -226,7 +265,7 @@ Component({
       this.setData({ recordingTime: 0 })
       const timer = setInterval(() => {
         this.setData({
-          recordingTime: this.data.recordingTime + 1
+          recordingTime: this.data.recordingTime + 1,
         })
       }, 1000)
       this.setData({ recordingTimer: timer })
@@ -247,47 +286,46 @@ Component({
      */
     async handleVoiceResult(res: any) {
       const { tempFilePath } = res
-      
+
       wx.showLoading({ title: '正在识别语音...' })
-      
+
       try {
         // 调用真实的语音识别服务
         const options: VoiceRecognitionOptions = {
           audioPath: tempFilePath,
           language: 'zh-CN',
-          format: 'mp3'
+          format: 'mp3',
         }
-        
+
         const result = await voiceRecognition.recognize(options)
-        
+
         wx.hideLoading()
-        
+
         if (result.success && result.text) {
           // 在控制台输出识别的文字
           console.log('🎤 语音识别结果:', result.text)
-          
+
           // 显示识别结果
           wx.showToast({
             title: '语音识别成功',
             icon: 'success',
-            duration: 1500
+            duration: 1500,
           })
-          
+
           // 设置识别后的文字到输入框
           this.setData({ inputMessage: result.text })
-          
+
           // 延迟一下再自动发送，让用户看到识别结果
           setTimeout(() => {
             console.log('📤 自动发送语音识别消息:', result.text)
             // 自动发送识别后的消息
             this.onSend()
           }, 800)
-          
         } else {
           console.error('❌ 语音识别失败:', result.error)
           wx.showToast({
             title: result.error || '语音识别失败',
-            icon: 'error'
+            icon: 'error',
           })
         }
       } catch (error) {
@@ -295,7 +333,7 @@ Component({
         console.error('❌ 语音识别处理失败:', error)
         wx.showToast({
           title: '语音识别失败，请重试',
-          icon: 'error'
+          icon: 'error',
         })
       }
     },
@@ -306,7 +344,9 @@ Component({
     formatRecordingTime(seconds: number): string {
       const mins = Math.floor(seconds / 60)
       const secs = seconds % 60
-      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-    }
-  }
+      return `${mins.toString().padStart(2, '0')}:${secs
+        .toString()
+        .padStart(2, '0')}`
+    },
+  },
 })

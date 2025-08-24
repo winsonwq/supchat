@@ -1,6 +1,3 @@
-/* 自定义样式，不能直接用工具类替代的部分 */
-
-/* 输入区域 - 特殊的定位和安全区域适配 */
 .input-container {
   position: fixed;
   bottom: 0;
@@ -8,70 +5,34 @@
   right: 0;
   z-index: 50;
   background-color: #f9f9f9;
-  /* 安全区域通过 JS 动态设置 */
-}
-
-/* 输入模式切换 */
-.mode-switch-container {
-  display: flex;
-  justify-content: center;
-}
-
-.mode-switch {
-  display: flex;
-  background-color: #f3f4f6;
-  border-radius: 20rpx;
-  padding: 2rpx;
-  gap: 2rpx;
-}
-
-.mode-tab {
-  display: flex;
-  align-items: center;
-  gap: 6rpx;
-  padding: 12rpx 16rpx;
-  border-radius: 16rpx;
-  font-size: 24rpx;
-  color: #6b7280;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.mode-tab.active {
-  background-color: #ffffff;
-  color: #3b82f6;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
-}
-
-.mode-tab text {
-  font-weight: 500;
 }
 
 /* 输入框样式 - 需要特殊的圆角和高度限制 */
 .message-textarea {
-  max-height: 200rpx;
-  padding: 16rpx 16rpx 0;
-  border-radius: 44rpx;
+  min-height: 66rpx;
   resize: none;
   word-wrap: break-word;
   box-sizing: border-box;
+  font-size: 28rpx;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: height;
 }
 
-.message-textarea:focus {
-  border-color: #3b82f6; /* border-blue-500 */
-  background-color: #ffffff; /* bg-white */
-  outline: none;
+/* 初始高度样式，避免闪烁 */
+.textarea-initial {
+  height: 66rpx !important;
+  overflow: hidden;
+  transition: none;
 }
 
 .message-textarea:disabled {
-  background-color: #f3f4f6; /* bg-gray-100 */
-  color: #9ca3af; /* text-gray-400 */
+  color: #9ca3af;
 }
 
 /* 输入框占位符样式 */
 .message-textarea::placeholder {
-  color: #9ca3af; /* text-gray-400 */
-  font-size: 32rpx; /* text-base */
+  color: #9ca3af;
+  font-size: 28rpx;
 }
 
 /* 按钮样式 */
@@ -130,51 +91,45 @@
 
 .voice-button {
   width: 100% !important;
-  height: 80rpx !important;
+  height: 66rpx !important;
   border-radius: 44rpx;
-  background-color: #3b82f6;
-  color: #ffffff;
-  border: none;
-  transition: all 0.3s ease;
+  background-color: transparent;
+  color: #374151;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32rpx;
+  font-size: 28rpx !important;
   font-weight: 600;
 }
 
-.voice-button:active {
-  background-color: #2563eb;
-  transform: scale(0.98);
-}
-
 .voice-button:disabled {
-  background-color: #9ca3af;
+  background-color: #f9fafb;
+  color: #9ca3af;
+  border-color: #e5e7eb;
   cursor: not-allowed;
 }
 
 .voice-button.recording {
-  background-color: #ef4444;
+  background-color: transparent;
+  color: #ef4444;
+  border-color: #ef4444;
   animation: pulse-red 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse-red {
   0%, 100% {
-    background-color: #ef4444;
+    border-color: #ef4444;
   }
   50% {
-    background-color: #dc2626;
+    border-color: #dc2626;
   }
 }
 
 .voice-button-text {
   font-size: 32rpx;
   font-weight: 600;
-  color: #ffffff;
 }
-
-
 
 /* MCP 列表 */
 .mcp-list {

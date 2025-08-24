@@ -3,7 +3,7 @@ page {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f5f5f5;
+  background-color: white;
   overflow: hidden;
   position: relative;
   z-index: 1;
@@ -12,10 +12,10 @@ page {
 /* 聊天滚动区域 */
 .chat-scroll-view {
   flex: 1;
-  overflow-y: auto; /* 改为 auto 以支持 sticky */
-  background-color: #f5f5f5;
+  overflow-y: auto;
+  background-color: white;
   padding: 0;
-  height: 100%; /* 确保有明确的高度 */
+  height: 100%; 
 }
 
 /* 底部占位符样式 */

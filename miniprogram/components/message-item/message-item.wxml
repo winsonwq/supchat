@@ -59,7 +59,7 @@
     <view wx:for="{{ message.tool_calls }}" wx:key="id" wx:for-item="toolCall" class="tool-call-item my-2">
       <view class="cursor-pointer flex items-center justify-between bg-gray-100 rounded-lg p-4" bindtap="showToolParamsModal" data-tool-index="{{ index }}">
         <text class="font-medium text-gray-800 text-sm">{{ toolCall.function.name }}</text>
-        <svg-icon name="arrow-right" />
+        <svg-icon name="expand" />
       </view>
     </view>
   </view>
