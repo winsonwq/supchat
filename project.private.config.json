@@ -5,5 +5,18 @@
     "compileHotReLoad": true,
     "urlCheck": false
   },
-  "libVersion": "3.9.0"
+  "libVersion": "3.9.0",
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "pages/storage-test/storage-test",
+          "pathName": "pages/storage-test/storage-test",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        }
+      ]
+    }
+  }
 }
