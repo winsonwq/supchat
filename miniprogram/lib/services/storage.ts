@@ -5,18 +5,25 @@
 
 // 存储适配器接口
 export interface StorageAdapter {
-  get<T = unknown>(key: string, options?: StorageOptions): Promise<StorageResult<T>>
-  create<T = unknown>(data: T, options?: StorageOptions): Promise<StorageResult<T>>
-  update<T = unknown>(key: string, data: Partial<T>, options?: StorageOptions): Promise<StorageResult<T>>
-  delete(key: string, options?: StorageOptions): Promise<StorageResult<boolean>>
-  batchGet<T = unknown>(keys: string[], options?: StorageOptions): Promise<StorageResult<T[]>>
-  query<T = unknown>(query: Record<string, unknown>, options?: StorageOptions): Promise<StorageResult<T[]>>
+  get<T = unknown>(
+    path: string,
+    options?: StorageOptions,
+  ): Promise<StorageResult<T>>
+  create<T = unknown>(
+    path: string,
+    data: T,
+  ): Promise<StorageResult<T>>
+  update<T = unknown>(
+    path: string,
+    data: Partial<T>,
+  ): Promise<StorageResult<T>>
+  delete(
+    path: string,
+  ): Promise<StorageResult<boolean>>
 }
 
 // 存储选项
 export interface StorageOptions {
-  collection?: string
-  adapter?: 'cloud' | 'local'
   [key: string]: any
 }
 
@@ -38,28 +45,31 @@ export class StorageService {
     this.adapter = adapter || new CloudStorageAdapter()
   }
 
-  async get<T = unknown>(key: string, options?: StorageOptions): Promise<StorageResult<T>> {
-    return this.adapter.get<T>(key, options)
+  async get<T = unknown>(
+    path: string,
+    options?: StorageOptions,
+  ): Promise<StorageResult<T>> {
+    return this.adapter.get<T>(path, options)
   }
 
-  async create<T = unknown>(data: T, options?: StorageOptions): Promise<StorageResult<T>> {
-    return this.adapter.create<T>(data, options)
+  async create<T = unknown>(
+    path: string,
+    data: T,
+  ): Promise<StorageResult<T>> {
+    return this.adapter.create<T>(path, data)
   }
 
-  async update<T = unknown>(key: string, data: Partial<T>, options?: StorageOptions): Promise<StorageResult<T>> {
-    return this.adapter.update<T>(key, data, options)
+  async update<T = unknown>(
+    path: string,
+    data: Partial<T>,
+  ): Promise<StorageResult<T>> {
+    return this.adapter.update<T>(path, data)
   }
 
-  async delete(key: string, options?: StorageOptions): Promise<StorageResult<boolean>> {
-    return this.adapter.delete(key, options)
-  }
-
-  async batchGet<T = unknown>(keys: string[], options?: StorageOptions): Promise<StorageResult<T[]>> {
-    return this.adapter.batchGet<T>(keys, options)
-  }
-
-  async query<T = unknown>(query: Record<string, unknown>, options?: StorageOptions): Promise<StorageResult<T[]>> {
-    return this.adapter.query<T>(query, options)
+  async delete(
+    path: string,
+  ): Promise<StorageResult<boolean>> {
+    return this.adapter.delete(path)
   }
 
   // 设置适配器

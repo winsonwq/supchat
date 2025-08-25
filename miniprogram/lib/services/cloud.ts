@@ -4,6 +4,7 @@
  */
 
 export interface CloudCallConfig {
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
   name?: string // 云函数名称，默认 'index'
   route: string
   data?: Record<string, unknown>
@@ -18,7 +19,7 @@ export interface CloudCallResponse<T = any> {
 export async function callCloudFunction<T = any>(
   config: CloudCallConfig,
 ): Promise<CloudCallResponse<T>> {
-  const { name = 'index', route, data } = config
+  const { name = 'index', route, data, method = 'POST' } = config
 
   if (!wx.cloud || typeof wx.cloud.callFunction !== 'function') {
     return { ok: false, error: 'wx.cloud.callFunction 不可用' }
@@ -27,7 +28,7 @@ export async function callCloudFunction<T = any>(
   try {
     const res = await wx.cloud.callFunction({
       name,
-      data: { route, data },
+      data: { route, method, data },
     })
 
     const result = (res && (res.result as CloudCallResponse<T>)) || null
@@ -51,71 +52,46 @@ export class CloudStorageAdapter implements StorageAdapter {
   }
 
   private async call<R>(
-    route: string,
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+    path: string,
     body?: unknown,
   ): Promise<StorageResult<R>> {
     const res = await callCloudFunction<R>({
       name: this.cloudFunctionName,
-      route,
+      route: path,
+      method,
       data: body as Record<string, unknown>,
     })
     return res as unknown as StorageResult<R>
   }
 
   async get<T = unknown>(
-    key: string,
+    path: string,
     options?: StorageOptions,
   ): Promise<StorageResult<T>> {
-    const data = { key, collection: options?.collection }
-    return this.call<unknown>('/storage/get', data) as Promise<StorageResult<T>>
+    const data = { collection: options?.collection }
+    return this.call<T>('GET', path, data)
   }
 
   async create<T = unknown>(
+    path: string,
     data: T,
-    options?: StorageOptions,
   ): Promise<StorageResult<T>> {
-    const requestData = { data, collection: options?.collection }
-    return this.call<unknown>('/storage/create', requestData) as Promise<
-      StorageResult<T>
-    >
+    const requestData = { data }
+    return this.call<T>('POST', path, requestData)
   }
 
   async update<T = unknown>(
-    key: string,
+    path: string,
     data: Partial<T>,
-    options?: StorageOptions,
   ): Promise<StorageResult<T>> {
-    const requestData = { key, data, collection: options?.collection }
-    return this.call<unknown>('/storage/update', requestData) as Promise<
-      StorageResult<T>
-    >
+    const requestData = { data }
+    return this.call<T>('PUT', path, requestData)
   }
 
   async delete(
-    key: string,
-    options?: StorageOptions,
+    path: string,
   ): Promise<StorageResult<boolean>> {
-    const data = { key, collection: options?.collection }
-    return this.call<boolean>('/storage/delete', data)
-  }
-
-  async batchGet<T = unknown>(
-    keys: string[],
-    options?: StorageOptions,
-  ): Promise<StorageResult<T[]>> {
-    const data = { keys, collection: options?.collection }
-    return this.call<unknown[]>('/storage/batchGet', data) as Promise<
-      StorageResult<T[]>
-    >
-  }
-
-  async query<T = unknown>(
-    query: Record<string, unknown>,
-    options?: StorageOptions,
-  ): Promise<StorageResult<T[]>> {
-    const data = { query, collection: options?.collection }
-    return this.call<unknown[]>('/storage/query', data) as Promise<
-      StorageResult<T[]>
-    >
+    return this.call<boolean>('DELETE', path)
   }
 }

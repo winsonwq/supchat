@@ -1,7 +1,3 @@
-import demoHandlers from './handlers/demo.mjs'
 import storageHandlers from './handlers/storage.mjs'
 
-export default [
-  ...demoHandlers,
-  ...storageHandlers,
-]
+export default [...storageHandlers]
