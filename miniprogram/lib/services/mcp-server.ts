@@ -1,6 +1,6 @@
 // MCP 服务器通信服务
 import { MCPConfig } from '../types/mcp-config'
-import { post } from './http'
+import { post } from './request'
 
 export interface MCPTool {
   name: string

@@ -13,6 +13,17 @@ App<IAppOption>({
   },
   towxml: require('/towxml/index'),
   onLaunch() {
+    // 初始化云能力（若可用）
+    if (wx.cloud && typeof wx.cloud.init === 'function') {
+      try {
+        wx.cloud.init({
+          // 按需设置 env
+          traceUser: true,
+        })
+      } catch (e) {
+        console.warn('wx.cloud.init 失败或不可用:', e)
+      }
+    }
     // 展示本地存储能力
     const logs = wx.getStorageSync('logs') || []
     logs.unshift(Date.now())

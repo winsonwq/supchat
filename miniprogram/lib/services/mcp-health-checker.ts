@@ -1,7 +1,7 @@
 // MCP 工具健康检查服务
 import { MCPConfig } from '../types/mcp-config'
 import { MCPConfigStorage } from '../storage/mcp-config-storage'
-import { post } from './http'
+import { post } from './request'
 
 // 健康检查结果
 export interface MCPHealthCheckResult {

@@ -2,7 +2,7 @@
 import { MCPConfig } from '../types/mcp-config'
 import { MCPConfigStorage } from '../storage/mcp-config-storage'
 import { MCPToolLogger } from './mcp-tool-logger'
-import { post } from './http'
+import { post } from './request'
 
 // MCP JSON-RPC 请求接口
 export interface MCPRequest {

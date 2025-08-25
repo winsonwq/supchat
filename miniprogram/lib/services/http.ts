@@ -1,191 +1,243 @@
 /**
- * HTTP 请求封装
- * 对 wx.request 的简单封装
+ * HTTP 服务适配器
+ * 提供高级 HTTP 服务封装，包括拦截器、错误处理、重试机制等
  */
 
-// 请求配置接口
-export interface RequestConfig {
-  url: string
-  method?:
-    | 'GET'
-    | 'POST'
-    | 'PUT'
-    | 'DELETE'
-    | 'OPTIONS'
-    | 'HEAD'
-    | 'TRACE'
-    | 'CONNECT'
-  data?: any
-  header?: Record<string, string>
+import { get, post, put, del, patch, setBaseURL, setDefaultHeaders, setRequestTimeout } from './request'
+
+// 请求拦截器类型
+export interface RequestInterceptor {
+  (config: any): any | Promise<any>
+}
+
+// 响应拦截器类型
+export interface ResponseInterceptor {
+  (response: any): any | Promise<any>
+}
+
+// 错误拦截器类型
+export interface ErrorInterceptor {
+  (error: any): any | Promise<any>
+}
+
+// HTTP 客户端配置
+export interface HttpClientConfig {
+  baseURL?: string
   timeout?: number
+  headers?: Record<string, string>
+  retries?: number
+  retryDelay?: number
 }
 
-// 响应接口
-export interface HttpResponse<T = any> {
-  data: T
-  statusCode: number
-  header: Record<string, string>
-  cookies: string[]
-}
+// HTTP 客户端类
+class HttpClient {
+  private requestInterceptors: RequestInterceptor[] = []
+  private responseInterceptors: ResponseInterceptor[] = []
+  private errorInterceptors: ErrorInterceptor[] = []
+  private config: HttpClientConfig
 
-// 错误接口
-export interface HttpError {
-  errMsg: string
-  statusCode?: number
-  data?: any
-}
+  constructor(config: HttpClientConfig = {}) {
+    this.config = {
+      baseURL: '',
+      timeout: 10000,
+      headers: {},
+      retries: 0,
+      retryDelay: 1000,
+      ...config,
+    }
 
-// 默认配置
-const DEFAULT_CONFIG = {
-  baseURL: '',
-  timeout: 10000,
-  header: {
-    'Content-Type': 'application/json',
-  },
-}
+    // 应用配置
+    if (this.config.baseURL) {
+      setBaseURL(this.config.baseURL)
+    }
+    if (this.config.timeout) {
+      setRequestTimeout(this.config.timeout)
+    }
+    if (this.config.headers) {
+      setDefaultHeaders(this.config.headers)
+    }
+  }
 
-// 核心请求方法
-const request = async <T = any>(
-  config: RequestConfig,
-): Promise<HttpResponse<T>> => {
-  const {
-    url,
-    method = 'GET',
-    data,
-    header = {},
-    timeout = DEFAULT_CONFIG.timeout,
-  } = config
+  // 添加请求拦截器
+  addRequestInterceptor(interceptor: RequestInterceptor) {
+    this.requestInterceptors.push(interceptor)
+  }
 
-  try {
-    // 构建完整 URL
-    const fullURL = DEFAULT_CONFIG.baseURL + url
+  // 添加响应拦截器
+  addResponseInterceptor(interceptor: ResponseInterceptor) {
+    this.responseInterceptors.push(interceptor)
+  }
 
-    // 合并请求头
-    const finalHeaders = { ...DEFAULT_CONFIG.header, ...header }
+  // 添加错误拦截器
+  addErrorInterceptor(interceptor: ErrorInterceptor) {
+    this.errorInterceptors.push(interceptor)
+  }
 
-    // 发起请求
-    const response = await new Promise<HttpResponse<T>>((resolve, reject) => {
-      wx.request({
-        url: fullURL,
-        method,
-        data,
-        header: finalHeaders,
-        timeout,
-        success: (res) => {
-          resolve(res as HttpResponse<T>)
-        },
-        fail: (err) => {
-          reject({
-            errMsg: err.errMsg,
-            statusCode: (err as any).statusCode,
-            data: (err as any).data,
-          })
-        },
-      })
-    })
+  // 执行请求拦截器
+  private async executeRequestInterceptors(config: any): Promise<any> {
+    let result = config
+    for (const interceptor of this.requestInterceptors) {
+      result = await interceptor(result)
+    }
+    return result
+  }
 
-    // 检查状态码
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return response
-    } else {
-      // 处理 HTTP 错误
-      const error: HttpError = {
-        errMsg: `HTTP ${response.statusCode}`,
-        statusCode: response.statusCode,
-        data: response.data,
+  // 执行响应拦截器
+  private async executeResponseInterceptors(response: any): Promise<any> {
+    let result = response
+    for (const interceptor of this.responseInterceptors) {
+      result = await interceptor(result)
+    }
+    return result
+  }
+
+  // 执行错误拦截器
+  private async executeErrorInterceptors(error: any): Promise<any> {
+    let result = error
+    for (const interceptor of this.errorInterceptors) {
+      result = await interceptor(result)
+    }
+    return result
+  }
+
+  // 带重试的请求方法
+  private async requestWithRetry<T>(
+    requestFn: () => Promise<T>,
+    retries: number = this.config.retries || 0
+  ): Promise<T> {
+    try {
+      return await requestFn()
+    } catch (error) {
+      if (retries > 0) {
+        await this.delay(this.config.retryDelay || 1000)
+        return this.requestWithRetry(requestFn, retries - 1)
       }
-
       throw error
     }
-  } catch (error) {
-    const httpError = error as HttpError
-    throw httpError
+  }
+
+  // 延迟方法
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
+  // GET 请求
+  async get<T = any>(url: string, config?: any): Promise<T> {
+    return this.requestWithRetry(async () => {
+      const finalConfig = await this.executeRequestInterceptors({ url, ...config })
+      try {
+        const response = await get<T>(finalConfig.url, finalConfig)
+        return await this.executeResponseInterceptors(response.data)
+      } catch (error) {
+        const processedError = await this.executeErrorInterceptors(error)
+        throw processedError
+      }
+    })
+  }
+
+  // POST 请求
+  async post<T = any>(url: string, data?: any, config?: any): Promise<T> {
+    return this.requestWithRetry(async () => {
+      const finalConfig = await this.executeRequestInterceptors({ url, data, ...config })
+      try {
+        const response = await post<T>(finalConfig.url, finalConfig.data, finalConfig)
+        return await this.executeResponseInterceptors(response.data)
+      } catch (error) {
+        const processedError = await this.executeErrorInterceptors(error)
+        throw processedError
+      }
+    })
+  }
+
+  // PUT 请求
+  async put<T = any>(url: string, data?: any, config?: any): Promise<T> {
+    return this.requestWithRetry(async () => {
+      const finalConfig = await this.executeRequestInterceptors({ url, data, ...config })
+      try {
+        const response = await put<T>(finalConfig.url, finalConfig.data, finalConfig)
+        return await this.executeResponseInterceptors(response.data)
+      } catch (error) {
+        const processedError = await this.executeErrorInterceptors(error)
+        throw processedError
+      }
+    })
+  }
+
+  // DELETE 请求
+  async delete<T = any>(url: string, config?: any): Promise<T> {
+    return this.requestWithRetry(async () => {
+      const finalConfig = await this.executeRequestInterceptors({ url, ...config })
+      try {
+        const response = await del<T>(finalConfig.url, finalConfig)
+        return await this.executeResponseInterceptors(response.data)
+      } catch (error) {
+        const processedError = await this.executeErrorInterceptors(error)
+        throw processedError
+      }
+    })
+  }
+
+  // PATCH 请求
+  async patch<T = any>(url: string, data?: any, config?: any): Promise<T> {
+    return this.requestWithRetry(async () => {
+      const finalConfig = await this.executeRequestInterceptors({ url, data, ...config })
+      try {
+        const response = await patch<T>(finalConfig.url, finalConfig.data, finalConfig)
+        return await this.executeResponseInterceptors(response.data)
+      } catch (error) {
+        const processedError = await this.executeErrorInterceptors(error)
+        throw processedError
+      }
+    })
+  }
+
+  // 更新配置
+  updateConfig(config: Partial<HttpClientConfig>) {
+    this.config = { ...this.config, ...config }
+    
+    if (config.baseURL) {
+      setBaseURL(config.baseURL)
+    }
+    if (config.timeout) {
+      setRequestTimeout(config.timeout)
+    }
+    if (config.headers) {
+      setDefaultHeaders(config.headers)
+    }
+  }
+
+  // 获取当前配置
+  getConfig(): HttpClientConfig {
+    return { ...this.config }
   }
 }
 
-// 导出请求方法
-export const get = <T = any>(
-  url: string,
-  config?: Partial<RequestConfig>,
-): Promise<HttpResponse<T>> => {
-  return request<T>({
-    url,
-    method: 'GET',
-    ...config,
-  })
+// 创建默认 HTTP 客户端实例
+const defaultHttpClient = new HttpClient()
+
+// 导出默认实例的方法
+export const http = {
+  get: <T = any>(url: string, config?: any) => defaultHttpClient.get<T>(url, config),
+  post: <T = any>(url: string, data?: any, config?: any) => defaultHttpClient.post<T>(url, data, config),
+  put: <T = any>(url: string, data?: any, config?: any) => defaultHttpClient.put<T>(url, data, config),
+  delete: <T = any>(url: string, config?: any) => defaultHttpClient.delete<T>(url, config),
+  patch: <T = any>(url: string, data?: any, config?: any) => defaultHttpClient.patch<T>(url, data, config),
+  
+  // 拦截器方法
+  addRequestInterceptor: (interceptor: RequestInterceptor) => 
+    defaultHttpClient.addRequestInterceptor(interceptor),
+  addResponseInterceptor: (interceptor: ResponseInterceptor) => 
+    defaultHttpClient.addResponseInterceptor(interceptor),
+  addErrorInterceptor: (interceptor: ErrorInterceptor) => 
+    defaultHttpClient.addErrorInterceptor(interceptor),
+  
+  // 配置方法
+  updateConfig: (config: Partial<HttpClientConfig>) => defaultHttpClient.updateConfig(config),
+  getConfig: () => defaultHttpClient.getConfig(),
 }
 
-export const post = <T = any>(
-  url: string,
-  data?: any,
-  config?: Partial<RequestConfig>,
-): Promise<HttpResponse<T>> => {
-  return request<T>({
-    url,
-    method: 'POST',
-    data,
-    ...config,
-  })
-}
-
-export const put = <T = any>(
-  url: string,
-  data?: any,
-  config?: Partial<RequestConfig>,
-): Promise<HttpResponse<T>> => {
-  return request<T>({
-    url,
-    method: 'PUT',
-    data,
-    ...config,
-  })
-}
-
-export const del = <T = any>(
-  url: string,
-  config?: Partial<RequestConfig>,
-): Promise<HttpResponse<T>> => {
-  return request<T>({
-    url,
-    method: 'DELETE',
-    ...config,
-  })
-}
-
-export const patch = <T = any>(
-  url: string,
-  data?: any,
-  config?: Partial<RequestConfig>,
-): Promise<HttpResponse<T>> => {
-  return request<T>({
-    url,
-    method: 'PUT', // 微信小程序不支持 PATCH，使用 PUT 替代
-    data,
-    ...config,
-  })
-}
-
-// 配置方法
-export const setBaseURL = (url: string) => {
-  DEFAULT_CONFIG.baseURL = url
-}
-
-export const setTimeout = (timeout: number) => {
-  DEFAULT_CONFIG.timeout = timeout
-}
-
-export const setDefaultHeaders = (headers: Record<string, string>) => {
-  DEFAULT_CONFIG.header = { ...DEFAULT_CONFIG.header, ...headers }
-}
+// 导出 HttpClient 类，用于创建自定义实例
+export { HttpClient }
 
 // 默认导出
-export default {
-  get,
-  post,
-  put,
-  delete: del,
-  patch,
-  setBaseURL,
-  setTimeout,
-  setDefaultHeaders,
-}
+export default http
