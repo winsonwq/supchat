@@ -1,5 +1,5 @@
 import { db } from '../database.mjs'
-import { userCreateSchema, userUpdateSchema, safeParse } from '../schemas/user-schema.mjs'
+import userSchema, { userCreateSchema, userUpdateSchema, safeParse } from '../schemas/user-schema.mjs'
 
 // 用户集合名称
 const COLLECTION_NAME = 'users'

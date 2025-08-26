@@ -3,25 +3,41 @@
 const routes = []
 
 // 通用路由方法
-export const GET = (path, handler) => {
-  return { path, method: 'GET', handler }
+// 支持中间件链：GET(path, mw1, mw2, handler)
+const toStack = (fns) => {
+  if (!Array.isArray(fns)) return []
+  return fns.filter(Boolean).map(fn => {
+    if (typeof fn !== 'function') throw new Error('Middleware/handler must be function')
+    return fn
+  })
 }
 
-export const POST = (path, handler) => {
-  return { path, method: 'POST', handler }
+const compose = (stack) => {
+  return async function composed(ctx) {
+    let index = -1
+    async function dispatch(i) {
+      if (i <= index) throw new Error('next() called multiple times')
+      index = i
+      const fn = stack[i]
+      if (!fn) return
+      // 允许中间件返回值进行短路（例如 {error})
+      return await fn(ctx, async () => await dispatch(i + 1))
+    }
+    return await dispatch(0)
+  }
 }
 
-export const PUT = (path, handler) => {
-  return { path, method: 'PUT', handler }
+const makeRoute = (method, path, ...fns) => {
+  const stack = toStack(fns)
+  const handler = compose(stack)
+  return { path, method, handler, stack }
 }
 
-export const DELETE = (path, handler) => {
-  return { path, method: 'DELETE', handler }
-}
-
-export const PATCH = (path, handler) => {
-  return { path, method: 'PATCH', handler }
-}
+export const GET = (path, ...fns) => makeRoute('GET', path, ...fns)
+export const POST = (path, ...fns) => makeRoute('POST', path, ...fns)
+export const PUT = (path, ...fns) => makeRoute('PUT', path, ...fns)
+export const DELETE = (path, ...fns) => makeRoute('DELETE', path, ...fns)
+export const PATCH = (path, ...fns) => makeRoute('PATCH', path, ...fns)
 
 // 路由组功能 - 为多个路由添加共同前缀
 export const group = (prefix, routeDefinitions) => {
@@ -32,20 +48,15 @@ export const group = (prefix, routeDefinitions) => {
 }
 
 // 中间件支持
+// 兼容保留：将 withMiddleware 包装为链式中间件（不再推荐）
 export const withMiddleware = (middleware, routeDefinition) => {
-  const originalHandler = routeDefinition.handler
-  return {
-    ...routeDefinition,
-    handler: async (context) => {
-      // 执行中间件
-      const middlewareResult = await middleware(context)
-      if (middlewareResult && middlewareResult.error) {
-        return middlewareResult
-      }
-      // 执行原始处理器
-      return await originalHandler(context)
-    }
-  }
+  const { path, method } = routeDefinition || {}
+  if (!path || !method) return routeDefinition
+  return makeRoute(method, path, async (ctx, next) => {
+    const res = await middleware(ctx)
+    if (res && res.error) return res
+    return await next()
+  }, routeDefinition.handler)
 }
 
 // 批量注册路由的便捷方法
