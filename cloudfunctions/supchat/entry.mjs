@@ -4,7 +4,7 @@ import builtins from './lib/routes.mjs'
 registerMany(builtins || [])
 
 export const entry = async (event, context) => {
-  const { route, data, method } = event || {}
+  const { route, body, method } = event || {}
   
   if (!route) {
     return { ok: false, error: 'Missing route' }
@@ -36,12 +36,18 @@ export const entry = async (event, context) => {
     const result = await matched.handler({
       event,
       context,
-      data,
+      body,
       params: matched.params,
       query,
       path: pathname,
       method: matched.method,
     })
+    
+    // 检查handler返回的结果是否包含错误信息
+    if (result && typeof result === 'object' && result.error) {
+      return { ok: false, error: result.error }
+    }
+    
     return { ok: true, data: result }
   } catch (err) {
     console.error('Handler error:', err)

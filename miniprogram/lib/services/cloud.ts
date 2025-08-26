@@ -7,7 +7,7 @@ export interface CloudCallConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
   name?: string // 云函数名称，默认 'index'
   route: string
-  data?: Record<string, unknown>
+  body?: Record<string, unknown>
 }
 
 export interface CloudCallResponse<T = any> {
@@ -19,7 +19,7 @@ export interface CloudCallResponse<T = any> {
 export async function callCloudFunction<T = any>(
   config: CloudCallConfig,
 ): Promise<CloudCallResponse<T>> {
-  const { name = 'index', route, data, method = 'POST' } = config
+  const { name = 'index', route, body, method = 'POST' } = config
 
   if (!wx.cloud || typeof wx.cloud.callFunction !== 'function') {
     return { ok: false, error: 'wx.cloud.callFunction 不可用' }
@@ -28,7 +28,7 @@ export async function callCloudFunction<T = any>(
   try {
     const res = await wx.cloud.callFunction({
       name,
-      data: { route, method, data },
+      data: { route, method, body },
     })
 
     const result = (res && (res.result as CloudCallResponse<T>)) || null
@@ -60,7 +60,7 @@ export class CloudStorageAdapter implements StorageAdapter {
       name: this.cloudFunctionName,
       route: path,
       method,
-      data: body as Record<string, unknown>,
+      body: body as Record<string, unknown>,
     })
     return res as unknown as StorageResult<R>
   }
@@ -77,16 +77,14 @@ export class CloudStorageAdapter implements StorageAdapter {
     path: string,
     data: T,
   ): Promise<StorageResult<T>> {
-    const requestData = { data }
-    return this.call<T>('POST', path, requestData)
+    return this.call<T>('POST', path, data)
   }
 
   async update<T = unknown>(
     path: string,
     data: Partial<T>,
   ): Promise<StorageResult<T>> {
-    const requestData = { data }
-    return this.call<T>('PUT', path, requestData)
+    return this.call<T>('PUT', path, data)
   }
 
   async delete(

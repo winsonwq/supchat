@@ -7,11 +7,11 @@
   <view class="actions">
     <button 
       class="btn btn-primary" 
-      bindtap="testBasicOperations"
+      bindtap="testDatabaseOperations"
       loading="{{loading}}"
       disabled="{{loading}}"
     >
-      测试基础操作
+      测试数据库操作
     </button>
     
     <button 
@@ -25,11 +25,29 @@
     
     <button 
       class="btn btn-secondary" 
-      bindtap="testStorageService"
+      bindtap="testLocalStorage"
       loading="{{loading}}"
       disabled="{{loading}}"
     >
-      测试 StorageService 类
+      测试本地存储
+    </button>
+
+    <button 
+      class="btn btn-secondary" 
+      bindtap="testErrorHandling"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+    >
+      测试错误处理
+    </button>
+
+    <button 
+      class="btn btn-success" 
+      bindtap="runAllTests"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+    >
+      运行所有测试
     </button>
     
     <button 

@@ -1,4 +1,5 @@
 import { StorageService } from '../../lib/services/storage'
+import { UserInfoStorage } from '../../lib/storage/user-info-storage'
 
 interface TestUser {
   id?: string
@@ -6,6 +7,7 @@ interface TestUser {
   email: string
   age: number
   createdAt?: Date
+  openid: string
 }
 
 Component({
@@ -22,34 +24,31 @@ Component({
       })
     },
 
-    async testBasicOperations() {
+    async testDatabaseOperations() {
       this.setData({ loading: true, testResults: [] })
 
       try {
-        // 测试创建
-        this.addResult('开始测试基础操作...')
+        this.addResult('开始测试数据库操作...')
 
         const storage = new StorageService()
         const userData: TestUser = {
           name: '测试用户',
           email: 'test@example.com',
           age: 25,
+          createdAt: new Date(),
+          openid: 'test-openid',
         }
 
-        const createResult = await storage.create('/storage', userData)
+        // 测试创建
+        this.addResult('1. 测试创建用户数据...')
+        const createResult = await storage.create('/users', userData)
         if (createResult.ok) {
-          this.addResult(`✅ 创建成功: ${JSON.stringify(createResult.data)}`)
-
-          // 获取创建的数据ID
-          const createdId =
-            (createResult.data as any)?.id || (createResult.data as any)?._id
-          if (!createdId) {
-            this.addResult(`❌ 创建的数据缺少ID`)
-            return
-          }
+          const createdId = (createResult.data as any)?.id || (createResult.data as any)?._id
+          this.addResult(`✅ 创建成功，ID: ${createdId}`)
 
           // 测试获取
-          const getResult = await storage.get<TestUser>('/storage/111?a=1&b=2')
+          this.addResult('2. 测试获取用户数据...')
+          const getResult = await storage.get<TestUser>(`/users/${createdId}`)
           if (getResult.ok) {
             this.addResult(`✅ 获取成功: ${JSON.stringify(getResult.data)}`)
           } else {
@@ -57,9 +56,11 @@ Component({
           }
 
           // 测试更新
+          this.addResult('3. 测试更新用户数据...')
+          const updateData = { age: 26, name: '更新后的用户' }
           const updateResult = await storage.update<TestUser>(
-            '/storage/222',
-            { age: 26 },
+            `/users/${createdId}`,
+            updateData,
           )
           if (updateResult.ok) {
             this.addResult(`✅ 更新成功: ${JSON.stringify(updateResult.data)}`)
@@ -68,12 +69,14 @@ Component({
           }
 
           // 测试删除
-          const deleteResult = await storage.delete('/storage/333')
+          this.addResult('4. 测试删除用户数据...')
+          const deleteResult = await storage.delete(`/users/${createdId}`)
           if (deleteResult.ok) {
-            this.addResult(`✅ 删除成功: ${deleteResult.data}`)
+            this.addResult(`✅ 删除成功`)
           } else {
             this.addResult(`❌ 删除失败: ${deleteResult.error}`)
           }
+
         } else {
           this.addResult(`❌ 创建失败: ${createResult.error}`)
         }
@@ -88,52 +91,68 @@ Component({
       this.setData({ loading: true })
 
       try {
-        this.addResult('开始测试批量操作...')
+        this.addResult('开始测试批量数据库操作...')
 
         const storage = new StorageService()
 
-        // 先创建一些测试数据
+        // 创建测试数据
+        this.addResult('1. 创建批量测试数据...')
         const testUsers = [
-          { name: '用户1', email: 'user1@example.com', age: 20 },
-          { name: '用户2', email: 'user2@example.com', age: 25 },
-          { name: '用户3', email: 'user3@example.com', age: 30 },
+          { name: '批量用户1', email: 'batch1@example.com', age: 20, createdAt: new Date() },
+          { name: '批量用户2', email: 'batch2@example.com', age: 25, createdAt: new Date() },
+          { name: '批量用户3', email: 'batch3@example.com', age: 30, createdAt: new Date() },
         ]
 
         const createdIds: string[] = []
 
         for (const userData of testUsers) {
-          const createResult = await storage.create('/storage', userData)
-          if (
-            createResult.ok &&
-            ((createResult.data as any)?.id || (createResult.data as any)?._id)
-          ) {
-            createdIds.push(
-              (createResult.data as any)?.id || (createResult.data as any)?._id,
-            )
-            this.addResult(`✅ 创建用户成功: ${userData.name}`)
+          const createResult = await storage.create('/users', userData)
+          if (createResult.ok) {
+            const createdId = (createResult.data as any)?.id || (createResult.data as any)?._id
+            if (createdId) {
+              createdIds.push(createdId)
+              this.addResult(`✅ 创建用户成功: ${userData.name} (ID: ${createdId})`)
+            }
+          } else {
+            this.addResult(`❌ 创建用户失败: ${userData.name} - ${createResult.error}`)
           }
         }
 
         if (createdIds.length > 0) {
+          this.addResult(`2. 批量获取测试数据...`)
+          
           // 测试逐个获取
           for (const id of createdIds) {
-            const getResult = await storage.get<TestUser>('/storage')
+            const getResult = await storage.get<TestUser>(`/users/${id}`)
             if (getResult.ok) {
-              this.addResult(
-                `✅ 获取用户成功: ${JSON.stringify(getResult.data)}`,
-              )
+              this.addResult(`✅ 获取用户成功: ${JSON.stringify(getResult.data)}`)
             } else {
-              this.addResult(`❌ 获取用户失败: ${getResult.error}`)
+              this.addResult(`❌ 获取用户失败 (ID: ${id}): ${getResult.error}`)
+            }
+          }
+
+          // 测试批量更新
+          this.addResult('3. 批量更新测试数据...')
+          for (const id of createdIds) {
+            const updateResult = await storage.update<TestUser>(
+              `/users/${id}`,
+              { age: 99, name: '批量更新后的用户' }
+            )
+            if (updateResult.ok) {
+              this.addResult(`✅ 更新用户成功 (ID: ${id})`)
+            } else {
+              this.addResult(`❌ 更新用户失败 (ID: ${id}): ${updateResult.error}`)
             }
           }
 
           // 清理测试数据
+          this.addResult('4. 清理测试数据...')
           for (const id of createdIds) {
-            const deleteResult = await storage.delete('/storage')
+            const deleteResult = await storage.delete(`/users/${id}`)
             if (deleteResult.ok) {
-              this.addResult(`✅ 删除用户成功: ${id}`)
+              this.addResult(`✅ 删除用户成功 (ID: ${id})`)
             } else {
-              this.addResult(`❌ 删除用户失败: ${deleteResult.error}`)
+              this.addResult(`❌ 删除用户失败 (ID: ${id}): ${deleteResult.error}`)
             }
           }
         } else {
@@ -146,38 +165,110 @@ Component({
       }
     },
 
-    async testStorageService() {
+    async testLocalStorage() {
       this.setData({ loading: true })
 
       try {
-        this.addResult('开始测试 StorageService 类...')
+        this.addResult('开始测试本地存储...')
+
+        // 创建用户
+        const user = UserInfoStorage.createDefaultUserInfo()
+        user.name = '测试用户'
+        user.avatar = 'https://example.com/avatar.jpg'
+        
+        const saveResult = UserInfoStorage.saveUserInfo(user)
+        
+        if (saveResult) {
+          this.addResult(`✅ 创建用户成功: ${user.name}`)
+          
+          // 获取用户
+          const retrievedUser = UserInfoStorage.getUserInfo()
+          if (retrievedUser) {
+            this.addResult(`✅ 获取用户成功: ${retrievedUser.name}`)
+            this.addResult(`   用户信息: ${JSON.stringify(retrievedUser)}`)
+          } else {
+            this.addResult(`❌ 获取用户失败`)
+          }
+
+          // 测试更新用户
+          if (retrievedUser) {
+            const updatedUser = { ...retrievedUser, name: '更新后的测试用户' }
+            const updateResult = UserInfoStorage.saveUserInfo(updatedUser)
+            if (updateResult) {
+              this.addResult(`✅ 更新用户成功`)
+              
+              // 再次获取验证更新
+              const finalUser = UserInfoStorage.getUserInfo()
+              if (finalUser && finalUser.name === '更新后的测试用户') {
+                this.addResult(`✅ 用户更新验证成功`)
+              } else {
+                this.addResult(`❌ 用户更新验证失败`)
+              }
+            } else {
+              this.addResult(`❌ 更新用户失败`)
+            }
+          }
+        } else {
+          this.addResult(`❌ 创建用户失败`)
+        }
+
+        // 清理
+        UserInfoStorage.clearUserInfo()
+        this.addResult(`✅ 测试完成，数据已清理`)
+
+      } catch (error) {
+        this.addResult(`❌ 本地存储测试异常: ${error}`)
+      } finally {
+        this.setData({ loading: false })
+      }
+    },
+
+    async testErrorHandling() {
+      this.setData({ loading: true })
+
+      try {
+        this.addResult('开始测试错误处理...')
 
         const storage = new StorageService()
 
-        const userData: TestUser = {
-          name: '类测试用户',
-          email: 'class@example.com',
-          age: 30,
-        }
-
-        const result = await storage.create('/storage', userData)
-        if (result.ok) {
-          this.addResult(
-            `✅ StorageService 创建成功: ${JSON.stringify(result.data)}`,
-          )
-
-          // 清理测试数据
-          const createdId =
-            (result.data as any)?.id || (result.data as any)?._id
-          if (createdId) {
-            await storage.delete('/storage')
-            this.addResult(`✅ 测试数据已清理`)
-          }
+        // 测试无效路径
+        this.addResult('1. 测试无效路径...')
+        const invalidPathResult = await storage.get('/invalid/path/123')
+        if (!invalidPathResult.ok) {
+          this.addResult(`✅ 无效路径正确处理: ${invalidPathResult.error}`)
         } else {
-          this.addResult(`❌ StorageService 创建失败: ${result.error}`)
+          this.addResult(`⚠️ 无效路径返回了成功结果`)
         }
+
+        // 测试无效数据
+        this.addResult('2. 测试无效数据...')
+        const invalidDataResult = await storage.create('/users', null as any)
+        if (!invalidDataResult.ok) {
+          this.addResult(`✅ 无效数据正确处理: ${invalidDataResult.error}`)
+        } else {
+          this.addResult(`⚠️ 无效数据返回了成功结果`)
+        }
+
+        // 测试更新不存在的记录
+        this.addResult('3. 测试更新不存在的记录...')
+        const nonExistentUpdateResult = await storage.update('/users/nonexistent', { test: true })
+        if (!nonExistentUpdateResult.ok) {
+          this.addResult(`✅ 更新不存在记录正确处理: ${nonExistentUpdateResult.error}`)
+        } else {
+          this.addResult(`⚠️ 更新不存在记录返回了成功结果`)
+        }
+
+        // 测试删除不存在的记录
+        this.addResult('4. 测试删除不存在的记录...')
+        const nonExistentDeleteResult = await storage.delete('/users/nonexistent')
+        if (!nonExistentDeleteResult.ok) {
+          this.addResult(`✅ 删除不存在记录正确处理: ${nonExistentDeleteResult.error}`)
+        } else {
+          this.addResult(`⚠️ 删除不存在记录返回了成功结果`)
+        }
+
       } catch (error) {
-        this.addResult(`❌ StorageService 测试异常: ${error}`)
+        this.addResult(`❌ 错误处理测试异常: ${error}`)
       } finally {
         this.setData({ loading: false })
       }
@@ -185,6 +276,26 @@ Component({
 
     clearResults() {
       this.setData({ testResults: [] })
+    },
+
+    async runAllTests() {
+      this.setData({ loading: true, testResults: [] })
+      
+      try {
+        this.addResult('开始运行所有测试...')
+        
+        // 按顺序运行测试
+        await this.testDatabaseOperations()
+        await this.testBatchOperations()
+        await this.testLocalStorage()
+        await this.testErrorHandling()
+        
+        this.addResult('🎉 所有测试完成！')
+      } catch (error) {
+        this.addResult(`❌ 运行所有测试时发生异常: ${error}`)
+      } finally {
+        this.setData({ loading: false })
+      }
     },
   },
 })

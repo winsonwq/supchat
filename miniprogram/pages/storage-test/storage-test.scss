@@ -74,6 +74,16 @@
   color: white;
 }
 
+.btn-success {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.btn-success:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 4rpx 12rpx rgba(79, 172, 254, 0.4);
+}
+
 .btn[disabled] {
   opacity: 0.6;
   transform: none !important;
