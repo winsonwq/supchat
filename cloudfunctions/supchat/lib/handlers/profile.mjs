@@ -1,24 +1,22 @@
 import { GET, PUT } from '../router.mjs'
 import auth from '../middlewares/auth.mjs'
-import User from '../models/user.mjs'
 import { safeParse, userUpdateSchema } from '../schemas/user-schema.mjs'
 
 export default [
   // 获取当前用户资料
-  GET('/users/me', auth, async ({ authUserId }) => {
+  GET('/profile', auth, async ({ profile }) => {
     try {
-      const user = await User.findById(authUserId)
-      if (!user) return { error: '用户不存在' }
-      return user
+      if (!profile) return { error: '用户不存在' }
+      return profile
     } catch (e) {
       return { error: e.message }
     }
   }),
 
   // 更新当前用户资料（头像/昵称等）
-  PUT('/users/profile', auth, async ({ body, authUserId }) => {
+  PUT('/profile', auth, async ({ body, profile }) => {
     try {
-      const user = await User.findById(authUserId)
+      const user = profile
       if (!user) return { error: '用户不存在' }
       const allowed = ['nickname', 'avatar', 'gender', 'country', 'province', 'city', 'language']
       const payload = {}

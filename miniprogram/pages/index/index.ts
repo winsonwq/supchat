@@ -11,6 +11,7 @@ import { BaseComponent } from '../../lib/mcp/components/base-component.js'
 import { processMessageContent as processContentWithParser } from '../../lib/utils/content-parser.js'
 
 import { ComponentManager } from '../../lib/mcp/components/component-manager.js'
+import { getMyProfile, updateMyProfile, needProfileGuide, bindPhone } from '../../lib/services/auth'
 
 // 获取 ComponentManager 实例
 function getComponentManager(): ComponentManager | null {
@@ -44,6 +45,7 @@ Component({
       name: '用户',
       avatar: '',
     },
+    cloudUserId: '' as string,
   },
 
   lifetimes: {
@@ -59,6 +61,8 @@ Component({
       this.initChatSessions()
       // 加载用户信息
       this.loadUserInfo()
+      // 登录并引导完善资料
+      this.ensureAuthAndProfile()
     },
 
     ready() {
@@ -163,6 +167,69 @@ Component({
             avatar: userInfo.avatar || '',
           },
         })
+      }
+    },
+
+    // 登录并引导完善资料（头像/昵称，后续可扩展手机号）
+    async ensureAuthAndProfile() {
+      try {
+        const profile = await getMyProfile()
+        const userId = profile._id
+
+        this.setData({ cloudUserId: userId })
+        if (needProfileGuide(profile)) {
+          const modal = await wx.showModal({
+            title: '完善资料',
+            content: '为更好体验，请设置头像和昵称',
+            confirmText: '去设置',
+            cancelText: '稍后'
+          }) as any
+
+          if (modal && modal.confirm) {
+            // 从微信获取头像昵称（若用户允许）
+            try {
+              const up = await wx.getUserProfile({
+                desc: '用于完善资料'
+              }) as any
+              const nick = up && up.userInfo && up.userInfo.nickName
+              const avatar = up && up.userInfo && up.userInfo.avatarUrl
+              const updated = await updateMyProfile({ nickname: nick || '用户', avatar: avatar || '' })
+              this.setData({
+                userInfo: {
+                  name: updated.nickname || '用户',
+                  avatar: updated.avatar || ''
+                }
+              })
+            } catch (err) {
+              // 如果拒绝授权，给出手动输入路径（简单弹窗演示）
+              const manual = await wx.showModal({
+                title: '手动设置',
+                content: '请手动输入昵称',
+                editable: true,
+                placeholderText: '请输入昵称'
+              }) as any
+              if (manual && manual.confirm) {
+                const nickname = manual.content || '用户'
+                const updated = await updateMyProfile({ nickname })
+                this.setData({
+                  userInfo: {
+                    name: updated.nickname || '用户',
+                    avatar: updated.avatar || ''
+                  }
+                })
+              }
+            }
+          }
+        } else {
+          this.setData({
+            userInfo: {
+              name: profile.nickname || '用户',
+              avatar: profile.avatar || ''
+            }
+          })
+        }
+      } catch (e) {
+        console.warn('登录/资料引导失败或被取消:', e)
       }
     },
 

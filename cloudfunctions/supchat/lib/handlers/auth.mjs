@@ -9,16 +9,9 @@ export default [
       const { code } = body || {}
       if (!code) return { error: '缺少 code' }
 
-      // 使用云函数 openapi，无需配置 appid/secret
-      const data = await cloud.openapi.auth.code2Session({
-        js_code: code,
-        grant_type: 'authorization_code'
-      })
-      if (!data || !data.openid) {
-        return { error: data && data.errmsg ? data.errmsg : 'code2Session 失败' }
-      }
+      const wxContext = cloud.getWXContext()
+      const openid = wxContext.OPENID
 
-      const openid = data.openid
       let user = await User.findByOpenid(openid)
       if (!user) {
         user = await User.create({ openid })
