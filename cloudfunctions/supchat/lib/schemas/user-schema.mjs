@@ -5,6 +5,7 @@ export const userBaseSchema = z.object({
   openid: z.string().min(1, 'openid 必填'),
   nickname: z.string().default(''),
   avatar: z.string().default(''),
+  phone: z.string().default(''),
   gender: z.number().int().min(0).max(2).default(0),
   country: z.string().default(''),
   province: z.string().default(''),

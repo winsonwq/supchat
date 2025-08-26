@@ -12,6 +12,7 @@ export class User {
     this.openid = data.openid || ''
     this.nickname = data.nickname || ''
     this.avatar = data.avatar || ''
+    this.phone = data.phone || ''
     this.gender = data.gender || 0 // 0: 未知, 1: 男, 2: 女
     this.country = data.country || ''
     this.province = data.province || ''

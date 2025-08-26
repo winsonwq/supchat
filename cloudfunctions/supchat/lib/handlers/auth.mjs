@@ -36,6 +36,28 @@ export default [
       return { error: error.message }
     }
   })
+  ,
+  // 绑定手机号
+  POST('/auth/phone', async ({ body }) => {
+    try {
+      const { code, userId } = body || {}
+      if (!code) return { error: '缺少 code' }
+      if (!userId) return { error: '缺少 userId' }
+
+      const resp = await cloud.openapi.phonenumber.getPhoneNumber({ code })
+      const phoneInfo = resp && resp.phoneInfo
+      const phoneNumber = phoneInfo && (phoneInfo.purePhoneNumber || phoneInfo.phoneNumber)
+      if (!phoneNumber) return { error: '获取手机号失败' }
+
+      const user = await User.findById(userId)
+      if (!user) return { error: '用户不存在' }
+      await user.update({ phone: phoneNumber })
+      return { userId: user._id, phone: user.phone }
+    } catch (error) {
+      console.error('绑定手机号失败:', error)
+      return { error: error.message }
+    }
+  })
 ]
 
 
