@@ -1,4 +1,5 @@
 import { db } from '../database.mjs'
+import { userCreateSchema, userUpdateSchema, safeParse } from '../schemas/user-schema.mjs'
 
 // 用户集合名称
 const COLLECTION_NAME = 'users'
@@ -20,6 +21,15 @@ export class User {
     this.updatedAt = data.updatedAt || new Date()
     this.lastLoginAt = data.lastLoginAt || new Date()
     this.isActive = data.isActive !== undefined ? data.isActive : true
+  }
+
+  // 通过 schema 校验并创建 User 实例（用于统一入口）
+  static from(data = {}) {
+    const parsed = safeParse(userCreateSchema, data)
+    if (!parsed.ok) {
+      throw new Error(parsed.error)
+    }
+    return new User(parsed.data)
   }
 
   // 获取用户集合引用
@@ -60,20 +70,19 @@ export class User {
     try {
       const collection = this.getCollection()
       
+      // 使用 schema 校验并合并默认值
+      const parsed = safeParse(userCreateSchema, userData)
+      if (!parsed.ok) {
+        throw new Error(parsed.error)
+      }
+      const validated = parsed.data
+
       // 准备要插入的数据，不包含_id字段，让数据库自动生成
       const userToInsert = {
-        openid: userData.openid || '',
-        nickname: userData.nickname || '',
-        avatar: userData.avatar || '',
-        gender: userData.gender || 0,
-        country: userData.country || '',
-        province: userData.province || '',
-        city: userData.city || '',
-        language: userData.language || 'zh_CN',
+        ...validated,
         createdAt: new Date(),
         updatedAt: new Date(),
-        lastLoginAt: new Date(),
-        isActive: userData.isActive !== undefined ? userData.isActive : true
+        lastLoginAt: new Date()
       }
       
       const result = await collection.add({
@@ -97,8 +106,13 @@ export class User {
   async update(updateData) {
     try {
       const collection = User.getCollection()
+      // 使用 schema 校验更新数据（全部可选）
+      const parsed = safeParse(userUpdateSchema, updateData)
+      if (!parsed.ok) {
+        throw new Error(parsed.error)
+      }
       const updateInfo = {
-        ...updateData,
+        ...parsed.data,
         updatedAt: new Date()
       }
       

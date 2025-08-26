@@ -1,4 +1,5 @@
 import UserService from '../services/user-service.mjs'
+import { userCreateSchema, userUpdateSchema, safeParse } from '../schemas/user-schema.mjs'
 import { GET, POST, PUT, DELETE } from '../router.mjs'
 
 // 用户相关路由处理器
@@ -28,18 +29,15 @@ export default [
   // 创建用户
   POST('/users', async ({ body, method }) => {
     try {
-      const userData = body
-      
-      if (!userData) {
+      const raw = body
+      if (!raw) {
         return { error: '缺少用户数据' }
       }
-      
-      // 验证必填字段
-      if (!userData.openid) {
-        return { error: '缺少 openid 参数' }
+      const parsed = safeParse(userCreateSchema, raw)
+      if (!parsed.ok) {
+        return { error: parsed.error }
       }
-      
-      const user = await UserService.createUser(userData)
+      const user = await UserService.createUser(parsed.data)
       
       return user
     } catch (error) {
@@ -52,17 +50,21 @@ export default [
   PUT('/users/:id', async ({ params, body, method }) => {
     try {
       const { id } = params
-      const updateData = body
+      const raw = body
       
       if (!id) {
         return { error: '缺少用户 ID 参数' }
       }
       
-      if (!updateData) {
+      if (!raw) {
         return { error: '缺少更新数据' }
       }
+      const parsed = safeParse(userUpdateSchema, raw)
+      if (!parsed.ok) {
+        return { error: parsed.error }
+      }
       
-      const user = await UserService.updateUser(id, updateData)
+      const user = await UserService.updateUser(id, parsed.data)
       
       if (!user) {
         return { error: '用户不存在或更新失败' }
