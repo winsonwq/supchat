@@ -2,8 +2,6 @@
 <generic-dialog 
   visible="{{isVisible}}" 
   title="编辑昵称" 
-  show-close="{{true}}" 
-  mask-closable="{{true}}"
   width="600rpx"
   bind:close="onClose"
 >
@@ -17,13 +15,17 @@
       bind:input="onNicknameInput"
     />
     
-    <view class="flex items-center justify-end gap-4">
-      <button class="btn btn-secondary flex-1" bindtap="onCancel">
+    <!-- 底部按钮区域 -->
+    <view class="flex gap-3 mt-6">
+      <button 
+        class="btn btn-secondary flex-1"
+        bindtap="onCancel"
+      >
         取消
       </button>
       <button 
-        class="btn btn-primary flex-1 {{isConfirmDisabled ? 'btn-disabled' : ''}}" 
-        bindtap="{{isConfirmDisabled ? '' : 'onConfirm'}}"
+        class="btn btn-primary flex-1"
+        bindtap="onConfirm"
       >
         确定
       </button>

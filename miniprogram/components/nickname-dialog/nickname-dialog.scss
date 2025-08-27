@@ -1,8 +1,15 @@
-/* 昵称编辑对话框 - 完全使用共享组件，无需自定义样式 */
+/* 昵称编辑对话框样式 */
 
-/* 禁用状态的按钮样式 */
-.btn-disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
+.nickname-dialog-content {
+  min-width: 500rpx;
+}
+
+/* 按钮布局样式 */
+.nickname-dialog-content .flex {
+  gap: 24rpx;
+}
+
+/* 确保按钮在对话框中有合适的间距 */
+.nickname-dialog-content button {
+  min-height: 88rpx;
 }

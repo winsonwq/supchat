@@ -20,7 +20,6 @@ Component({
    */
   data: {
     nickname: '',
-    isConfirmDisabled: true, // 新增：确认按钮禁用状态
   },
 
   observers: {
@@ -28,7 +27,6 @@ Component({
       if (isVisible) {
         this.setData({
           nickname: currentNickname || '',
-          isConfirmDisabled: !(currentNickname || '').trim()
         })
         console.log('Dialog opened, nickname set to:', this.data.nickname)
       }
@@ -71,12 +69,10 @@ Component({
       const value = e.detail.value
       console.log('Input event triggered:', e.detail, 'Value:', value)
       
-      const isDisabled = !value.trim()
       this.setData({
         nickname: value,
-        isConfirmDisabled: isDisabled
       })
-      console.log('Nickname updated:', this.data.nickname, 'Button disabled:', isDisabled)
+      console.log('Nickname updated:', this.data.nickname)
     },
   },
 })

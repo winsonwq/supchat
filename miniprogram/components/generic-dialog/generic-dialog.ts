@@ -44,7 +44,12 @@ Component({
   /**
    * 组件的初始数据
    */
-  data: {},
+  data: {
+    // 动画状态：'hidden', 'showing', 'visible', 'hiding'
+    animationState: 'hidden',
+    // 是否应该渲染DOM
+    shouldRender: false
+  },
 
   /**
    * 组件的方法列表
@@ -70,6 +75,8 @@ Component({
      * 关闭对话框
      */
     onClose() {
+      this.hide()
+      // 触发关闭事件
       this.triggerEvent('close')
     },
 
@@ -77,14 +84,43 @@ Component({
      * 显示对话框
      */
     show() {
-      this.setData({ visible: true })
+      this.setData({ 
+        shouldRender: true,
+        animationState: 'showing'
+      })
+      
+      // 等待下一帧确保DOM已渲染
+      setTimeout(() => {
+        this.setData({ animationState: 'visible' })
+      }, 16)
     },
 
     /**
      * 隐藏对话框
      */
     hide() {
-      this.setData({ visible: false })
+      this.setData({ animationState: 'hiding' })
+      
+      // 等待动画结束后再隐藏DOM
+      setTimeout(() => {
+        this.setData({ 
+          animationState: 'hidden',
+          shouldRender: false
+        })
+      }, 300) // 300ms 是CSS动画的持续时间
+    }
+  },
+
+  /**
+   * 监听属性变化
+   */
+  observers: {
+    'visible': function(newVal: boolean) {
+      if (newVal) {
+        this.show()
+      } else {
+        this.hide()
+      }
     }
   }
 })

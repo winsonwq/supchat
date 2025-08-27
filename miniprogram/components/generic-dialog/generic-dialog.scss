@@ -11,13 +11,25 @@
   justify-content: center;
   z-index: 1000;
   opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease;
+}
+
+/* 显示动画 */
+.generic-dialog-overlay.showing {
+  opacity: 0;
 }
 
 .generic-dialog-overlay.visible {
   opacity: 1;
-  visibility: visible;
+}
+
+/* 隐藏动画 */
+.generic-dialog-overlay.hiding {
+  opacity: 0;
+}
+
+.generic-dialog-overlay.hidden {
+  display: none;
 }
 
 .generic-dialog-container {
@@ -33,6 +45,10 @@
 
 .generic-dialog-overlay.visible .generic-dialog-container {
   transform: scale(1);
+}
+
+.generic-dialog-overlay.hiding .generic-dialog-container {
+  transform: scale(0.8);
 }
 
 .generic-dialog-header {
