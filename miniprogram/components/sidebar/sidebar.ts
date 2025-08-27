@@ -3,8 +3,8 @@ import { UserInfo } from '../../lib/types/user-info'
 import { ChatSession } from '../../lib/types/chat-history'
 import { updateMyProfile } from '../../lib/services/auth'
 import { rootStore } from '../../lib/state/states/root'
+import { updateUserProfile } from '../../lib/state/actions/user'
 import { subscribe } from '../../lib/state/bind'
-import { updateUserAvatar, updateUserName } from '../../lib/state/actions/user'
 
 Component({
   /**
@@ -91,30 +91,31 @@ Component({
    */
   methods: {
     // 通过 open-type="chooseAvatar" 获取系统头像
-    onChooseAvatar(e: any) {
+    async onChooseAvatar(e: any) {
       try {
         const avatarUrl = e?.detail?.avatarUrl
         if (!avatarUrl) return
 
-        // 更新云端与全局 store
-        updateMyProfile({ avatar: avatarUrl, nickname: (this.data.localUserInfo?.name || '').trim() || undefined })
-          .then(() => {
-            rootStore.dispatch(updateUserAvatar(avatarUrl))
-            const current = this.data.localUserInfo
-            this.setData({
-              localUserInfo: {
-                id: current?.id || '',
-                name: (current?.name && current.name.trim()) ? current.name : '用户',
-                avatar: avatarUrl,
-                isAuthorized: current?.isAuthorized ?? false,
-                createdAt: current?.createdAt || Date.now(),
-                updatedAt: Date.now(),
-              }
-            })
-            wx.showToast({ title: '头像更新成功', icon: 'success' })
-          })
-          .catch(() => wx.showToast({ title: '头像更新失败', icon: 'none' }))
-      } catch (_) {}
+        // 更新头像到云端和本地
+        const updated = await rootStore.dispatch(updateUserProfile({ avatar: avatarUrl }))
+        console.log('头像已更新:', updated)
+        
+        const current = this.data.localUserInfo
+        this.setData({
+          localUserInfo: {
+            id: current?.id || '',
+            name: (current?.name && current.name.trim()) ? current.name : '用户',
+            avatar: avatarUrl,
+            isAuthorized: current?.isAuthorized ?? false,
+            createdAt: current?.createdAt || Date.now(),
+            updatedAt: Date.now(),
+          }
+        })
+        wx.showToast({ title: '头像更新成功', icon: 'success' })
+      } catch (error) {
+        console.error('更新头像失败:', error)
+        wx.showToast({ title: '头像更新失败', icon: 'none' })
+      }
     },
 
     // 编辑昵称
@@ -134,12 +135,11 @@ Component({
         }
 
         // 更新昵称到云端和本地
-        await updateMyProfile({ 
-          nickname: nickname.trim(), 
-          avatar: (this.data.localUserInfo?.avatar || '').trim() || undefined 
-        })
-        
-        rootStore.dispatch(updateUserName(nickname.trim()))
+        const updated = await rootStore.dispatch(updateUserProfile({ 
+          nickname: nickname.trim(),
+          avatar: (this.data.localUserInfo?.avatar || '').trim() || undefined
+        }))
+        console.log('用户资料已更新:', updated)
         
         const current = this.data.localUserInfo
         this.setData({

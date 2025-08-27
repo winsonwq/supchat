@@ -1,5 +1,3 @@
-import { createStore } from '../store'
-
 export interface UserState {
   id: string
   name: string
@@ -16,9 +14,7 @@ export const initialUserState: UserState = {
 
 export type UserAction =
   | { type: 'user/setProfile'; payload: { id?: string; name?: string; avatar?: string; updatedAt?: number } }
-  | { type: 'user/updateName'; payload: { name: string } }
-  | { type: 'user/updateAvatar'; payload: { avatar: string } }
-  | { type: 'user/clear' }
+  | { type: 'user/updateProfile'; payload: { name?: string; avatar?: string; updatedAt?: number } }
 
 export function userReducer(state: UserState = initialUserState, action: UserAction): UserState {
   switch (action.type) {
@@ -31,25 +27,16 @@ export function userReducer(state: UserState = initialUserState, action: UserAct
         updatedAt: p.updatedAt ?? Date.now(),
       }
     }
-    case 'user/updateName': {
-      const { name } = action.payload
-      return { ...state, name, updatedAt: Date.now() }
+    case 'user/updateProfile': {
+      const { name, avatar, updatedAt } = action.payload
+      return {
+        ...state,
+        ...(name !== undefined && { name }),
+        ...(avatar !== undefined && { avatar }),
+        updatedAt: updatedAt ?? Date.now(),
+      }
     }
-    case 'user/updateAvatar': {
-      const { avatar } = action.payload
-      return { ...state, avatar, updatedAt: Date.now() }
-    }
-    case 'user/clear':
-      return { ...initialUserState, updatedAt: Date.now() }
     default:
       return state
   }
 }
-
-export const userStore = createStore<UserState, UserAction>({
-  reducer: userReducer,
-  preloadedState: initialUserState,
-  name: 'user',
-})
-
-

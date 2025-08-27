@@ -7,6 +7,7 @@ import type {
 	Selector,
 	Store,
 	Thunk,
+	AsyncThunk,
 } from './types';
 import { defaultEquality, scheduleMicrotask, shallowEqual } from './utils';
 
@@ -25,10 +26,15 @@ export function createStore<State, A extends Action = Action>(
 		return currentState;
 	}
 
-	function dispatch(action: A | Thunk<State, A>): unknown {
+	function dispatch(action: A | Thunk<State, A> | AsyncThunk<State, A, unknown>): unknown {
 		if (destroyed) return;
 		if (typeof action === 'function') {
-			return (action as Thunk<State, A>)(dispatch, getState);
+			const result = (action as Thunk<State, A> | AsyncThunk<State, A, unknown>)(dispatch, getState);
+			// 如果返回的是 Promise，则返回该 Promise
+			if (result && typeof result === 'object' && 'then' in result) {
+				return result;
+			}
+			return result;
 		}
 		const nextState = currentReducer(currentState, action);
 		if (Object.is(nextState, currentState)) return;

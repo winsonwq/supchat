@@ -8,6 +8,11 @@ export type Thunk<State, A extends Action = Action, R = unknown> = (
 	getState: () => State
 ) => R;
 
+export type AsyncThunk<State, A extends Action = Action, R = unknown> = (
+	dispatch: (action: A | Thunk<State, A> | AsyncThunk<State, A, R>) => unknown,
+	getState: () => State
+) => Promise<R>;
+
 export type Reducer<State, A extends Action = Action> = (
 	state: State,
 	action: A
@@ -23,7 +28,7 @@ export type EqualityFn<T> = (a: T, b: T) => boolean;
 
 export interface Store<State, A extends Action = Action> {
 	getState(): State;
-	dispatch(action: A | Thunk<State, A>): unknown;
+	dispatch(action: A | Thunk<State, A> | AsyncThunk<State, A, unknown>): unknown;
 	subscribe<Selected = State>(
 		listener: ListenerCallback<Selected>,
 		selector?: Selector<State, Selected>,
