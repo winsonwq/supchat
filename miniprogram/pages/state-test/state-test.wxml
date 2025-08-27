@@ -1,0 +1,33 @@
+<view class="p-4">
+	<view class="text-xl font-bold mb-2">State Test</view>
+
+	<view class="mb-4">
+		<view class="mb-2">Counter: {{counter.value}}</view>
+		<button bindtap="onInc">+1</button>
+		<button class="ml-2" bindtap="onDec">-1</button>
+	</view>
+
+	<view class="mb-4">
+		<view class="font-bold mb-2">Todos</view>
+		<form bindsubmit="onAdd">
+			<input name="text" placeholder="输入待办" />
+			<button formType="submit">添加</button>
+		</form>
+		<view class="mt-2">
+			<block wx:for="{{todos.items}}" wx:key="id">
+				<view class="flex items-center mb-1">
+					<checkbox checked="{{item.done}}" bindtap="onToggle" data-id="{{item.id}}"></checkbox>
+					<text class="ml-2 {{item.done ? 'line-through text-gray-500' : ''}}">{{item.text}}</text>
+				</view>
+			</block>
+		</view>
+		<button class="mt-2" bindtap="onClear">清除已完成</button>
+	</view>
+
+	<view class="mb-4">
+		<view class="font-bold mb-2">多订阅汇总</view>
+		<text>总计：{{summary.total}}，已完成：{{summary.done}}</text>
+	</view>
+</view>
+
+

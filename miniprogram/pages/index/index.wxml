@@ -15,6 +15,7 @@
   chatSessions="{{ chatSessions }}"
   currentSessionId="{{ currentSessionId }}"
   userInfo="{{ userInfo }}"
+  cloudUserId="{{ cloudUserId }}"
   bind:close="closeSidebar"
   bind:selectChatSession="selectChatSession"
   bind:createNewTopic="createNewTopic"

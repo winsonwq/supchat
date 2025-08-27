@@ -10,6 +10,13 @@
     "miniprogram": {
       "list": [
         {
+          "name": "pages/state-test/state-test",
+          "pathName": "pages/state-test/state-test",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "pages/storage-test/storage-test",
           "pathName": "pages/storage-test/storage-test",
           "query": "",

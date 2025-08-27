@@ -9,7 +9,8 @@
     "pages/mcp-list/mcp-list",
     "pages/mcp-detail/mcp-detail",
     "pages/mcp-edit/mcp-edit",
-    "pages/mcp-add/mcp-add"
+    "pages/mcp-add/mcp-add",
+    "pages/state-test/state-test"
   ],
   "window": {
     "navigationBarTextStyle": "black",

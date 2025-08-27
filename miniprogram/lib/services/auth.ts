@@ -30,6 +30,12 @@ export async function bindPhone(
   return res.data as { userId: string; phone: string }
 }
 
+export async function ensureProfile(): Promise<UserProfile> {
+  const res = await storage.create<any>('/profile/ensure-get', {})
+  if (!res.ok || !res.data) throw new Error(res.error || '确保用户资料失败')
+  return res.data as UserProfile
+}
+
 export async function getMyProfile(): Promise<UserProfile> {
   const res = await storage.get<any>(`/profile`)
   if (!res.ok || !res.data) throw new Error(res.error || '获取资料失败')
