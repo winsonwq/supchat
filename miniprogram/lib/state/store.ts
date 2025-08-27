@@ -6,6 +6,7 @@ import type {
 	Reducer,
 	Selector,
 	Store,
+	Thunk,
 } from './types';
 import { defaultEquality, scheduleMicrotask, shallowEqual } from './utils';
 
@@ -24,12 +25,16 @@ export function createStore<State, A extends Action = Action>(
 		return currentState;
 	}
 
-	function dispatch(action: A): void {
+	function dispatch(action: A | Thunk<State, A>): unknown {
 		if (destroyed) return;
+		if (typeof action === 'function') {
+			return (action as Thunk<State, A>)(dispatch, getState);
+		}
 		const nextState = currentReducer(currentState, action);
 		if (Object.is(nextState, currentState)) return;
 		currentState = nextState;
 		enqueueNotify();
+		return undefined;
 	}
 
 	function enqueueNotify(): void {

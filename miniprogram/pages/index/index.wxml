@@ -1,6 +1,6 @@
 <!--index.wxml-->
 <navigation-bar
-  title="AI助手"
+  title="SupChat"
   back="{{ false }}"
   showSidebar="{{ true }}"
   color="black"

@@ -1,0 +1,32 @@
+<!-- 昵称编辑对话框 -->
+<generic-dialog 
+  visible="{{isVisible}}" 
+  title="编辑昵称" 
+  show-close="{{true}}" 
+  mask-closable="{{true}}"
+  width="600rpx"
+  bind:close="onClose"
+>
+  <view class="flex flex-col gap-4">
+    <form-input
+      type="nickname"
+      value="{{nickname}}"
+      placeholder="请输入昵称"
+      maxlength="{{20}}"
+      helper="{{nickname.length}}/20"
+      bind:input="onNicknameInput"
+    />
+    
+    <view class="flex items-center justify-end gap-4">
+      <button class="btn btn-secondary flex-1" bindtap="onCancel">
+        取消
+      </button>
+      <button 
+        class="btn btn-primary flex-1 {{isConfirmDisabled ? 'btn-disabled' : ''}}" 
+        bindtap="{{isConfirmDisabled ? '' : 'onConfirm'}}"
+      >
+        确定
+      </button>
+    </view>
+  </view>
+</generic-dialog>

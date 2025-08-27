@@ -4,14 +4,17 @@ import { RenderNode, StreamContentType } from '../../lib/mcp/types.js'
 import { ToolCall, TowxmlNode, WxEvent } from '../../lib/mcp/types.js'
 import { RenderMessage, Message } from '../../lib/types/message' // 使用新的消息类型
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
-import { UserInfoStorage } from '../../lib/storage/user-info-storage'
 import { UserInfo } from '../../lib/types/user-info'
 import { ChatSession } from '../../lib/types/chat-history'
 import { BaseComponent } from '../../lib/mcp/components/base-component.js'
 import { processMessageContent as processContentWithParser } from '../../lib/utils/content-parser.js'
 
 import { ComponentManager } from '../../lib/mcp/components/component-manager.js'
-import { ensureProfile, bindPhone } from '../../lib/services/auth'
+import { ensureProfile } from '../../lib/services/auth'
+import { rootStore } from '../../lib/state/states/root'
+import { subscribe } from '../../lib/state/bind'
+import { selectUserBrief } from '../../lib/state/selectors/user'
+import { fetchProfile } from '../../lib/state/actions/user'
 
 // 获取 ComponentManager 实例
 function getComponentManager(): ComponentManager | null {
@@ -61,6 +64,9 @@ Component({
       this.initChatSessions()
       // 加载用户信息
       this.loadUserInfo()
+      // 订阅全局用户信息
+      this.subscribeUser()
+
       // 登录并引导完善资料
       this.ensureAuthAndProfile()
     },
@@ -75,6 +81,9 @@ Component({
     detached() {
       // 页面卸载时取消当前请求
       AIService.getInstance().cancelCurrentRequest()
+      // 取消用户订阅
+      const unsub = (this as any)._unsubUser as (() => void) | undefined
+      unsub && unsub()
     },
   },
 
@@ -91,6 +100,19 @@ Component({
     // 获取 AI 服务实例
     getAIService(): AIService {
       return AIService.getInstance()
+    },
+
+    // 订阅全局用户信息
+    subscribeUser() {
+      const unsub = subscribe(rootStore, (s) => selectUserBrief((s as any).user), (u) => {
+        this.setData({
+          userInfo: {
+            name: u.name,
+            avatar: u.avatar || '',
+          },
+        })
+      })
+      ;(this as any)._unsubUser = unsub
     },
 
     // 计算 viewport 高度
@@ -157,18 +179,8 @@ Component({
       }
     },
 
-    // 加载用户信息
-    loadUserInfo() {
-      const userInfo = UserInfoStorage.getUserInfo()
-      if (userInfo) {
-        this.setData({
-          userInfo: {
-            name: userInfo.name,
-            avatar: userInfo.avatar || '',
-          },
-        })
-      }
-    },
+    // 加载用户信息（已由全局 store 订阅驱动，无需本地缓存）
+    loadUserInfo() {},
 
     // 登录并确保用户资料存在
     async ensureAuthAndProfile() {
@@ -176,13 +188,10 @@ Component({
         const profile = await ensureProfile()
         const userId = profile._id
 
-        this.setData({ 
-          cloudUserId: userId,
-          userInfo: {
-            name: profile.nickname || '用户',
-            avatar: profile.avatar || ''
-          }
-        })
+        // 更新全局用户状态（也可直接用 fetchProfile）
+        await (rootStore as any).dispatch(fetchProfile())
+
+        this.setData({ cloudUserId: userId })
       } catch (e) {
         console.warn('登录/资料获取失败:', e)
       }

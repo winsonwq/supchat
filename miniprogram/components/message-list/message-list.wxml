@@ -6,7 +6,7 @@
   <!-- 欢迎消息 -->
   <view wx:if="{{ messages.length === 0 }}" class="flex justify-center items-center h-full">
     <view class="rounded-2xl text-center welcome-container">
-      <text class="welcome-title">欢迎使用 SupChat</text>
+      <text class="welcome-title">欢迎使用</text>
       <text class="welcome-subtitle">有什么可以帮助你</text>
     </view>
   </view>

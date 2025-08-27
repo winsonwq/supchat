@@ -1,8 +1,10 @@
 import getSafeArea from '../../lib/utils/safe-area'
-import { UserInfoStorage } from '../../lib/storage/user-info-storage'
 import { UserInfo } from '../../lib/types/user-info'
 import { ChatSession } from '../../lib/types/chat-history'
 import { updateMyProfile } from '../../lib/services/auth'
+import { rootStore } from '../../lib/state/states/root'
+import { subscribe } from '../../lib/state/bind'
+import { updateUserAvatar, updateUserName } from '../../lib/state/actions/user'
 
 Component({
   /**
@@ -41,6 +43,7 @@ Component({
     localUserInfo: null as UserInfo | null,
     isEditMode: false,
     sortedChatSessions: [] as ChatSession[],
+    showNicknameDialog: false,
   },
 
   lifetimes: {
@@ -55,9 +58,13 @@ Component({
         },
       })
       
-      // 加载本地用户信息
-      this.loadUserInfo()
+      // 订阅全局用户信息
+      this.subscribeUser()
     },
+    detached() {
+      const unsub = (this as any)._unsubUser as (() => void) | undefined
+      unsub && unsub()
+    }
   },
 
   observers: {
@@ -83,6 +90,102 @@ Component({
    * 组件的方法列表
    */
   methods: {
+    // 通过 open-type="chooseAvatar" 获取系统头像
+    onChooseAvatar(e: any) {
+      try {
+        const avatarUrl = e?.detail?.avatarUrl
+        if (!avatarUrl) return
+
+        // 更新云端与全局 store
+        updateMyProfile({ avatar: avatarUrl, nickname: (this.data.localUserInfo?.name || '').trim() || undefined })
+          .then(() => {
+            rootStore.dispatch(updateUserAvatar(avatarUrl))
+            const current = this.data.localUserInfo
+            this.setData({
+              localUserInfo: {
+                id: current?.id || '',
+                name: (current?.name && current.name.trim()) ? current.name : '用户',
+                avatar: avatarUrl,
+                isAuthorized: current?.isAuthorized ?? false,
+                createdAt: current?.createdAt || Date.now(),
+                updatedAt: Date.now(),
+              }
+            })
+            wx.showToast({ title: '头像更新成功', icon: 'success' })
+          })
+          .catch(() => wx.showToast({ title: '头像更新失败', icon: 'none' }))
+      } catch (_) {}
+    },
+
+    // 编辑昵称
+    onEditNickname() {
+      this.setData({
+        showNicknameDialog: true
+      })
+    },
+
+    // 昵称编辑确认
+    async onNicknameConfirm(e: any) {
+      try {
+        const { nickname } = e.detail
+        if (!nickname || !nickname.trim()) {
+          wx.showToast({ title: '昵称不能为空', icon: 'none' })
+          return
+        }
+
+        // 更新昵称到云端和本地
+        await updateMyProfile({ 
+          nickname: nickname.trim(), 
+          avatar: (this.data.localUserInfo?.avatar || '').trim() || undefined 
+        })
+        
+        rootStore.dispatch(updateUserName(nickname.trim()))
+        
+        const current = this.data.localUserInfo
+        this.setData({
+          localUserInfo: {
+            id: current?.id || '',
+            name: nickname.trim(),
+            avatar: current?.avatar || '',
+            isAuthorized: current?.isAuthorized ?? false,
+            createdAt: current?.createdAt || Date.now(),
+            updatedAt: Date.now(),
+          }
+        })
+        
+        wx.showToast({ title: '昵称已更新', icon: 'success' })
+        
+        // 保存成功后关闭对话框
+        this.onNicknameDialogClose()
+      } catch (err) {
+        console.error('更新昵称失败:', err)
+        wx.showToast({ title: '更新失败', icon: 'none' })
+        // 保存失败时不关闭对话框，让用户可以重试
+      }
+    },
+
+    // 昵称编辑对话框关闭
+    onNicknameDialogClose() {
+      this.setData({
+        showNicknameDialog: false
+      })
+    },
+    // 订阅全局用户信息
+    subscribeUser() {
+      // @ts-expect-error 保存到实例
+      this._unsubUser = subscribe(rootStore, (s) => s.user, (u) => {
+        const current = this.data.localUserInfo
+        const merged: UserInfo = {
+          id: current?.id || '',
+          name: (u.name && u.name.trim()) ? u.name : (current?.name || '用户'),
+          avatar: (u.avatar && u.avatar.trim()) ? u.avatar : (current?.avatar || ''),
+          isAuthorized: current?.isAuthorized ?? false,
+          createdAt: current?.createdAt || Date.now(),
+          updatedAt: Date.now(),
+        }
+        this.setData({ localUserInfo: merged })
+      })
+    },
     // 关闭侧边栏
     closeSidebar() {
       this.triggerEvent('close', {}, {})
@@ -185,303 +288,7 @@ Component({
       return `${date.getMonth() + 1}月${date.getDate()}日`
     },
 
-    // 加载用户信息
-    loadUserInfo() {
-      const userInfo = UserInfoStorage.getUserInfo()
-      this.setData({
-        localUserInfo: userInfo
-      })
-    },
-
-    // 显示用户菜单或授权
-    showUserMenu() {
-      const localUserInfo = this.data.localUserInfo
-      
-      if (!localUserInfo || !localUserInfo.isAuthorized) {
-        // 未授权，弹出授权选项
-        this.requestAuthorization()
-      } else {
-        // 已授权，显示用户设置选项
-        this.showUserSettings()
-      }
-    },
-
-    // 请求微信授权
-    requestAuthorization() {
-      wx.showModal({
-        title: '用户授权',
-        content: '是否获取您的微信头像和昵称？这将帮助我们为您提供更好的服务。',
-        confirmText: '授权',
-        cancelText: '取消',
-        success: (res) => {
-          if (res.confirm) {
-            this.getUserProfile()
-          } else {
-            // 用户取消授权，显示手动设置选项
-            this.showManualSettings()
-          }
-        }
-      })
-    },
-
-    // 获取微信用户信息
-    async getUserProfile() {
-      try {
-        const res = await wx.getUserProfile({
-          desc: '用于完善用户资料'
-        })
-        
-        console.log('获取用户信息成功:', res.userInfo)
-        
-        // 调用云函数更新 profile
-        if (this.data.cloudUserId) {
-          const updatedProfile = await updateMyProfile({
-            nickname: res.userInfo.nickName,
-            avatar: res.userInfo.avatarUrl
-          })
-          
-          // 基于完整的本地用户信息构建，补齐必需字段
-          const baseUser = this.data.localUserInfo || UserInfoStorage.createDefaultUserInfo()
-          const updatedUserInfo: UserInfo = {
-            ...baseUser,
-            name: updatedProfile.nickname || res.userInfo.nickName,
-            avatar: updatedProfile.avatar || res.userInfo.avatarUrl,
-            isAuthorized: true,
-            updatedAt: Date.now()
-          }
-
-          // 持久化本地缓存
-          UserInfoStorage.saveUserInfo(updatedUserInfo)
-          
-          this.setData({
-            localUserInfo: updatedUserInfo
-          })
-          
-          // 通知父组件用户信息已更新
-          this.triggerEvent('userInfoUpdated', { userInfo: updatedUserInfo })
-          
-          wx.showToast({
-            title: '授权成功',
-            icon: 'success'
-          })
-        } else {
-          wx.showToast({
-            title: '用户ID不存在，请重新登录',
-            icon: 'error'
-          })
-        }
-      } catch (err) {
-        console.error('获取用户信息失败:', err)
-        wx.showToast({
-          title: '授权失败',
-          icon: 'none'
-        })
-        // 授权失败，显示手动设置选项
-        this.showManualSettings()
-      }
-    },
-
-    // 显示用户设置选项
-    showUserSettings() {
-      wx.showActionSheet({
-        itemList: ['修改昵称', '更换头像', '清除用户信息'],
-        success: (res) => {
-          switch (res.tapIndex) {
-            case 0:
-              this.editUserName()
-              break
-            case 1:
-              this.editUserAvatar()
-              break
-            case 2:
-              this.clearUserInfo()
-              break
-          }
-        }
-      })
-    },
-
-    // 显示手动设置选项
-    showManualSettings() {
-      wx.showActionSheet({
-        itemList: ['设置昵称', '重新授权'],
-        success: (res) => {
-          switch (res.tapIndex) {
-            case 0:
-              this.editUserName()
-              break
-            case 1:
-              this.requestAuthorization()
-              break
-          }
-        }
-      })
-    },
-
-    // 编辑用户名
-    async editUserName() {
-      const currentName = this.data.localUserInfo?.name || '用户'
-      
-      try {
-        const res = await wx.showModal({
-          title: '修改昵称',
-          placeholderText: '请输入新昵称',
-          editable: true,
-          content: currentName
-        })
-        
-        if (res.confirm && res.content) {
-          const newName = res.content.trim()
-          
-          if (!newName) {
-            wx.showToast({
-              title: '昵称不能为空',
-              icon: 'none'
-            })
-            return
-          }
-
-          // 调用云函数更新 profile
-          if (this.data.cloudUserId) {
-            const updatedProfile = await updateMyProfile({
-              nickname: newName
-            })
-            
-            // 基于完整的本地用户信息构建
-            const baseUser = this.data.localUserInfo || UserInfoStorage.createDefaultUserInfo()
-            const updatedUserInfo: UserInfo = {
-              ...baseUser,
-              name: updatedProfile.nickname || newName,
-              updatedAt: Date.now()
-            }
-            // 持久化本地缓存
-            UserInfoStorage.saveUserInfo(updatedUserInfo)
-            
-            this.setData({
-              localUserInfo: updatedUserInfo
-            })
-
-            // 通知父组件用户信息已更新
-            this.triggerEvent('userInfoUpdated', { userInfo: updatedUserInfo })
-
-            wx.showToast({
-              title: '修改成功',
-              icon: 'success'
-            })
-          } else {
-            wx.showToast({
-              title: '用户ID不存在，请重新登录',
-              icon: 'error'
-            })
-          }
-        }
-      } catch (err) {
-        console.error('修改昵称失败:', err)
-        wx.showToast({
-          title: '修改失败',
-          icon: 'none'
-        })
-      }
-    },
-
-    // 编辑用户头像
-    editUserAvatar() {
-      wx.showActionSheet({
-        itemList: ['从相册选择', '重新授权获取微信头像'],
-        success: (res) => {
-          switch (res.tapIndex) {
-            case 0:
-              this.chooseImageFromAlbum()
-              break
-            case 1:
-              this.getUserProfile()
-              break
-          }
-        }
-      })
-    },
-
-    // 从相册选择图片
-    async chooseImageFromAlbum() {
-      try {
-        const res = await wx.chooseMedia({
-          count: 1,
-          mediaType: ['image'],
-          sourceType: ['album']
-        })
-        
-        const tempFiles = res.tempFiles
-        if (tempFiles && tempFiles.length > 0) {
-          const tempFilePath = tempFiles[0].tempFilePath
-          
-          // 调用云函数更新 profile
-          if (this.data.cloudUserId) {
-            const updatedProfile = await updateMyProfile({
-              avatar: tempFilePath
-            })
-            
-            // 基于完整的本地用户信息构建
-            const baseUser = this.data.localUserInfo || UserInfoStorage.createDefaultUserInfo()
-            const updatedUserInfo: UserInfo = {
-              ...baseUser,
-              avatar: updatedProfile.avatar || tempFilePath,
-              updatedAt: Date.now()
-            }
-            // 持久化本地缓存
-            UserInfoStorage.saveUserInfo(updatedUserInfo)
-            
-            this.setData({
-              localUserInfo: updatedUserInfo
-            })
-
-            // 通知父组件用户信息已更新
-            this.triggerEvent('userInfoUpdated', { userInfo: updatedUserInfo })
-
-            wx.showToast({
-              title: '头像更新成功',
-              icon: 'success'
-            })
-          } else {
-            wx.showToast({
-              title: '用户ID不存在，请重新登录',
-              icon: 'error'
-            })
-          }
-        }
-      } catch (err) {
-        console.error('选择图片失败:', err)
-        wx.showToast({
-          title: '选择图片失败',
-          icon: 'none'
-        })
-      }
-    },
-
-    // 清除用户信息
-    clearUserInfo() {
-      wx.showModal({
-        title: '清除用户信息',
-        content: '确定要清除所有用户信息吗？此操作不可恢复。',
-        confirmText: '确定',
-        cancelText: '取消',
-        success: (res) => {
-          if (res.confirm) {
-            UserInfoStorage.clearUserInfo()
-            this.setData({
-              localUserInfo: null
-            })
-
-            // 通知父组件用户信息已清除
-            this.triggerEvent('userInfoUpdated', { userInfo: null })
-
-            wx.showToast({
-              title: '清除成功',
-              icon: 'success'
-            })
-          }
-        }
-      })
-    },
+    // 组件其他方法...
 
     // 打开设置页面
     openSettings() {

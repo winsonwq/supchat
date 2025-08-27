@@ -1,0 +1,8 @@
+/* 昵称编辑对话框 - 完全使用共享组件，无需自定义样式 */
+
+/* 禁用状态的按钮样式 */
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}

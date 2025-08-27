@@ -45,7 +45,7 @@
             aria-role="button"
             aria-label="侧边栏"
           >
-            <view class="weui-navigation-bar__button weui-navigation-bar__btn_sidebar"></view>
+            <svg-icon name="sidebar" size="40"></svg-icon>
           </view>
         </view>
       </block>

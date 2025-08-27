@@ -6,7 +6,7 @@
   right: 0;
   bottom: 0;
   background-color: rgba(255, 255, 255, 0.6);
-  z-index: 9998;
+  z-index: 999;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -27,7 +27,7 @@
   width: 280px;
   height: 100vh;
   background-color: #fff;
-  z-index: 9999;
+  z-index: 1000;
   transform: translateX(-100%);
   transition: transform 0.3s ease;
   display: flex;
@@ -237,7 +237,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
+  padding: 16px 16px 32px 16px;
   border-top: 1px solid #f0f0f0;
   background-color: #fafafa;
   gap: 32rpx;
@@ -248,18 +248,13 @@
   align-items: center;
   flex: 1;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  padding: 4px;
   border-radius: 6px;
-}
-
-.user-info:hover {
-  background-color: #f0f0f0;
+  gap: 8px;
 }
 
 .user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 40px !important;
+  height: 40px !important;
   border-radius: 50%;
   background-color: #bbb;
   display: flex;
@@ -269,10 +264,9 @@
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease;
-}
-
-.user-avatar:hover {
-  transform: scale(1.05);
+  border: none;
+  outline: none;
+  padding: 0;
 }
 
 .avatar-image {
@@ -283,22 +277,35 @@
 
 .avatar-text {
   color: #fff;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
+  display: inline-block;
 }
 
 .user-name-wrapper {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-}
+  margin-left: 16rpx;
 
-.user-name {
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
-  line-height: 1.2;
+  .user-name-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    line-height: 1.4;
+    text-align: left;
+    font-size: inherit;
+    color: inherit;
+    justify-content: flex-start;
+
+    &::after {
+      border: none;
+    }
+
+    .user-name {
+      color: #333;
+      font-weight: 500;
+    }
+  }
 }
 
 .auth-hint {
@@ -307,25 +314,6 @@
   line-height: 1;
 }
 
-.settings-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+.user-avatar::after {
   border: none;
-  outline: none;
-  background-color: transparent;
-  padding: 0;
-  font-size: inherit;
-  line-height: inherit;
 }
-
-.settings-btn:hover {
-  background-color: #e0e0e0;
-}
-
-/* 设置图标样式由 svg-icon 组件处理 */

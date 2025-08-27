@@ -2,7 +2,8 @@
   "component": true,
   "styleIsolation": "apply-shared",
   "usingComponents": {
+    "generic-dialog": "../generic-dialog/generic-dialog",
     "svg-icon": "../svg-icon/svg-icon",
-    "nickname-dialog": "../nickname-dialog/nickname-dialog"
+    "form-input": "../form-input/form-input"
   }
 }
