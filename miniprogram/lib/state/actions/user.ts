@@ -1,11 +1,11 @@
-import type { UserAction } from '../states/user'
+import { UserAction } from '../states/user'
 import type { Thunk } from '../types'
 import {
   ensureProfile,
   updateMyProfile,
   UserProfile,
 } from '../../services/auth'
-import { UserInfo } from '../../types/user-info'
+import { ProfileVO } from '../../types/profile'
 import { createAsyncThunk } from '../action'
 
 export interface UpdateUserProfileParams {
@@ -13,7 +13,7 @@ export interface UpdateUserProfileParams {
   avatar?: string
 }
 
-export const setUserProfile = (payload: UserInfo): UserAction => ({
+export const setUserProfile = (payload: ProfileVO): UserAction => ({
   type: 'user/setProfile',
   payload,
 })

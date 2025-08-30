@@ -1,9 +1,10 @@
 import getSafeArea from '../../lib/utils/safe-area'
-import { UserInfo } from '../../lib/types/user-info'
+import { ProfileVO } from '../../lib/types/profile'
 import { ChatSession } from '../../lib/types/chat-history'
 import { appDispatch, rootStore } from '../../lib/state/states/root'
 import { updateUserProfile } from '../../lib/state/actions/user'
 import { subscribe } from '../../lib/state/bind'
+import { UserState } from '../../lib/state/states/user'
 
 Component({
   /**
@@ -39,7 +40,7 @@ Component({
    * 组件的初始数据
    */
   data: {
-    localUserInfo: null as UserInfo | null,
+    localUserInfo: null as ProfileVO | null,
     isEditMode: false,
     sortedChatSessions: [] as ChatSession[],
     showNicknameDialog: false,
@@ -173,16 +174,7 @@ Component({
     subscribeUser() {
       // @ts-expect-error 保存到实例
       this._unsubUser = subscribe(rootStore, (s) => s.user, (u: UserState) => {
-        const current = this.data.localUserInfo
-        const merged: UserInfo = {
-          id: current?.id || '',
-          nickname: (u.nickname && u.nickname.trim()) ? u.nickname : (current?.nickname || '用户'),
-          avatar: (u.avatar && u.avatar.trim()) ? u.avatar : (current?.avatar || ''),
-          gender: current?.gender || 0,
-          createdAt: current?.createdAt || Date.now(),
-          updatedAt: Date.now(),
-        }
-        this.setData({ localUserInfo: merged })
+        this.setData({ localUserInfo: u })
       })
     },
     // 关闭侧边栏

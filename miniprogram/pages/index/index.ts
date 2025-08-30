@@ -4,7 +4,7 @@ import { RenderNode, StreamContentType } from '../../lib/mcp/types.js'
 import { ToolCall, TowxmlNode, WxEvent } from '../../lib/mcp/types.js'
 import { RenderMessage, Message } from '../../lib/types/message' // 使用新的消息类型
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
-import { UserInfo } from '../../lib/types/user-info'
+import { ProfileVO } from '../../lib/types/profile'
 import { ChatSession } from '../../lib/types/chat-history'
 import { BaseComponent } from '../../lib/mcp/components/base-component.js'
 import { processMessageContent as processContentWithParser } from '../../lib/utils/content-parser.js'
@@ -196,7 +196,7 @@ Component({
 
     // 处理用户信息更新
     onUserInfoUpdated(e: WxEvent) {
-      const { userInfo } = e.detail as { userInfo: UserInfo | null }
+      const { userInfo } = e.detail as { userInfo: ProfileVO | null }
       if (userInfo) {
         this.setData({
           userInfo: {

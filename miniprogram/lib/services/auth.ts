@@ -1,5 +1,5 @@
 import storage from './storage'
-import { UserInfo } from '../types/user-info'
+import { ProfileVO } from '../types/profile'
 
 export interface LoginResult {
   userId: string
@@ -7,7 +7,7 @@ export interface LoginResult {
 }
 
 // UserProfile 现在与 UserInfo 保持一致，使用类型别名保持向后兼容
-export type UserProfile = UserInfo
+export type UserProfile = ProfileVO
 
 export async function bindPhone(
   userId: string,
