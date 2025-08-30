@@ -18,10 +18,8 @@ export const setUserProfile = (payload: UserInfo): UserAction => ({
   payload,
 })
 
-export const updateUserProfile = createAsyncThunk<
-  UpdateUserProfileParams,
-  UserProfile
->('user/updateProfile', async (params: UpdateUserProfileParams) => {
+export const updateUserProfile = createAsyncThunk
+('user/updateProfile', async (params: UpdateUserProfileParams) => {
   const result = await updateMyProfile(params)
   return result
 })

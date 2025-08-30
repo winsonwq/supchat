@@ -3,7 +3,7 @@ import { Action, AsyncThunk } from './types'
 export function createAsyncThunk<T, R>(
   name: string,
   fn: (params: T) => Promise<R>,
-): (params: T) => AsyncThunk<any, Action<string, R>, R> {
+): (params: T) => AsyncThunk<unknown, Action<string, R>, R> {
   return (params: T) => {
     return async (dispatch) => {
       const result = await fn(params)
