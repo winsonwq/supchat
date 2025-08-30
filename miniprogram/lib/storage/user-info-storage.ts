@@ -39,7 +39,7 @@ export class UserInfoStorage {
     const now = Date.now()
     return {
       id: this.generateUserId(),
-      name: '用户',
+      nickname: '用户',
       avatar: '',
       isAuthorized: false,
       createdAt: now,
@@ -55,16 +55,13 @@ export class UserInfoStorage {
     
     const updatedUserInfo: UserInfo = {
       ...existingUserInfo,
-      name: wxUserInfo.nickName || existingUserInfo.name,
+      nickname: wxUserInfo.nickName || existingUserInfo.nickname,
       avatar: wxUserInfo.avatarUrl || existingUserInfo.avatar,
-      avatarUrl: wxUserInfo.avatarUrl,
-      nickName: wxUserInfo.nickName,
       gender: wxUserInfo.gender,
       language: wxUserInfo.language,
       city: wxUserInfo.city,
       province: wxUserInfo.province,
       country: wxUserInfo.country,
-      isAuthorized: true,
       updatedAt: Date.now()
     }
 
@@ -73,15 +70,15 @@ export class UserInfoStorage {
   }
 
   /**
-   * 更新用户名
+   * 更新用户昵称
    */
-  static updateUserName(name: string): boolean {
+  static updateUserNickname(nickname: string): boolean {
     const userInfo = this.getUserInfo()
     if (!userInfo) {
       return false
     }
 
-    userInfo.name = name
+    userInfo.nickname = nickname
     return this.saveUserInfo(userInfo)
   }
 
@@ -130,11 +127,11 @@ export class UserInfoStorage {
    * 验证用户信息
    */
   static validateUserInfo(userInfo: Partial<UserInfo>): { isValid: boolean; message?: string } {
-    if (!userInfo.name?.trim()) {
+    if (!userInfo.nickname?.trim()) {
       return { isValid: false, message: '请输入用户名' }
     }
     
-    if (userInfo.name.length > 20) {
+    if (userInfo.nickname.length > 20) {
       return { isValid: false, message: '用户名不能超过20个字符' }
     }
 

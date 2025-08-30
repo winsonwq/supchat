@@ -71,14 +71,14 @@
                class="avatar-image"
                mode="aspectFill" />
         <!-- 否则显示文字头像 -->
-        <text wx:else class="avatar-text">{{localUserInfo && localUserInfo.name ? localUserInfo.name.charAt(0) : 'U'}}</text>
+        <text wx:else class="avatar-text">{{localUserInfo && localUserInfo.nickname ? localUserInfo.nickname.charAt(0) : 'U'}}</text>
       </button>
       <view class="user-name-wrapper">
         <button 
           class="user-name-btn" 
           bindtap="onEditNickname"
         >
-          <text class="user-name">{{localUserInfo && localUserInfo.name || '点击设置昵称'}}</text>
+          <text class="user-name">{{localUserInfo && localUserInfo.nickname || '点击设置昵称'}}</text>
         </button>
       </view>
     </view>
@@ -93,7 +93,7 @@
 <!-- 昵称编辑对话框 -->
 <nickname-dialog 
   isVisible="{{showNicknameDialog}}" 
-  currentNickname="{{localUserInfo && localUserInfo.name || ''}}"
+  currentNickname="{{localUserInfo && localUserInfo.nickname || ''}}"
   bind:confirm="onNicknameConfirm"
   bind:close="onNicknameDialogClose"
 />

@@ -28,7 +28,11 @@ export type EqualityFn<T> = (a: T, b: T) => boolean;
 
 export interface Store<State, A extends Action = Action> {
 	getState(): State;
-	dispatch(action: A | Thunk<State, A> | AsyncThunk<State, A, unknown>): unknown;
+	dispatch<T>(action: T): T extends AsyncThunk<State, A, infer R>
+		? Promise<R>
+		: T extends (dispatch: any, getState: any) => infer R
+		? R
+		: T;
 	subscribe<Selected = State>(
 		listener: ListenerCallback<Selected>,
 		selector?: Selector<State, Selected>,

@@ -1,8 +1,7 @@
 import getSafeArea from '../../lib/utils/safe-area'
 import { UserInfo } from '../../lib/types/user-info'
 import { ChatSession } from '../../lib/types/chat-history'
-import { updateMyProfile } from '../../lib/services/auth'
-import { rootStore } from '../../lib/state/states/root'
+import { appDispatch, rootStore } from '../../lib/state/states/root'
 import { updateUserProfile } from '../../lib/state/actions/user'
 import { subscribe } from '../../lib/state/bind'
 
@@ -62,8 +61,8 @@ Component({
       this.subscribeUser()
     },
     detached() {
-      const unsub = (this as any)._unsubUser as (() => void) | undefined
-      unsub && unsub()
+      // @ts-expect-error 保存到实例
+      this._unsubUser?.()
     }
   },
 
@@ -97,16 +96,16 @@ Component({
         if (!avatarUrl) return
 
         // 更新头像到云端和本地
-        const updated = await rootStore.dispatch(updateUserProfile({ avatar: avatarUrl }))
+        const updated = await appDispatch(updateUserProfile({ avatar: avatarUrl }))
         console.log('头像已更新:', updated)
         
         const current = this.data.localUserInfo
         this.setData({
           localUserInfo: {
             id: current?.id || '',
-            name: (current?.name && current.name.trim()) ? current.name : '用户',
+            nickname: (current?.nickname && current.nickname.trim()) ? current.nickname : '用户',
             avatar: avatarUrl,
-            isAuthorized: current?.isAuthorized ?? false,
+            gender: current?.gender || 0,
             createdAt: current?.createdAt || Date.now(),
             updatedAt: Date.now(),
           }
@@ -135,7 +134,7 @@ Component({
         }
 
         // 更新昵称到云端和本地
-        const updated = await rootStore.dispatch(updateUserProfile({ 
+        const updated = await appDispatch(updateUserProfile({ 
           nickname: nickname.trim(),
           avatar: (this.data.localUserInfo?.avatar || '').trim() || undefined
         }))
@@ -145,9 +144,9 @@ Component({
         this.setData({
           localUserInfo: {
             id: current?.id || '',
-            name: nickname.trim(),
+            nickname: nickname.trim(),
             avatar: current?.avatar || '',
-            isAuthorized: current?.isAuthorized ?? false,
+            gender: current?.gender || 0,
             createdAt: current?.createdAt || Date.now(),
             updatedAt: Date.now(),
           }
@@ -173,13 +172,13 @@ Component({
     // 订阅全局用户信息
     subscribeUser() {
       // @ts-expect-error 保存到实例
-      this._unsubUser = subscribe(rootStore, (s) => s.user, (u) => {
+      this._unsubUser = subscribe(rootStore, (s) => s.user, (u: UserState) => {
         const current = this.data.localUserInfo
         const merged: UserInfo = {
           id: current?.id || '',
-          name: (u.name && u.name.trim()) ? u.name : (current?.name || '用户'),
+          nickname: (u.nickname && u.nickname.trim()) ? u.nickname : (current?.nickname || '用户'),
           avatar: (u.avatar && u.avatar.trim()) ? u.avatar : (current?.avatar || ''),
-          isAuthorized: current?.isAuthorized ?? false,
+          gender: current?.gender || 0,
           createdAt: current?.createdAt || Date.now(),
           updatedAt: Date.now(),
         }

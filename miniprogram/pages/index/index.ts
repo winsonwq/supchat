@@ -200,7 +200,7 @@ Component({
       if (userInfo) {
         this.setData({
           userInfo: {
-            name: userInfo.name,
+            name: userInfo.nickname,
             avatar: userInfo.avatar || '',
           },
         })

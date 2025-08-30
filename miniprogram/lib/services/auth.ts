@@ -1,22 +1,13 @@
 import storage from './storage'
+import { UserInfo } from '../types/user-info'
 
 export interface LoginResult {
   userId: string
   openid?: string
 }
 
-export interface UserProfile {
-  _id?: string
-  openid?: string
-  nickname?: string
-  avatar?: string
-  phone?: string
-  gender?: number
-  country?: string
-  province?: string
-  city?: string
-  language?: string
-}
+// UserProfile 现在与 UserInfo 保持一致，使用类型别名保持向后兼容
+export type UserProfile = UserInfo
 
 export async function bindPhone(
   userId: string,

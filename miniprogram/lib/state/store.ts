@@ -11,6 +11,7 @@ import type {
 } from './types';
 import { defaultEquality, scheduleMicrotask, shallowEqual } from './utils';
 
+
 export function createStore<State, A extends Action = Action>(
 	options: CreateStoreOptions<State, A>
 ): Store<State, A> {
@@ -26,21 +27,28 @@ export function createStore<State, A extends Action = Action>(
 		return currentState;
 	}
 
-	function dispatch(action: A | Thunk<State, A> | AsyncThunk<State, A, unknown>): unknown {
-		if (destroyed) return;
+	function dispatch<T>(action: T): T extends AsyncThunk<State, A, infer R>
+		? Promise<R>
+		: T extends (dispatch: any, getState: any) => infer R
+		? R
+		: T {
+		if (destroyed) return action as any;
 		if (typeof action === 'function') {
 			const result = (action as Thunk<State, A> | AsyncThunk<State, A, unknown>)(dispatch, getState);
 			// 如果返回的是 Promise，则返回该 Promise
 			if (result && typeof result === 'object' && 'then' in result) {
-				return result;
+				return result as any;
 			}
-			return result;
+			return result as any;
 		}
-		const nextState = currentReducer(currentState, action);
-		if (Object.is(nextState, currentState)) return;
-		currentState = nextState;
-		enqueueNotify();
-		return undefined;
+		// 对于普通 action，检查是否为 Action 类型
+		if (typeof action === 'object' && action !== null && 'type' in action) {
+			const nextState = currentReducer(currentState, action as A);
+			if (Object.is(nextState, currentState)) return action as any;
+			currentState = nextState;
+			enqueueNotify();
+		}
+		return action as any;
 	}
 
 	function enqueueNotify(): void {
