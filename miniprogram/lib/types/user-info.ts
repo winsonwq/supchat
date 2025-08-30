@@ -1,4 +1,3 @@
-// 用户信息类型定义 - 与云函数用户模型保持一致
 export interface UserInfo {
   _id?: string
   id?: string // _id的别名，保持兼容性

@@ -17,8 +17,8 @@ export const userBaseSchema = z.object({
 // 创建用户时允许的字段（由默认值填充缺省）
 export const userCreateSchema = userBaseSchema
 
-// 更新用户时的字段全部可选
-export const userUpdateSchema = userBaseSchema.partial()
+// 更新用户时不做 schema 验证，直接使用传入的值
+export const userUpdateSchema = z.any()
 
 export function safeParse(schema, data) {
   const result = schema.safeParse(data || {})

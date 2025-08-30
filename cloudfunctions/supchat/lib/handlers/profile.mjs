@@ -47,9 +47,8 @@ export default [
       for (const k of allowed) {
         if (body && body[k] !== undefined) payload[k] = body[k]
       }
-      const parsed = safeParse(userUpdateSchema, payload)
-      if (!parsed.ok) return { error: parsed.error }
-      await user.update(parsed.data)
+      // 直接使用 payload，不做 schema 验证
+      await user.update(payload)
       return user
     } catch (e) {
       return { error: e.message }

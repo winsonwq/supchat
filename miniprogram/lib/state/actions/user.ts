@@ -20,8 +20,7 @@ export const setUserProfile = (payload: UserInfo): UserAction => ({
 
 export const updateUserProfile = createAsyncThunk
 ('user/updateProfile', async (params: UpdateUserProfileParams) => {
-  const result = await updateMyProfile(params)
-  return result
+  return await updateMyProfile(params)
 })
 
 // 异步 Action：拉取云端 Profile 并更新到全局状态

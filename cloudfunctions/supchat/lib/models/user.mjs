@@ -107,13 +107,9 @@ export class User {
   async update(updateData) {
     try {
       const collection = User.getCollection()
-      // 使用 schema 校验更新数据（全部可选）
-      const parsed = safeParse(userUpdateSchema, updateData)
-      if (!parsed.ok) {
-        throw new Error(parsed.error)
-      }
+      // 直接使用传入的数据，不做 schema 验证
       const updateInfo = {
-        ...parsed.data,
+        ...updateData,
         updatedAt: new Date()
       }
       
