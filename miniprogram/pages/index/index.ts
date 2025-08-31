@@ -10,7 +10,6 @@ import { BaseComponent } from '../../lib/mcp/components/base-component.js'
 import { processMessageContent as processContentWithParser } from '../../lib/utils/content-parser.js'
 
 import { ComponentManager } from '../../lib/mcp/components/component-manager.js'
-import { ensureProfile, UserProfile } from '../../lib/services/auth'
 import { rootStore } from '../../lib/state/states/root'
 import { subscribe } from '../../lib/state/bind'
 import { selectUserBrief } from '../../lib/state/selectors/user'
@@ -185,7 +184,7 @@ Component({
     // 登录并确保用户资料存在
     async ensureAuthAndProfile() {
       try {
-        const profile = await rootStore.dispatch(fetchProfile()) as UserProfile
+        const profile = await rootStore.dispatch(fetchProfile()) 
         const userId = profile._id
 
         this.setData({ cloudUserId: userId })

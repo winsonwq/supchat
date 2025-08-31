@@ -1,9 +1,7 @@
 import { UserAction } from '../states/user'
-import type { Thunk } from '../types'
 import {
   ensureProfile,
   updateMyProfile,
-  UserProfile,
 } from '../../services/auth'
 import { ProfileVO } from '../../types/profile'
 import { createAsyncThunk } from '../action'
@@ -24,34 +22,10 @@ export const updateUserProfile = createAsyncThunk
 })
 
 // 异步 Action：拉取云端 Profile 并更新到全局状态
-export const fetchProfile = (): Thunk<
-  unknown,
-  UserAction,
-  Promise<UserProfile>
-> => {
-  return async (dispatch) => {
+export const fetchProfile = createAsyncThunk(
+  'user/fetchProfile',
+  async () => {
     const profile = await ensureProfile()
-    dispatch({
-      type: 'user/setProfile',
-      payload: {
-        _id: profile._id,
-        id: profile._id,
-        openid: profile.openid,
-        nickname: profile.nickname || '用户',
-        avatar: profile.avatar || '',
-        phone: profile.phone,
-        gender: profile.gender || 0,
-        country: profile.country,
-        province: profile.province,
-        city: profile.city,
-        language: profile.language,
-        isActive: profile.isActive,
-        createdAt: profile.createdAt,
-        updatedAt: Date.now(),
-        lastLoginAt: profile.lastLoginAt,
-      },
-    })
-
     return profile
   }
-}
+)
