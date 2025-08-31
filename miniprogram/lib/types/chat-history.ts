@@ -5,11 +5,17 @@ import { RenderMessage } from './message'
 
 export interface ChatSession {
   id: string
+  _id?: string // 云函数返回的原始ID
+  userId: string // 用户ID
   title: string // 会话标题，通常是第一条用户消息的摘要
-  messages: RenderMessage[] // 使用新的渲染消息类型
-  createdAt: number // 创建时间戳
-  updatedAt: number // 最后更新时间戳
-  isActive: boolean // 是否为当前活跃会话
+  isDeleted?: boolean // 是否已删除
+  lastMessageAt?: Date | string // 最后消息时间
+  messageCount?: number // 消息数量
+  lastMessagePreview?: string // 最后消息预览
+  messagesRecent?: Array<{ role: string; content: string; createdAt: Date | string }> // 最近消息预览
+  createdAt: Date | string | number // 创建时间
+  updatedAt: Date | string | number // 最后更新时间
+  isActive?: boolean // 是否为当前活跃会话
 }
 
 /**

@@ -1,71 +1,70 @@
 import { ChatSession } from '../../types/chat-history'
-import { Action } from '../types'
+import { ChatActionType, ChatAction } from '../actions/chat'
 
 export interface ChatState {
-  sessions: ChatSession[]
-  currentSessionId: string | null
+  chats: ChatSession[]
+  currentChatId: string | null
   isLoading: boolean
 }
 
 export const initialChatState: ChatState = {
-  sessions: [],
-  currentSessionId: null,
+  chats: [],
+  currentChatId: null,
   isLoading: false,
 }
-
-export type ChatAction =
-  | Action<'chat/setSessions', ChatSession[]>
-  | Action<'chat/addSession', ChatSession>
-  | Action<'chat/updateSession', { id: string; updates: Partial<ChatSession> }>
-  | Action<'chat/deleteSession', string>
-  | Action<'chat/setCurrentSession', string | null>
-  | Action<'chat/setLoading', boolean>
 
 export function chatReducer(
   state: ChatState = initialChatState,
   action: ChatAction,
 ): ChatState {
   switch (action.type) {
-    case 'chat/setSessions': {
+    case ChatActionType.SET_CHATS: {
       return {
         ...state,
-        sessions: action.payload,
+        chats: action.payload,
       }
     }
-    case 'chat/addSession': {
+    case ChatActionType.ADD_CHAT: {
       return {
         ...state,
-        sessions: [action.payload, ...state.sessions],
+        chats: [action.payload, ...state.chats],
       }
     }
-    case 'chat/updateSession': {
+    case ChatActionType.UPDATE_CHAT: {
       const { id, updates } = action.payload
       return {
         ...state,
-        sessions: state.sessions.map((session) =>
-          session.id === id ? { ...session, ...updates } : session,
+        chats: state.chats.map((chat) =>
+          chat.id === id ? { ...chat, ...updates } : chat,
         ),
       }
     }
-    case 'chat/deleteSession': {
-      const sessionId = action.payload
+    case ChatActionType.DELETE_CHAT: {
+      const chatId = action.payload
       return {
         ...state,
-        sessions: state.sessions.filter((session) => session.id !== sessionId),
-        currentSessionId:
-          state.currentSessionId === sessionId ? null : state.currentSessionId,
+        chats: state.chats.filter((chat) => chat.id !== chatId),
+        currentChatId:
+          state.currentChatId === chatId ? null : state.currentChatId,
       }
     }
-    case 'chat/setCurrentSession': {
+    case ChatActionType.SET_CURRENT_CHAT: {
       return {
         ...state,
-        currentSessionId: action.payload,
+        currentChatId: action.payload,
       }
     }
-    case 'chat/setLoading': {
+    case ChatActionType.SET_LOADING: {
       return {
         ...state,
         isLoading: action.payload,
+      }
+    }
+    case ChatActionType.ADD_MESSAGE: {
+      const { chatId, chat } = action.payload
+      return {
+        ...state,
+        chats: state.chats.map((c) => (c.id === chatId ? chat : c)),
       }
     }
     default:

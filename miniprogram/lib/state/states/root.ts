@@ -1,16 +1,8 @@
 import { createStore, combineReducers } from '../store'
-import {
-  userReducer,
-  UserState,
-  initialUserState
-} from './user'
-import {
-  chatReducer,
-  ChatState,
-  type ChatAction,
-  initialChatState,
-} from './chat'
+import { userReducer, UserState, initialUserState } from './user'
+import { chatReducer, ChatState, initialChatState } from './chat'
 import { UserAction } from '../actions/user'
+import { ChatAction } from '../actions/chat'
 
 export interface RootState {
   user: UserState
