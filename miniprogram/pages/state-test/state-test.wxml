@@ -28,6 +28,26 @@
 		<view class="font-bold mb-2">多订阅汇总</view>
 		<text>总计：{{summary.total}}，已完成：{{summary.done}}</text>
 	</view>
+
+	<view class="mb-4">
+		<view class="font-bold mb-2">聊天测试</view>
+		<view class="mb-2">
+			<text>加载状态: {{chatsLoading ? '加载中...' : '已加载'}}</text>
+		</view>
+		<view class="mb-2">
+			<text>聊天数量: {{chats.length}}</text>
+		</view>
+		<button bindtap="onTestFetchChats" class="bg-blue-500 text-white px-4 py-2 rounded">
+			测试 fetchChats
+		</button>
+		<view class="mt-2" wx:if="{{chats.length > 0}}">
+			<view class="font-bold mb-1">聊天列表:</view>
+			<view wx:for="{{chats}}" wx:key="id" class="border p-2 mb-1 rounded">
+				<text class="font-medium">{{item.title || '无标题'}}</text>
+				<text class="text-sm text-gray-500 ml-2">{{item.id}}</text>
+			</view>
+		</view>
+	</view>
 </view>
 
 

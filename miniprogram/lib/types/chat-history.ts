@@ -39,9 +39,6 @@ export interface ChatHistoryStorage {
   // 更新聊天会话
   updateSession(sessionId: string, updates: Partial<ChatSession>): boolean
   
-  // 删除聊天会话
-  deleteSession(sessionId: string): boolean
-  
   // 添加消息到会话
   addMessage(sessionId: string, message: Omit<RenderMessage, 'id' | 'timestamp'>): boolean
   
@@ -56,4 +53,40 @@ export interface ChatHistoryStorage {
   
   // 获取会话数量
   getSessionCount(): number
+}
+
+/**
+ * 异步版本的聊天历史存储接口
+ * 适用于云存储等需要异步操作的场景
+ */
+export interface AsyncChatHistoryStorage {
+  // 获取所有聊天会话
+  getAllSessions(): Promise<ChatSession[]>
+  
+  // 根据ID获取聊天会话
+  getSessionById(sessionId: string): Promise<ChatSession | null>
+  
+  // 创建新的聊天会话
+  createSession(title?: string): Promise<ChatSession>
+  
+  // 更新聊天会话
+  updateSession(sessionId: string, updates: Partial<ChatSession>): Promise<ChatSession>
+  
+  // 删除聊天会话
+  deleteSession(sessionId: string): Promise<boolean>
+  
+  // 添加消息到会话
+  addMessage(sessionId: string, message: Omit<RenderMessage, 'id' | 'timestamp'>): Promise<RenderMessage>
+  
+  // 获取当前活跃会话
+  getActiveSession(): Promise<ChatSession | null>
+  
+  // 设置活跃会话
+  setActiveSession(sessionId: string): Promise<void>
+  
+  // 清空所有聊天历史
+  clearAllHistory(): Promise<void>
+  
+  // 获取会话数量
+  getSessionCount(): Promise<number>
 }

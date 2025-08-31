@@ -1,6 +1,6 @@
 import { ChatSession } from '../types/chat-history'
 import { RenderMessage } from '../types/message'
-import { callCloudFunction } from './cloud'
+import storage from './storage'
 
 export interface CreateChatOptions {
   title?: string
@@ -9,12 +9,17 @@ export interface CreateChatOptions {
 
 export interface UpdateChatOptions {
   title?: string
+  isActive?: boolean
 }
 
 export interface AddMessageOptions {
   chatId: string
   role: 'user' | 'assistant'
   content: string
+}
+
+export interface ChatWithMessages extends ChatSession {
+  messages: RenderMessage[]
 }
 
 export class ChatService {
@@ -31,30 +36,23 @@ export class ChatService {
    * 创建新的聊天
    */
   async createChat(options: CreateChatOptions = {}): Promise<ChatSession> {
-    const result = await callCloudFunction({
-      route: '/chats',
-      method: 'POST',
-      body: {
-        title: options.title || '新对话',
-        firstMessage: options.firstMessage,
-      },
+    const result = await storage.create('/chats', {
+      title: options.title || '新对话',
+      firstMessage: options.firstMessage,
     })
 
     if (!result.ok) {
       throw new Error(result.error || '创建聊天失败')
     }
 
-    return result.data as ChatSession
+    return result.data as unknown as ChatSession
   }
 
   /**
    * 获取所有聊天记录
    */
   async getChats(): Promise<ChatSession[]> {
-    const result = await callCloudFunction({
-      route: '/chats',
-      method: 'GET',
-    })
+    const result = await storage.get('/chats')
 
     if (!result.ok) {
       throw new Error(result.error || '获取聊天列表失败')
@@ -67,10 +65,7 @@ export class ChatService {
    * 根据ID获取聊天记录
    */
   async getChatById(chatId: string): Promise<ChatSession | null> {
-    const result = await callCloudFunction({
-      route: `/chats/${chatId}`,
-      method: 'GET',
-    })
+    const result = await storage.get(`/chats/${chatId}`)
 
     if (!result.ok) {
       if (result.error?.includes('not found')) {
@@ -83,17 +78,46 @@ export class ChatService {
   }
 
   /**
+   * 获取聊天及其消息（用于切换聊天显示）
+   */
+  async getChatWithMessages(chatId: string): Promise<ChatWithMessages | null> {
+    try {
+      // 获取聊天基本信息
+      const chat = await this.getChatById(chatId)
+      if (!chat) {
+        return null
+      }
+
+      // 获取聊天消息
+      const messagesResult = await storage.get(`/chats/${chatId}/messages`)
+      const messages = messagesResult.ok ? (messagesResult.data as RenderMessage[]) : []
+
+      return {
+        ...chat,
+        messages,
+      }
+    } catch (error) {
+      console.error('获取聊天及消息失败:', error)
+      return null
+    }
+  }
+
+  /**
+   * 切换聊天（获取聊天数据和消息，用于显示）
+   * 这个方法只获取数据，不更新数据库状态
+   */
+  async switchToChat(chatId: string): Promise<ChatWithMessages | null> {
+    return await this.getChatWithMessages(chatId)
+  }
+
+  /**
    * 更新聊天记录
    */
   async updateChat(
     chatId: string,
     updates: UpdateChatOptions,
   ): Promise<ChatSession> {
-    const result = await callCloudFunction({
-      route: `/chats/${chatId}`,
-      method: 'PUT',
-      body: updates as Record<string, unknown>,
-    })
+    const result = await storage.update(`/chats/${chatId}`, updates)
 
     if (!result.ok) {
       throw new Error(result.error || '更新聊天失败')
@@ -106,10 +130,7 @@ export class ChatService {
    * 删除聊天记录
    */
   async deleteChat(chatId: string): Promise<boolean> {
-    const result = await callCloudFunction({
-      route: `/chats/${chatId}`,
-      method: 'DELETE',
-    })
+    const result = await storage.delete(`/chats/${chatId}`)
 
     if (!result.ok) {
       throw new Error(result.error || '删除聊天失败')
@@ -126,11 +147,7 @@ export class ChatService {
   ): Promise<{ message: any; chat: ChatSession }> {
     const { chatId, role, content } = options
 
-    const result = await callCloudFunction({
-      route: `/chats/${chatId}/messages`,
-      method: 'POST',
-      body: { role, content },
-    })
+    const result = await storage.create(`/chats/${chatId}/messages`, { role, content })
 
     if (!result.ok) {
       throw new Error(result.error || '发送消息失败')
@@ -152,9 +169,16 @@ export class ChatService {
    * 设置当前活跃聊天
    */
   async setActiveChat(chatId: string): Promise<void> {
-    // 云函数会自动处理活跃状态，这里只需要设置当前聊天ID
-    // 实际的活跃状态更新在云函数中处理
-    return
+    // 先取消所有聊天的活跃状态
+    const chats = await this.getChats()
+    const updatePromises = chats
+      .filter(chat => chat.isActive)
+      .map(chat => this.updateChat(chat.id, { isActive: false }))
+    
+    await Promise.all(updatePromises)
+
+    // 设置指定聊天为活跃状态
+    await this.updateChat(chatId, { isActive: true })
   }
 
   /**
@@ -183,6 +207,20 @@ export class ChatService {
   async getChatCount(): Promise<number> {
     const chats = await this.getChats()
     return chats.length
+  }
+
+  /**
+   * 测试云函数连接
+   */
+  async testCloudConnection(): Promise<boolean> {
+    try {
+      // 尝试获取聊天列表来测试云函数连接
+      await this.getChats()
+      return true
+    } catch (error) {
+      console.error('云函数连接测试失败:', error)
+      return false
+    }
   }
 }
 

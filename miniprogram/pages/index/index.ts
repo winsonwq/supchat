@@ -14,6 +14,8 @@ import { rootStore } from '../../lib/state/states/root'
 import { subscribe } from '../../lib/state/bind'
 import { selectUserBrief } from '../../lib/state/selectors/user'
 import { fetchProfile } from '../../lib/state/actions/user'
+import { fetchChats, createChat, deleteChat, setCurrentChat } from '../../lib/state/actions/chat'
+import { selectChats, selectCurrentChatId, selectChatsLoading } from '../../lib/state/selectors/chat'
 
 // 获取 ComponentManager 实例
 function getComponentManager(): ComponentManager | null {
@@ -65,6 +67,8 @@ Component({
       this.loadUserInfo()
       // 订阅全局用户信息
       this.subscribeUser()
+      // 订阅聊天数据
+      this.subscribeChats()
 
       // 登录并引导完善资料
       this.ensureAuthAndProfile()
@@ -83,6 +87,9 @@ Component({
       // 取消用户订阅
       const unsub = (this as any)._unsubUser as (() => void) | undefined
       unsub && unsub()
+      // 取消聊天订阅
+      const unsubChats = (this as any)._unsubChats as (() => void) | undefined
+      unsubChats && unsubChats()
     },
   },
 
@@ -112,6 +119,16 @@ Component({
         })
       })
       ;(this as any)._unsubUser = unsub
+    },
+
+    // 订阅聊天数据
+    subscribeChats() {
+      const unsub = subscribe(rootStore, (s) => selectChats((s as any)), (chats) => {
+        this.setData({
+          chatSessions: chats,
+        })
+      })
+      ;(this as any)._unsubChats = unsub
     },
 
     // 计算 viewport 高度
@@ -152,29 +169,37 @@ Component({
     },
 
     // 初始化聊天会话
-    initChatSessions() {
-      const aiService = this.getAIService()
-      const sessions = aiService.getAllChatSessions()
+    async initChatSessions() {
+      try {
+        // 使用 Redux store 获取聊天数据
+        const chats = await rootStore.dispatch(fetchChats())
+        
+        if (chats.length === 0) {
+          // 如果没有聊天记录，创建一个新的默认会话
+          const newSession = await rootStore.dispatch(createChat({ title: '新对话' }))
+          this.setData({
+            chatSessions: [newSession],
+            currentSessionId: newSession.id,
+          })
+        } else {
+          // 找到活跃会话
+          const activeSession = chats.find((session) => session.isActive)
+          this.setData({
+            chatSessions: chats,
+            currentSessionId: activeSession?.id || chats[0].id,
+          })
 
-      // 如果没有会话，创建一个新的默认会话
-      if (sessions.length === 0) {
-        const newSession = aiService.createNewChat()
-        this.setData({
-          chatSessions: [newSession],
-          currentSessionId: newSession.id,
-        })
-      } else {
-        // 找到活跃会话
-        const activeSession = sessions.find((session) => session.isActive)
-        this.setData({
-          chatSessions: sessions,
-          currentSessionId: activeSession?.id || sessions[0].id,
-        })
-
-        // 加载活跃会话的消息
-        if (activeSession) {
-          this.loadMessageHistory()
+          // 加载活跃会话的消息
+          if (activeSession) {
+            this.loadMessageHistory()
+          }
         }
+      } catch (error) {
+        console.error('初始化聊天会话失败:', error)
+        wx.showToast({
+          title: '初始化失败',
+          icon: 'error'
+        })
       }
     },
 
@@ -485,19 +510,11 @@ Component({
         content: '确定要清空当前会话的所有聊天记录吗？',
         success: (res) => {
           if (res.confirm) {
-            const aiService = this.getAIService()
-            aiService.clearMessages()
-
-            // 更新当前会话的消息为空
-            if (this.data.currentSessionId) {
-              aiService.updateSession(this.data.currentSessionId, {
-                messages: [],
-              })
-            }
-
+            // 清空当前页面的消息
             this.setData({
               messages: [],
             })
+            
             wx.showToast({
               title: '已清空',
               icon: 'success',
@@ -523,14 +540,13 @@ Component({
     },
 
     // 选择聊天会话
-    selectChatSession(e: any) {
+    async selectChatSession(e: any) {
       const { sessionId } = e.detail
       console.log('选择会话:', sessionId)
 
-      const aiService = this.getAIService()
-      const success = aiService.loadChatSession(sessionId)
+      try {
+        await rootStore.dispatch(setCurrentChat(sessionId))
 
-      if (success) {
         // 重新加载消息历史
         this.loadMessageHistory()
 
@@ -543,7 +559,8 @@ Component({
           title: '已切换会话',
           icon: 'success',
         })
-      } else {
+      } catch (error) {
+        console.error('切换会话失败:', error)
         wx.showToast({
           title: '切换会话失败',
           icon: 'error',
@@ -552,51 +569,65 @@ Component({
     },
 
     // 创建新话题
-    createNewTopic() {
+    async createNewTopic() {
       console.log('创建新话题')
 
-      const aiService = this.getAIService()
-      const newSession = aiService.createNewChat()
+      try {
+        const newSession = await rootStore.dispatch(createChat({ title: '新话题' }))
+        
+        // 重新获取聊天列表
+        const chats = await rootStore.dispatch(fetchChats())
 
-      // 更新会话列表
-      const sessions = aiService.getAllChatSessions()
+        this.setData({
+          messages: [],
+          chatSessions: chats,
+          currentSessionId: newSession.id,
+          sidebarOpen: false,
+        })
 
-      this.setData({
-        messages: [],
-        chatSessions: sessions,
-        currentSessionId: newSession.id,
-        sidebarOpen: false,
-      })
-
-      wx.showToast({
-        title: '已创建新话题',
-        icon: 'success',
-      })
+        wx.showToast({
+          title: '已创建新话题',
+          icon: 'success',
+        })
+      } catch (error) {
+        console.error('创建新话题失败:', error)
+        wx.showToast({
+          title: '创建失败',
+          icon: 'error',
+        })
+      }
     },
 
     // 处理新建聊天事件
-    onNewChat() {
-      const aiService = this.getAIService()
-      const newSession = aiService.createNewChat()
+    async onNewChat() {
+      try {
+        const newSession = await rootStore.dispatch(createChat({ title: '新聊天' }))
+        
+        // 重新获取聊天列表
+        const chats = await rootStore.dispatch(fetchChats())
 
-      // 更新会话列表
-      const sessions = aiService.getAllChatSessions()
+        this.setData({
+          messages: [],
+          chatSessions: chats,
+          currentSessionId: newSession.id,
+          sidebarOpen: false,
+        })
 
-      this.setData({
-        messages: [],
-        chatSessions: sessions,
-        currentSessionId: newSession.id,
-        sidebarOpen: false,
-      })
-
-      wx.showToast({
-        title: '已开始新聊天',
-        icon: 'success',
-      })
+        wx.showToast({
+          title: '已开始新聊天',
+          icon: 'success',
+        })
+      } catch (error) {
+        console.error('创建新聊天失败:', error)
+        wx.showToast({
+          title: '创建失败',
+          icon: 'error',
+        })
+      }
     },
 
     // 删除聊天会话
-    deleteChatSession(e: any) {
+    async deleteChatSession(e: any) {
       console.log('主页收到删除事件:', e)
       const { sessionId } = e.detail
       console.log('要删除的会话ID:', sessionId)
@@ -604,29 +635,31 @@ Component({
       wx.showModal({
         title: '确认删除',
         content: '确定要删除这个聊天会话吗？删除后无法恢复。',
-        success: (res) => {
+        success: async (res) => {
           if (res.confirm) {
             console.log('用户确认删除')
-            const aiService = this.getAIService()
-            const success = aiService.deleteChatSession(sessionId)
-
-            if (success) {
+            try {
+              // 删除聊天会话（这会自动更新redux状态）
+              await rootStore.dispatch(deleteChat(sessionId))
               console.log('删除成功')
-              // 更新会话列表
-              const sessions = aiService.getAllChatSessions()
+              
+              // 不需要重新获取聊天列表，redux已经自动更新了
+              // 从redux状态中获取最新的chats
+              const currentState = rootStore.getState()
+              const chats = currentState.chat.chats
 
               // 如果删除的是当前会话，需要切换到其他会话
               if (sessionId === this.data.currentSessionId) {
-                if (sessions.length > 0) {
-                  const newActiveSession = sessions[0]
-                  aiService.loadChatSession(newActiveSession.id)
+                if (chats.length > 0) {
+                  const newActiveSession = chats[0]
+                  await rootStore.dispatch(setCurrentChat(newActiveSession.id))
                   this.loadMessageHistory()
                   this.setData({
                     currentSessionId: newActiveSession.id,
                   })
                 } else {
                   // 如果没有其他会话，创建一个新的
-                  const newSession = aiService.createNewChat()
+                  const newSession = await rootStore.dispatch(createChat({ title: '新对话' }))
                   this.setData({
                     messages: [],
                     currentSessionId: newSession.id,
@@ -634,16 +667,19 @@ Component({
                 }
               }
 
+              // 更新本地状态，使用redux中的最新数据
               this.setData({
-                chatSessions: sessions,
+                chatSessions: chats,
               })
 
               wx.showToast({
                 title: '已删除',
                 icon: 'success',
               })
-            } else {
-              console.log('删除失败')
+              
+              // 注意：不通知sidebar退出编辑模式，保持编辑状态
+            } catch (error) {
+              console.error('删除失败:', error)
               wx.showToast({
                 title: '删除失败',
                 icon: 'error',

@@ -70,15 +70,14 @@ Component({
   observers: {
     'chatSessions': function(chatSessions: ChatSession[]) {
       // 按最新更新时间倒序排序
-      const sorted = [...chatSessions].sort((a, b) => b.updatedAt - a.updatedAt)
+      const sorted = [...chatSessions].sort((a, b) => {
+        const timeA = typeof a.updatedAt === 'number' ? a.updatedAt : new Date(a.updatedAt).getTime()
+        const timeB = typeof b.updatedAt === 'number' ? b.updatedAt : new Date(b.updatedAt).getTime()
+        return timeB - timeA
+      })
       
-      // 如果当前在编辑模式且会话数量减少，说明有会话被删除，自动退出编辑模式
-      if (this.data.isEditMode && chatSessions.length < this.data.sortedChatSessions.length) {
-        console.log('检测到会话删除，自动退出编辑模式')
-        this.setData({
-          isEditMode: false
-        })
-      }
+      // 移除自动退出编辑模式的逻辑，删除成功后应该保持编辑模式
+      // 让用户手动控制何时退出编辑模式
       
       this.setData({
         sortedChatSessions: sorted
@@ -236,14 +235,6 @@ Component({
     // 阻止事件冒泡的空方法
     catchTap() {
       // 空方法，仅用于阻止事件冒泡
-    },
-
-    // 删除成功后的回调，退出编辑模式
-    onDeleteSuccess() {
-      console.log('删除成功，退出编辑模式')
-      this.setData({
-        isEditMode: false
-      })
     },
 
     // 格式化时间
