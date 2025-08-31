@@ -133,11 +133,14 @@ export function createStore<State, A extends Action = Action>(
 	};
 }
 
-export function combineReducers<State, A extends Action = Action>(reducers: {
-	[K in keyof State]: Reducer<State[K], A>;
-}): Reducer<State, A> {
+// 重新设计的 combineReducers，使用高级类型推断
+export function combineReducers<State extends Record<string, any>, Actions extends Action>(
+	reducers: {
+		[K in keyof State]: (state: State[K], action: any) => State[K];
+	}
+): Reducer<State, Actions> {
 	const keys = Object.keys(reducers) as (keyof State)[];
-	return (state: State, action: A) => {
+	return (state: State, action: Actions) => {
 		let hasChanged = false;
 		const next = { ...state } as State;
 		for (const k of keys) {

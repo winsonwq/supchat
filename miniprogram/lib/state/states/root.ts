@@ -2,22 +2,32 @@ import { createStore, combineReducers } from '../store'
 import {
   userReducer,
   UserState,
-  type UserAction,
-  initialUserState,
+  initialUserState
 } from './user'
+import {
+  chatReducer,
+  ChatState,
+  type ChatAction,
+  initialChatState,
+} from './chat'
+import { UserAction } from '../actions/user'
 
 export interface RootState {
   user: UserState
+  chat: ChatState
 }
 
-const rootReducer = combineReducers<RootState, UserAction>({
+export type RootAction = UserAction | ChatAction
+const rootReducer = combineReducers({
   user: userReducer,
+  chat: chatReducer,
 })
 
-export const rootStore = createStore<RootState, UserAction>({
+export const rootStore = createStore({
   reducer: rootReducer,
   preloadedState: {
     user: initialUserState,
+    chat: initialChatState,
   },
   name: 'root',
 })

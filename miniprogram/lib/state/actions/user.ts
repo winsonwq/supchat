@@ -1,31 +1,33 @@
-import { UserAction } from '../states/user'
-import {
-  ensureProfile,
-  updateMyProfile,
-} from '../../services/auth'
+import { ensureProfile, updateMyProfile } from '../../services/auth'
 import { ProfileVO } from '../../types/profile'
 import { createAsyncThunk } from '../action'
+import { Action } from '../types'
 
 export interface UpdateUserProfileParams {
   nickname?: string
   avatar?: string
 }
 
-export const setUserProfile = (payload: ProfileVO): UserAction => ({
-  type: 'user/setProfile',
-  payload,
-})
+export enum UserActionType {
+  UPDATE_PROFILE = 'user/updateProfile',
+  FETCH_PROFILE = 'user/fetchProfile',
+}
 
-export const updateUserProfile = createAsyncThunk
-('user/updateProfile', async (params: UpdateUserProfileParams) => {
-  return await updateMyProfile(params)
-})
+export const updateUserProfile = createAsyncThunk(
+  UserActionType.UPDATE_PROFILE,
+  async (params: UpdateUserProfileParams) => {
+    return (await updateMyProfile(params)) as Partial<ProfileVO>
+  },
+)
 
-// 异步 Action：拉取云端 Profile 并更新到全局状态
 export const fetchProfile = createAsyncThunk(
-  'user/fetchProfile',
+  UserActionType.FETCH_PROFILE,
   async () => {
     const profile = await ensureProfile()
     return profile
-  }
+  },
 )
+
+export type UserAction =
+  | Action<UserActionType.UPDATE_PROFILE, Partial<ProfileVO>>
+  | Action<UserActionType.FETCH_PROFILE, ProfileVO>
