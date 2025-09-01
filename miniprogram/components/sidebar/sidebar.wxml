@@ -31,7 +31,7 @@
         data-session-id="{{item.id}}"
       >
         <view class="chat-session-content">
-          <view class="chat-session-title">{{item.title}}</view>
+          <view class="chat-session-title">{{item.title || '未命名'}}</view>
           <view class="chat-session-time">{{formatTime(item.updatedAt)}}</view>
         </view>
         <view class="chat-session-actions {{isEditMode ? 'chat-session-actions--visible' : ''}}">

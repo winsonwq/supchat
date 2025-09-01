@@ -10,12 +10,19 @@ import { BaseComponent } from '../../lib/mcp/components/base-component.js'
 import { processMessageContent as processContentWithParser } from '../../lib/utils/content-parser.js'
 
 import { ComponentManager } from '../../lib/mcp/components/component-manager.js'
-import { rootStore } from '../../lib/state/states/root'
+import { appDispatch, rootStore } from '../../lib/state/states/root'
 import { subscribe } from '../../lib/state/bind'
 import { selectUserBrief } from '../../lib/state/selectors/user'
 import { fetchProfile } from '../../lib/state/actions/user'
-import { fetchChats, createChat, deleteChat, setCurrentChat } from '../../lib/state/actions/chat'
-import { selectChats, selectCurrentChatId, selectChatsLoading } from '../../lib/state/selectors/chat'
+import {
+  fetchChats,
+  createChat,
+  deleteChat,
+  setCurrentChat,
+  addMessage,
+  switchToChat,
+} from '../../lib/state/actions/chat'
+import { selectChats } from '../../lib/state/selectors/chat'
 
 // 获取 ComponentManager 实例
 function getComponentManager(): ComponentManager | null {
@@ -57,8 +64,6 @@ Component({
       // 计算安全区域和导航栏高度
       this.calculateSafeAreaPadding()
 
-      // 页面加载时初始化并加载消息历史
-      this.loadMessageHistory()
       // 计算 viewport 高度
       this.calculateViewportHeight()
       // 初始化聊天会话
@@ -110,24 +115,32 @@ Component({
 
     // 订阅全局用户信息
     subscribeUser() {
-      const unsub = subscribe(rootStore, (s) => selectUserBrief((s as any).user), (u) => {
-        this.setData({
-          userInfo: {
-            name: u.name,
-            avatar: u.avatar || '',
-          },
-        })
-      })
+      const unsub = subscribe(
+        rootStore,
+        (s) => selectUserBrief((s as any).user),
+        (u) => {
+          this.setData({
+            userInfo: {
+              name: u.name,
+              avatar: u.avatar || '',
+            },
+          })
+        },
+      )
       ;(this as any)._unsubUser = unsub
     },
 
     // 订阅聊天数据
     subscribeChats() {
-      const unsub = subscribe(rootStore, (s) => selectChats((s as any)), (chats) => {
-        this.setData({
-          chatSessions: chats,
-        })
-      })
+      const unsub = subscribe(
+        rootStore,
+        (s) => selectChats(s as any),
+        (chats) => {
+          this.setData({
+            chatSessions: chats,
+          })
+        },
+      )
       ;(this as any)._unsubChats = unsub
     },
 
@@ -153,19 +166,45 @@ Component({
     },
 
     // 加载消息历史
-    loadMessageHistory() {
-      const history = this.getAIService().getMessageHistory()
-      const processedHistory = history.map((msg: RenderMessage) => {
-        return {
-          ...msg,
-          towxmlNodes: this.processMessageContent(msg.content),
-        }
-      })
+    async loadMessageHistory(sessionId: string) {
+      if (!sessionId) {
+        return
+      }
 
-      this.setData({
-        messages: processedHistory,
-      })
-      this.scrollToLatestMessage()
+      try {
+        // 从数据库加载当前聊天的消息
+        const chatWithMessages = await appDispatch(switchToChat(sessionId))
+
+        if (chatWithMessages?.chatWithMessages?.messages) {
+          const processedHistory =
+            chatWithMessages.chatWithMessages.messages.map((msg: any) => {
+              return {
+                ...msg,
+                towxmlNodes: this.processMessageContent(msg.content),
+              }
+            })
+
+          this.setData({
+            messages: processedHistory,
+          })
+          this.scrollToLatestMessage()
+        }
+      } catch (error) {
+        console.error('加载消息历史失败:', error)
+        // 如果从数据库加载失败，回退到本地历史
+        const history = this.getAIService().getMessageHistory()
+        const processedHistory = history.map((msg: RenderMessage) => {
+          return {
+            ...msg,
+            towxmlNodes: this.processMessageContent(msg.content),
+          }
+        })
+
+        this.setData({
+          messages: processedHistory,
+        })
+        this.scrollToLatestMessage()
+      }
     },
 
     // 初始化聊天会话
@@ -173,32 +212,33 @@ Component({
       try {
         // 使用 Redux store 获取聊天数据
         const chats = await rootStore.dispatch(fetchChats())
-        
+
         if (chats.length === 0) {
-          // 如果没有聊天记录，创建一个新的默认会话
-          const newSession = await rootStore.dispatch(createChat({ title: '新对话' }))
+          const newSession = await rootStore.dispatch(
+            createChat({ title: '新对话' }),
+          )
           this.setData({
             chatSessions: [newSession],
             currentSessionId: newSession.id,
           })
         } else {
-          // 找到活跃会话
           const activeSession = chats.find((session) => session.isActive)
           this.setData({
             chatSessions: chats,
             currentSessionId: activeSession?.id || chats[0].id,
           })
 
-          // 加载活跃会话的消息
           if (activeSession) {
-            this.loadMessageHistory()
+            this.loadMessageHistory(activeSession.id).catch((error) => {
+              console.error('加载活跃会话消息失败:', error)
+            })
           }
         }
       } catch (error) {
         console.error('初始化聊天会话失败:', error)
         wx.showToast({
           title: '初始化失败',
-          icon: 'error'
+          icon: 'error',
         })
       }
     },
@@ -209,7 +249,7 @@ Component({
     // 登录并确保用户资料存在
     async ensureAuthAndProfile() {
       try {
-        const profile = await rootStore.dispatch(fetchProfile()) 
+        const profile = await rootStore.dispatch(fetchProfile())
         const userId = profile._id
 
         this.setData({ cloudUserId: userId })
@@ -247,7 +287,7 @@ Component({
           const componentManager = getComponentManager()
           componentManager?.registerComponent(content)
         }
-        
+
         // 使用新的内容解析工具
         return processContentWithParser(content, app, (e: WxEvent) => {
           this.handleComponentEvent(e)
@@ -263,15 +303,22 @@ Component({
         const eventData = (e.currentTarget as any)?.dataset?.data?.attrs || {}
         const componentId = eventData['data-component-id']
         const eventName = eventData['data-action']
-        
+
         if (!componentId || !eventName) {
-          console.warn('事件对象中缺少组件ID或事件名称:', { componentId, eventName })
+          console.warn('事件对象中缺少组件ID或事件名称:', {
+            componentId,
+            eventName,
+          })
           return
         }
-        
+
         const componentManager = getComponentManager()
-        const success = componentManager?.handleComponentEvent(componentId, eventName, e)
-        
+        const success = componentManager?.handleComponentEvent(
+          componentId,
+          eventName,
+          e,
+        )
+
         if (!success) {
           console.warn(`组件事件处理失败: ${componentId}.${eventName}`)
         }
@@ -339,6 +386,21 @@ Component({
           messages: newMessages,
         })
 
+        // 保存用户消息到数据库
+        if (this.data.currentSessionId) {
+          try {
+            await rootStore.dispatch(
+              addMessage({
+                chatId: this.data.currentSessionId,
+                role: 'user',
+                content: messageContent,
+              }),
+            )
+          } catch (error) {
+            console.error('保存用户消息失败:', error)
+          }
+        }
+
         // 滚动到用户消息（智能滚动到顶部）
         this.scrollToUserMessageTop()
 
@@ -386,8 +448,28 @@ Component({
               isStreaming: false,
             })
 
-            // 重新加载消息历史以确保所有消息正确显示
-            this.loadMessageHistory()
+            // 保存助手消息到数据库
+            if (this.data.currentSessionId) {
+              const finalContent =
+                typeof content === 'string' ? content : JSON.stringify(content)
+              rootStore
+                .dispatch(
+                  addMessage({
+                    chatId: this.data.currentSessionId,
+                    role: 'assistant',
+                    content: finalContent,
+                  }),
+                )
+                .catch((error) => {
+                  console.error('保存助手消息失败:', error)
+                })
+            }
+
+            this.loadMessageHistory(this.data.currentSessionId).catch(
+              (error) => {
+                console.error('重新加载消息历史失败:', error)
+              },
+            )
           }
         }
 
@@ -514,7 +596,7 @@ Component({
             this.setData({
               messages: [],
             })
-            
+
             wx.showToast({
               title: '已清空',
               icon: 'success',
@@ -540,15 +622,13 @@ Component({
     },
 
     // 选择聊天会话
-    async selectChatSession(e: any) {
+    async selectChatSession(e: WXEvent<{ sessionId: string }>) {
       const { sessionId } = e.detail
       console.log('选择会话:', sessionId)
 
       try {
-        await rootStore.dispatch(setCurrentChat(sessionId))
-
-        // 重新加载消息历史
-        this.loadMessageHistory()
+        await appDispatch(setCurrentChat(sessionId))
+        this.loadMessageHistory(sessionId)
 
         this.setData({
           currentSessionId: sessionId,
@@ -573,8 +653,10 @@ Component({
       console.log('创建新话题')
 
       try {
-        const newSession = await rootStore.dispatch(createChat({ title: '新话题' }))
-        
+        const newSession = await rootStore.dispatch(
+          createChat({ title: '新话题' }),
+        )
+
         // 重新获取聊天列表
         const chats = await rootStore.dispatch(fetchChats())
 
@@ -601,8 +683,10 @@ Component({
     // 处理新建聊天事件
     async onNewChat() {
       try {
-        const newSession = await rootStore.dispatch(createChat({ title: '新聊天' }))
-        
+        const newSession = await rootStore.dispatch(
+          createChat({ title: '新聊天' }),
+        )
+
         // 重新获取聊天列表
         const chats = await rootStore.dispatch(fetchChats())
 
@@ -642,7 +726,7 @@ Component({
               // 删除聊天会话（这会自动更新redux状态）
               await rootStore.dispatch(deleteChat(sessionId))
               console.log('删除成功')
-              
+
               // 不需要重新获取聊天列表，redux已经自动更新了
               // 从redux状态中获取最新的chats
               const currentState = rootStore.getState()
@@ -653,13 +737,19 @@ Component({
                 if (chats.length > 0) {
                   const newActiveSession = chats[0]
                   await rootStore.dispatch(setCurrentChat(newActiveSession.id))
-                  this.loadMessageHistory()
+                  this.loadMessageHistory(newActiveSession.id).catch(
+                    (error) => {
+                      console.error('删除会话后加载消息历史失败:', error)
+                    },
+                  )
                   this.setData({
                     currentSessionId: newActiveSession.id,
                   })
                 } else {
                   // 如果没有其他会话，创建一个新的
-                  const newSession = await rootStore.dispatch(createChat({ title: '新对话' }))
+                  const newSession = await rootStore.dispatch(
+                    createChat({ title: '新对话' }),
+                  )
                   this.setData({
                     messages: [],
                     currentSessionId: newSession.id,
@@ -676,7 +766,7 @@ Component({
                 title: '已删除',
                 icon: 'success',
               })
-              
+
               // 注意：不通知sidebar退出编辑模式，保持编辑状态
             } catch (error) {
               console.error('删除失败:', error)

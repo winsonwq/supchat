@@ -8,3 +8,7 @@ interface IAppOption {
   towxml: any,
   userInfoReadyCallback?: WechatMiniprogram.GetUserInfoSuccessCallback,
 }
+
+interface WXEvent<D extends any> {
+  detail: D
+}
