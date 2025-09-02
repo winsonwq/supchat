@@ -1,6 +1,10 @@
 // index.ts
 import { AIService, StreamCallback } from '../../lib/services/ai.js'
-import { RenderNode, StreamContentType } from '../../lib/mcp/types.js'
+import {
+  RenderNode,
+  StreamContentType,
+  StreamContent,
+} from '../../lib/mcp/types.js'
 import { ToolCall, TowxmlNode, WxEvent } from '../../lib/mcp/types.js'
 import { RenderMessage, Message } from '../../lib/types/message' // 使用新的消息类型
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
@@ -99,6 +103,32 @@ Component({
   },
 
   methods: {
+    // 如果符合条件，持久化一次包含 tool_calls 的助手消息
+    maybePersistAssistantToolPlan(streamContent: StreamContent) {
+      const { content, toolCalls, isComplete } = streamContent
+      if (
+        isComplete ||
+        !toolCalls ||
+        toolCalls.length === 0 ||
+        !this.data.currentSessionId
+      ) {
+        return
+      }
+
+      const partialContent =
+        typeof content === 'string' ? content : JSON.stringify(content)
+      appDispatch(
+        addMessage({
+          chatId: this.data.currentSessionId,
+          role: 'assistant',
+          content: partialContent,
+          tool_calls: toolCalls,
+        }),
+      ).catch((error) => {
+        console.error('保存含工具计划的助手消息失败:', error)
+      })
+    },
+
     // 计算安全区域顶部间距
     calculateSafeAreaPadding() {
       const topPadding = getNavigationHeight()
@@ -435,14 +465,18 @@ Component({
             this.setData({
               messages: updatedMessages,
             })
-
-            // 保存工具消息到数据库
-            // 注意：工具消息的存储应该在工具执行完成后进行
-            // 这里只是显示，不进行存储
-            console.log('显示工具消息:', toolMessage)
           } else {
-            // 更新助手消息内容，保持工具调用信息
             this.updateAssistantMessage(content, toolCalls, undefined)
+          }
+
+          // 尝试持久化包含 tool_calls 的助手消息（仅一次）
+          // 如果 AI 层指示需要持久化一次含 tool_calls 的助手计划消息，则执行一次
+          if (streamContent.shouldPersistAssistantToolPlan) {
+            console.log(
+              'streamContent.shouldPersistAssistantToolPlan',
+              streamContent.shouldPersistAssistantToolPlan,
+            )
+            this.maybePersistAssistantToolPlan(streamContent)
           }
 
           // 实时滚动到最新消息
@@ -809,7 +843,5 @@ Component({
       console.log('消息点击:', messageIndex)
       // 可以在这里添加消息点击的逻辑
     },
-
-    
   },
 })

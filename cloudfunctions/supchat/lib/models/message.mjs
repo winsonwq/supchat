@@ -18,6 +18,18 @@ export class Message {
     this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date()
   }
 
+  static hasContent(content) {
+    return !(content === undefined || content === null || content === '')
+  }
+
+  static hasToolCalls(toolCalls) {
+    return Array.isArray(toolCalls) ? toolCalls.length > 0 : !!toolCalls
+  }
+
+  static isContentOrToolCallsProvided(content, toolCalls) {
+    return this.hasContent(content) || this.hasToolCalls(toolCalls)
+  }
+
   static getCollection() {
     return db.collection(COLLECTION_NAME)
   }

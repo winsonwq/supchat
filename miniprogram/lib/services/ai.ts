@@ -1,16 +1,8 @@
 import { AIConfigStorage } from '../storage/ai-config-storage.js'
 import { ChatHistoryStorageFactory } from '../storage/chat-history-storage-interface.js'
-import {
-  transformToOpenRouterTool,
-  executeToolCall,
-  processToolCalls,
-  buildToolCallResponse,
-  allTools,
-} from '../mcp/index.js'
-import { MCPToolsService } from './mcp-tools.js'
+import { processToolCalls, buildToolCallResponse } from '../mcp/index.js'
 import { ToolManager } from './tool-manager.js'
 import {
-  formatToolCallMessage,
   formatToolCallErrorMessage,
   createStreamContent,
 } from '../utils/util.js'
@@ -22,7 +14,6 @@ import {
   WxRequestTask,
   ToolResponseMessage,
   ToolCallResult,
-  TowxmlNode,
   StreamContent,
   StreamContentType,
   RenderNode,
@@ -33,8 +24,7 @@ import {
   RenderMessage,
   RenderMessageHistory,
   MessageConverter,
-  MessageBuilder,
-  Message // 向后兼容的类型
+  Message, // 向后兼容的类型
 } from '../types/message.js'
 import chatService from './chat.js'
 
@@ -93,7 +83,7 @@ export class AIService {
     if (role === 'tool') {
       const chatId = this.currentChatId || activeSession?.id
       if (chatId) {
-        this.storeToolMessageToCloud(chatId, renderMessage).catch(error => {
+        this.storeToolMessageToCloud(chatId, renderMessage).catch((error) => {
           console.error('存储工具消息到云函数失败:', error)
         })
       } else {
@@ -106,9 +96,10 @@ export class AIService {
   getMessagesForAI(): AIMessageHistory {
     const systemMessage: AIMessage = {
       role: 'system',
-      content: '你是一个有用的AI助手，请用简洁友好的方式回答用户的问题。你可以使用可用的工具来帮助用户。当需要使用工具时，请直接调用相应的工具。',
+      content:
+        '你是一个有用的AI助手，请用简洁友好的方式回答用户的问题。你可以使用可用的工具来帮助用户。当需要使用工具时，请直接调用相应的工具。',
     }
-    
+
     const aiMessages = MessageConverter.renderToAIHistory(this.renderMessages)
     return [systemMessage, ...aiMessages]
   }
@@ -125,7 +116,10 @@ export class AIService {
   }
 
   // 将工具消息存储到云函数
-  private async storeToolMessageToCloud(chatId: string, message: RenderMessage) {
+  private async storeToolMessageToCloud(
+    chatId: string,
+    message: RenderMessage,
+  ) {
     try {
       await chatService.addMessage({
         chatId,
@@ -151,7 +145,10 @@ export class AIService {
     // 同时清空当前会话的消息
     const activeSession = this.chatHistoryStorage.getActiveSession()
     if (activeSession) {
-      this.chatHistoryStorage.updateSession(activeSession.id, { messages: [] })
+      // 类型定义中 ChatSession 不包含 messages 字段，这里以 any 断言以兼容实现
+      ;(this.chatHistoryStorage as any).updateSession(activeSession.id, {
+        messages: [],
+      })
     }
   }
 
@@ -175,7 +172,9 @@ export class AIService {
     this.chatHistoryStorage.setActiveSession(sessionId)
 
     // 加载会话消息
-    this.renderMessages = [...session.messages]
+    // 兼容存储实现：若存在 messages 字段则加载，否则保持空
+    const sessionMessages = (session as any).messages || []
+    this.renderMessages = [...sessionMessages]
 
     return true
   }
@@ -187,7 +186,8 @@ export class AIService {
 
   // 删除聊天会话
   deleteChatSession(sessionId: string): boolean {
-    return this.chatHistoryStorage.deleteSession(sessionId)
+    // 接口未声明 deleteSession，这里以 any 兼容调用
+    return (this.chatHistoryStorage as any).deleteSession(sessionId)
   }
 
   // 获取当前活跃会话
@@ -466,14 +466,16 @@ export class AIService {
     if (hasToolCalls && toolCalls.length > 0) {
       // 添加助手消息（保存工具调用信息，以便显示）
       this.addMessage('assistant', assistantContent, undefined, toolCalls)
-      onStream(
-        createStreamContent(
+      {
+        const sc = createStreamContent(
           assistantContent,
           StreamContentType.NORMAL,
           false,
           toolCalls,
-        ),
-      ) // 传递 toolCalls 以便显示工具调用信息
+        )
+        sc.shouldPersistAssistantToolPlan = true
+        onStream(sc)
+      } // 传递 toolCalls 以便显示工具调用信息，并标记需持久化一次
 
       // 处理工具调用
       await this.handleToolCalls(toolCalls, onStream)
@@ -519,7 +521,7 @@ export class AIService {
 
   // 保存工具调用结果到聊天历史
   private saveToolCallResults(toolResponses: any[]) {
-    toolResponses.forEach(response => {
+    toolResponses.forEach((response) => {
       if (response.originalData) {
         // 使用原始数据保存到聊天历史，而不是渲染后的HTML字符串
         this.addMessage('tool', response.originalData, response.tool_call_id)
@@ -563,7 +565,7 @@ export class AIService {
 
         // 移除这里的addMessage调用，现在在saveToolCallResults中统一处理
         // this.addMessage('tool', result.data, call.id)
-        
+
         onStream(
           createStreamContent(result.data, StreamContentType.TOOL, false),
         )
@@ -692,14 +694,16 @@ export class AIService {
             undefined,
             toolCalls,
           )
-          onStream(
-            createStreamContent(
+          {
+            const sc = createStreamContent(
               message?.content || '',
               StreamContentType.NORMAL,
               false,
               toolCalls,
-            ),
-          ) // 传递 toolCalls 以便显示工具调用信息
+            )
+            sc.shouldPersistAssistantToolPlan = true
+            onStream(sc)
+          } // 传递 toolCalls 以便显示工具调用信息，并标记需持久化一次
 
           // 处理工具调用
           await this.handleToolCalls(toolCalls, onStream)
@@ -817,7 +821,7 @@ export class AIService {
 
           // 使用工具管理器执行工具
           const result = await toolManager.executeTool(call.function.name, args)
-          
+
           // 直接保存原始数据，不进行渲染
           this.addMessage('tool', result.data, call.id)
         } catch (error) {
@@ -841,9 +845,9 @@ export class AIService {
   // 获取消息历史（不包括系统消息） - 向后兼容
   getMessageHistory(): Message[] {
     // 转换为旧格式以保持向后兼容
-    return this.renderMessages.map(msg => ({
+    return this.renderMessages.map((msg) => ({
       ...msg,
-      towxmlNodes: msg.towxmlNodes
+      towxmlNodes: msg.towxmlNodes,
     })) as Message[]
   }
 

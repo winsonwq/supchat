@@ -61,7 +61,24 @@ export class ChatService {
       throw new Error(result.error || '获取聊天列表失败')
     }
 
-    return result.data as ChatSession[]
+    // 部分后端返回的消息内字段使用 camelCase，这里做一次兼容映射
+    const chats = (result.data as any[]).map((c: any) => {
+      if (Array.isArray(c?.messages)) {
+        c.messages = c.messages.map((m: any) => {
+          const mapped: any = { ...m }
+          if (mapped.tool_calls === undefined && mapped.toolCalls !== undefined) {
+            mapped.tool_calls = mapped.toolCalls
+          }
+          if (mapped.tool_call_id === undefined && mapped.toolCallId !== undefined) {
+            mapped.tool_call_id = mapped.toolCallId
+          }
+          return mapped
+        })
+      }
+      return c
+    }) as ChatSession[]
+
+    return chats
   }
 
   /**
@@ -93,7 +110,19 @@ export class ChatService {
 
       // 获取聊天消息
       const messagesResult = await storage.get(`/chats/${chatId}/messages`)
-      const messages = messagesResult.ok ? (messagesResult.data as RenderMessage[]) : []
+      const rawMessages = messagesResult.ok ? (messagesResult.data as any[]) : []
+
+      // 统一字段：将后端 camelCase 字段映射到前端使用的下划线风格
+      const messages: RenderMessage[] = rawMessages.map((m: any) => {
+        const mapped: any = { ...m }
+        if (mapped.tool_calls === undefined && mapped.toolCalls !== undefined) {
+          mapped.tool_calls = mapped.toolCalls
+        }
+        if (mapped.tool_call_id === undefined && mapped.toolCallId !== undefined) {
+          mapped.tool_call_id = mapped.toolCallId
+        }
+        return mapped as RenderMessage
+      })
 
       return {
         ...chat,

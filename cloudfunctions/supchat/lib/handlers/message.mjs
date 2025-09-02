@@ -30,7 +30,10 @@ export default [
       if (!id) return { error: '缺少会话 ID' }
       const { userId = authUserId, role = 'user', content, toolCalls, toolCallId } = body || {}
       if (!userId || userId !== authUserId) return { error: '未授权或 userId 不匹配' }
-      if (!content) return { error: '缺少 content' }
+      // 允许在存在 toolCalls 时 content 为空
+      if (!Message.isContentOrToolCallsProvided(content, toolCalls)) {
+        return { error: '缺少 content' }
+      }
 
       const chat = await Chat.findById(id)
       if (!chat || chat.isDeleted) return { error: '会话不存在' }

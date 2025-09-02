@@ -159,6 +159,8 @@ export interface StreamContent {
   isComplete: boolean
   toolCalls?: ToolCall[]
   currentToolCall?: ToolCall
+  // 标识：是否应在前端侧持久化一次含 tool_calls 的助手计划消息
+  shouldPersistAssistantToolPlan?: boolean
 }
 
 // 天气相关类型定义
