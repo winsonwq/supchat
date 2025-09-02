@@ -55,7 +55,7 @@ Component({
     userInfo: {
       name: '用户',
       avatar: '',
-    },
+    } as { name: string; avatar: string },
     cloudUserId: '' as string,
   },
 
@@ -172,12 +172,11 @@ Component({
       }
 
       try {
-        // 从数据库加载当前聊天的消息
         const chatWithMessages = await appDispatch(switchToChat(sessionId))
 
         if (chatWithMessages?.chatWithMessages?.messages) {
           const processedHistory =
-            chatWithMessages.chatWithMessages.messages.map((msg: any) => {
+            chatWithMessages.chatWithMessages.messages.map((msg) => {
               return {
                 ...msg,
                 towxmlNodes: this.processMessageContent(msg.content),
@@ -211,27 +210,30 @@ Component({
     async initChatSessions() {
       try {
         // 使用 Redux store 获取聊天数据
-        const chats = await rootStore.dispatch(fetchChats())
+        const chats = await appDispatch(fetchChats())
 
         if (chats.length === 0) {
-          const newSession = await rootStore.dispatch(
-            createChat({ title: '新对话' }),
-          )
+          const newSession = await appDispatch(createChat({ title: '新对话' }))
           this.setData({
             chatSessions: [newSession],
             currentSessionId: newSession.id,
           })
+
+          // 设置AI服务的当前聊天会话ID
+          this.getAIService().setCurrentChatId(newSession.id)
         } else {
-          const activeSession = chats.find((session) => session.isActive)
+          const activeSession = chats[0]
+          const currentSessionId = activeSession?.id || chats[0].id
           this.setData({
             chatSessions: chats,
-            currentSessionId: activeSession?.id || chats[0].id,
+            currentSessionId,
           })
 
+          // 设置AI服务的当前聊天会话ID
+          this.getAIService().setCurrentChatId(currentSessionId)
+
           if (activeSession) {
-            this.loadMessageHistory(activeSession.id).catch((error) => {
-              console.error('加载活跃会话消息失败:', error)
-            })
+            this.loadMessageHistory(activeSession.id)
           }
         }
       } catch (error) {
@@ -249,7 +251,7 @@ Component({
     // 登录并确保用户资料存在
     async ensureAuthAndProfile() {
       try {
-        const profile = await rootStore.dispatch(fetchProfile())
+        const profile = await appDispatch(fetchProfile())
         const userId = profile._id
 
         this.setData({ cloudUserId: userId })
@@ -264,7 +266,7 @@ Component({
       if (userInfo) {
         this.setData({
           userInfo: {
-            name: userInfo.nickname,
+            name: userInfo.nickname || '用户',
             avatar: userInfo.avatar || '',
           },
         })
@@ -335,7 +337,7 @@ Component({
     },
 
     // 处理组件发送事件
-    onSendMessage(e: any) {
+    onSendMessage(e: WXEvent<{ message: string }>) {
       // 从事件中获取消息内容
       const message = e.detail?.message || this.data.inputMessage.trim()
       this.sendMessage(message)
@@ -389,7 +391,7 @@ Component({
         // 保存用户消息到数据库
         if (this.data.currentSessionId) {
           try {
-            await rootStore.dispatch(
+            await appDispatch(
               addMessage({
                 chatId: this.data.currentSessionId,
                 role: 'user',
@@ -433,6 +435,11 @@ Component({
             this.setData({
               messages: updatedMessages,
             })
+
+            // 保存工具消息到数据库
+            // 注意：工具消息的存储应该在工具执行完成后进行
+            // 这里只是显示，不进行存储
+            console.log('显示工具消息:', toolMessage)
           } else {
             // 更新助手消息内容，保持工具调用信息
             this.updateAssistantMessage(content, toolCalls, undefined)
@@ -448,30 +455,25 @@ Component({
               isStreaming: false,
             })
 
-            // 保存助手消息到数据库
             if (this.data.currentSessionId) {
               const finalContent =
                 typeof content === 'string' ? content : JSON.stringify(content)
-              rootStore
-                .dispatch(
-                  addMessage({
-                    chatId: this.data.currentSessionId,
-                    role: 'assistant',
-                    content: finalContent,
-                  }),
-                )
-                .catch((error) => {
-                  console.error('保存助手消息失败:', error)
-                })
+              appDispatch(
+                addMessage({
+                  chatId: this.data.currentSessionId,
+                  role: 'assistant',
+                  content: finalContent,
+                  tool_calls: toolCalls,
+                }),
+              )
             }
 
-            this.loadMessageHistory(this.data.currentSessionId).catch(
-              (error) => {
-                console.error('重新加载消息历史失败:', error)
-              },
-            )
+            this.loadMessageHistory(this.data.currentSessionId)
           }
         }
+
+        // 设置AI服务的当前聊天会话ID
+        this.getAIService().setCurrentChatId(this.data.currentSessionId)
 
         // 发送流式消息
         await this.getAIService().sendMessageStream(messageContent, onStream)
@@ -635,6 +637,9 @@ Component({
           sidebarOpen: false,
         })
 
+        // 设置AI服务的当前聊天会话ID
+        this.getAIService().setCurrentChatId(sessionId)
+
         wx.showToast({
           title: '已切换会话',
           icon: 'success',
@@ -653,12 +658,10 @@ Component({
       console.log('创建新话题')
 
       try {
-        const newSession = await rootStore.dispatch(
-          createChat({ title: '新话题' }),
-        )
+        const newSession = await appDispatch(createChat({ title: '新话题' }))
 
         // 重新获取聊天列表
-        const chats = await rootStore.dispatch(fetchChats())
+        const chats = await appDispatch(fetchChats())
 
         this.setData({
           messages: [],
@@ -666,6 +669,9 @@ Component({
           currentSessionId: newSession.id,
           sidebarOpen: false,
         })
+
+        // 设置AI服务的当前聊天会话ID
+        this.getAIService().setCurrentChatId(newSession.id)
 
         wx.showToast({
           title: '已创建新话题',
@@ -683,12 +689,10 @@ Component({
     // 处理新建聊天事件
     async onNewChat() {
       try {
-        const newSession = await rootStore.dispatch(
-          createChat({ title: '新聊天' }),
-        )
+        const newSession = await appDispatch(createChat({ title: '新聊天' }))
 
         // 重新获取聊天列表
-        const chats = await rootStore.dispatch(fetchChats())
+        const chats = await appDispatch(fetchChats())
 
         this.setData({
           messages: [],
@@ -696,6 +700,9 @@ Component({
           currentSessionId: newSession.id,
           sidebarOpen: false,
         })
+
+        // 设置AI服务的当前聊天会话ID
+        this.getAIService().setCurrentChatId(newSession.id)
 
         wx.showToast({
           title: '已开始新聊天',
@@ -724,7 +731,7 @@ Component({
             console.log('用户确认删除')
             try {
               // 删除聊天会话（这会自动更新redux状态）
-              await rootStore.dispatch(deleteChat(sessionId))
+              await appDispatch(deleteChat(sessionId))
               console.log('删除成功')
 
               // 不需要重新获取聊天列表，redux已经自动更新了
@@ -736,7 +743,7 @@ Component({
               if (sessionId === this.data.currentSessionId) {
                 if (chats.length > 0) {
                   const newActiveSession = chats[0]
-                  await rootStore.dispatch(setCurrentChat(newActiveSession.id))
+                  await appDispatch(setCurrentChat(newActiveSession.id))
                   this.loadMessageHistory(newActiveSession.id).catch(
                     (error) => {
                       console.error('删除会话后加载消息历史失败:', error)
@@ -747,7 +754,7 @@ Component({
                   })
                 } else {
                   // 如果没有其他会话，创建一个新的
-                  const newSession = await rootStore.dispatch(
+                  const newSession = await appDispatch(
                     createChat({ title: '新对话' }),
                   )
                   this.setData({

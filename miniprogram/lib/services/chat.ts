@@ -1,5 +1,6 @@
 import { ChatSession } from '../types/chat-history'
 import { RenderMessage } from '../types/message'
+import { RenderNode, ToolCall } from '../mcp/types'
 import storage from './storage'
 
 export interface CreateChatOptions {
@@ -14,8 +15,10 @@ export interface UpdateChatOptions {
 
 export interface AddMessageOptions {
   chatId: string
-  role: 'user' | 'assistant'
-  content: string
+  role: 'user' | 'assistant' | 'system' | 'tool'
+  content: RenderNode
+  tool_calls?: ToolCall[]
+  tool_call_id?: string
 }
 
 export interface ChatWithMessages extends ChatSession {
@@ -145,9 +148,17 @@ export class ChatService {
   async addMessage(
     options: AddMessageOptions,
   ): Promise<{ message: any; chat: ChatSession }> {
-    const { chatId, role, content } = options
+    const { chatId, role, content, tool_calls, tool_call_id } = options
 
-    const result = await storage.create(`/chats/${chatId}/messages`, { role, content })
+    // 构建消息数据
+    const messageData: any = { 
+      role, 
+      content,
+      ...(tool_calls && { toolCalls: tool_calls }),
+      ...(tool_call_id && { toolCallId: tool_call_id })
+    }
+
+    const result = await storage.create(`/chats/${chatId}/messages`, messageData)
 
     if (!result.ok) {
       throw new Error(result.error || '发送消息失败')
@@ -219,6 +230,47 @@ export class ChatService {
       return true
     } catch (error) {
       console.error('云函数连接测试失败:', error)
+      return false
+    }
+  }
+
+  /**
+   * 测试新的 addMessage 功能
+   */
+  async testAddMessageWithComplexContent(): Promise<boolean> {
+    try {
+      // 创建一个测试聊天
+      const chat = await this.createChat({ title: '测试复杂内容' })
+      
+      // 测试添加包含 tool_calls 的消息
+      const result = await this.addMessage({
+        chatId: chat.id,
+        role: 'assistant',
+        content: '这是一个测试消息',
+        tool_calls: [
+          {
+            id: 'test_tool_1',
+            type: 'function',
+            function: {
+              name: 'test_function',
+              arguments: '{"param": "value"}'
+            }
+          }
+        ]
+      })
+
+      // 测试添加 tool 角色的消息
+      const toolResult = await this.addMessage({
+        chatId: chat.id,
+        role: 'tool',
+        content: '工具执行结果: [1, 2, 3]',
+        tool_call_id: 'test_tool_1'
+      })
+
+      console.log('测试成功:', { result, toolResult })
+      return true
+    } catch (error) {
+      console.error('测试失败:', error)
       return false
     }
   }

@@ -28,7 +28,7 @@ export default [
     try {
       const { id } = params || {}
       if (!id) return { error: '缺少会话 ID' }
-      const { userId = authUserId, role = 'user', content } = body || {}
+      const { userId = authUserId, role = 'user', content, toolCalls, toolCallId } = body || {}
       if (!userId || userId !== authUserId) return { error: '未授权或 userId 不匹配' }
       if (!content) return { error: '缺少 content' }
 
@@ -36,16 +36,39 @@ export default [
       if (!chat || chat.isDeleted) return { error: '会话不存在' }
       if (chat.userId !== authUserId) return { error: '未授权访问该会话' }
 
-      const msg = await Message.create({ chatId: id, userId, role, content })
+      const msg = await Message.create({ 
+        chatId: id, 
+        userId, 
+        role, 
+        content,
+        toolCalls,
+        toolCallId
+      })
+
+      // 生成预览内容（处理复杂内容类型）
+      let previewContent = ''
+      if (typeof content === 'string') {
+        previewContent = content
+      } else if (Array.isArray(content)) {
+        previewContent = content.map(item => 
+          typeof item === 'string' ? item : JSON.stringify(item)
+        ).join(' ')
+      } else if (typeof content === 'object' && content !== null) {
+        // 尝试提取文本内容
+        if (content.text) previewContent = content.text
+        else if (content.content) previewContent = content.content
+        else if (content.message) previewContent = content.message
+        else previewContent = JSON.stringify(content)
+      }
 
       const recent = (chat.messagesRecent || []).concat([
-        { role: msg.role, content: msg.content, createdAt: msg.createdAt }
+        { role: msg.role, content: previewContent, createdAt: msg.createdAt }
       ])
       const messagesRecent = recent.slice(-20)
       await chat.update({
         messageCount: (chat.messageCount || 0) + 1,
         lastMessageAt: msg.createdAt,
-        lastMessagePreview: msg.content.slice(0, 100),
+        lastMessagePreview: previewContent.slice(0, 100),
         messagesRecent
       })
 

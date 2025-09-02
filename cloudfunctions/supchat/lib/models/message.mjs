@@ -12,6 +12,7 @@ export class Message {
     this.role = data.role || 'user'
     this.content = data.content || ''
     this.toolCalls = data.toolCalls
+    this.toolCallId = data.toolCallId
     this.toolResult = data.toolResult
     this.isDeleted = data.isDeleted !== undefined ? data.isDeleted : false
     this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date()

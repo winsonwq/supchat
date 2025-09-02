@@ -1,5 +1,6 @@
 import { ChatSession } from '../../types/chat-history'
 import { RenderMessage } from '../../types/message'
+import { RenderNode, ToolCall } from '../../mcp/types'
 import { createAsyncThunk } from '../action'
 import { Action } from '../types'
 import chatService from '../../services/chat'
@@ -16,8 +17,10 @@ export interface UpdateChatParams {
 
 export interface AddMessageParams {
   chatId: string
-  role: 'user' | 'assistant'
-  content: string
+  role: 'user' | 'assistant' | 'system' | 'tool'
+  content: RenderNode
+  tool_calls?: ToolCall[]
+  tool_call_id?: string
 }
 
 export enum ChatActionType {
@@ -67,8 +70,14 @@ export const deleteChat = createAsyncThunk(
 export const addMessage = createAsyncThunk(
   ChatActionType.ADD_MESSAGE,
   async (params: AddMessageParams) => {
-    const { chatId, role, content } = params
-    const result = await chatService.addMessage({ chatId, role, content })
+    const { chatId, role, content, tool_calls, tool_call_id } = params
+    const result = await chatService.addMessage({ 
+      chatId, 
+      role, 
+      content, 
+      tool_calls, 
+      tool_call_id 
+    })
 
     return {
       chatId,

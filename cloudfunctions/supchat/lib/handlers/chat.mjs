@@ -21,17 +21,34 @@ export default [
           userId,
           role: firstMessage.role || 'user',
           content: firstMessage.content,
+          toolCalls: firstMessage.tool_calls,
+          toolCallId: firstMessage.tool_call_id,
         })
+
+        // 生成预览内容
+        let previewContent = ''
+        if (typeof firstMessage.content === 'string') {
+          previewContent = firstMessage.content
+        } else if (Array.isArray(firstMessage.content)) {
+          previewContent = firstMessage.content.map(item => 
+            typeof item === 'string' ? item : JSON.stringify(item)
+          ).join(' ')
+        } else if (typeof firstMessage.content === 'object' && firstMessage.content !== null) {
+          if (firstMessage.content.text) previewContent = firstMessage.content.text
+          else if (firstMessage.content.content) previewContent = firstMessage.content.content
+          else if (firstMessage.content.message) previewContent = firstMessage.content.message
+          else previewContent = JSON.stringify(firstMessage.content)
+        }
 
         // 更新 Chat 聚合字段
         const recent = (chat.messagesRecent || []).concat([
-          { role: m.role, content: m.content, createdAt: m.createdAt }
+          { role: m.role, content: previewContent, createdAt: m.createdAt }
         ])
         const messagesRecent = recent.slice(-20)
         await chat.update({
           messageCount: (chat.messageCount || 0) + 1,
           lastMessageAt: m.createdAt,
-          lastMessagePreview: m.content.slice(0, 100),
+          lastMessagePreview: previewContent.slice(0, 100),
           messagesRecent
         })
       }

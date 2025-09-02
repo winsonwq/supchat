@@ -1,5 +1,10 @@
 // content-parser.ts
-import { TowxmlNode, WxEvent, RenderNode } from '../mcp/types.js'
+import {
+  TowxmlNode,
+  WxEvent,
+  RenderNode,
+  SerializableComponentData,
+} from '../mcp/types.js'
 import { BaseComponent } from '../mcp/components/base-component.js'
 
 /**
@@ -11,17 +16,17 @@ export function isHtmlContent(content: string): boolean {
   if (!content || typeof content !== 'string') {
     return false
   }
-  
+
   // HTML标签模式
   const htmlPatterns = [
     /<[^>]+>/, // 包含HTML标签
     /&[a-zA-Z]+;/, // HTML实体
     /<[a-zA-Z][a-zA-Z0-9]*\s+[^>]*>/, // 带属性的HTML标签
   ]
-  
+
   // 检查是否包含HTML特征
-  const hasHtmlTags = htmlPatterns.some(pattern => pattern.test(content))
-  
+  const hasHtmlTags = htmlPatterns.some((pattern) => pattern.test(content))
+
   // 如果包含HTML标签，进一步检查是否为有效的HTML结构
   if (hasHtmlTags) {
     // 检查是否有完整的HTML文档结构
@@ -30,19 +35,20 @@ export function isHtmlContent(content: string): boolean {
     const hasDiv = /<div[^>]*>.*<\/div>/i.test(content)
     const hasSpan = /<span[^>]*>.*<\/span>/i.test(content)
     const hasP = /<p[^>]*>.*<\/p>/i.test(content)
-    
+
     // 如果包含完整的HTML结构，则认为是HTML
     if (hasHtmlDoc || hasBody || hasDiv || hasSpan || hasP) {
       return true
     }
-    
+
     // 检查是否包含组件相关的HTML结构
-    const hasComponentStructure = /data-component-id|data-action|class="[^"]*component[^"]*"/i.test(content)
+    const hasComponentStructure =
+      /data-component-id|data-action|class="[^"]*component[^"]*"/i.test(content)
     if (hasComponentStructure) {
       return true
     }
   }
-  
+
   return false
 }
 
@@ -55,7 +61,7 @@ export function isMarkdownContent(content: string): boolean {
   if (!content || typeof content !== 'string') {
     return false
   }
-  
+
   // Markdown语法模式
   const markdownPatterns = [
     /^#{1,6}\s+/m, // 标题
@@ -73,34 +79,54 @@ export function isMarkdownContent(content: string): boolean {
     /~~(.*?)~~/, // 删除线
     /^`{3,}[a-zA-Z]*$/m, // 代码块开始
   ]
-  
+
   // 检查是否包含Markdown语法
-  const hasMarkdownSyntax = markdownPatterns.some(pattern => pattern.test(content))
-  
+  const hasMarkdownSyntax = markdownPatterns.some((pattern) =>
+    pattern.test(content),
+  )
+
   // 如果包含Markdown语法，进一步检查是否为纯Markdown
   if (hasMarkdownSyntax) {
     // 检查是否同时包含HTML标签（可能是混合内容）
     const hasHtmlTags = /<[^>]+>/.test(content)
-    
+
     // 如果包含HTML标签，需要进一步判断
     if (hasHtmlTags) {
       // 检查HTML标签是否只是简单的格式化标签
       const simpleHtmlTags = /<(b|strong|i|em|code|pre|br|hr)[^>]*>/i
-      const hasOnlySimpleTags = !/<(?!\/?(b|strong|i|em|code|pre|br|hr)\b)[^>]+>/i.test(content)
-      
+      const hasOnlySimpleTags =
+        !/<(?!\/?(b|strong|i|em|code|pre|br|hr)\b)[^>]+>/i.test(content)
+
       // 如果只包含简单的HTML标签，可能是Markdown转换后的结果
       if (hasOnlySimpleTags) {
         return true
       }
-      
+
       // 如果包含复杂的HTML结构，可能是HTML内容
       return false
     }
-    
+
     return true
   }
-  
+
   return false
+}
+
+/**
+ * 判断内容是否为 SerializableComponentData
+ * @param content 内容对象
+ * @returns 是否为 SerializableComponentData
+ */
+export function isSerializableComponentData(
+  content: any,
+): content is SerializableComponentData {
+  return (
+    typeof content === 'object' &&
+    content !== null &&
+    typeof content.componentType === 'string' &&
+    typeof content.componentId === 'string' &&
+    'data' in content
+  )
 }
 
 /**
@@ -111,7 +137,7 @@ export function isMarkdownContent(content: string): boolean {
 export function detectContentType(content: string): 'html' | 'markdown' {
   if (isHtmlContent(content)) {
     return 'html'
-  } 
+  }
   return 'markdown'
 }
 
@@ -125,43 +151,59 @@ export function detectContentType(content: string): 'html' | 'markdown' {
 export function processMessageContent(
   content: RenderNode,
   app: any,
-  eventHandler?: (e: WxEvent) => void
+  eventHandler?: (e: WxEvent) => void,
 ): TowxmlNode | undefined {
   try {
     let html: string
     let contentType: 'html' | 'markdown'
-    
+
+    // 首先处理 SerializableComponentData，反序列化为组件实例
+    if (isSerializableComponentData(content)) {
+      const originalContent = content // 保存原始引用用于错误处理
+      try {
+        content = BaseComponent.deserialize(content)
+      } catch (error) {
+        console.error('组件反序列化失败:', error)
+        content = originalContent
+      }
+    }
+
+    // 现在 content 可能是 BaseComponent 实例或其他类型
     if (content instanceof BaseComponent) {
-      // 如果是组件，渲染为HTML
+      // 如果是组件实例，渲染为HTML
       html = content.render()
       contentType = 'html'
     } else {
-      // 如果是字符串，智能判断类型
+      // 如果是字符串或其他类型，智能判断类型
       const contentStr = String(content)
       contentType = detectContentType(contentStr)
       html = contentStr
     }
-    
+
     // 根据内容类型选择解析方式
     let towxmlNodes: TowxmlNode
-    
+
     if (contentType === 'html') {
       towxmlNodes = app.towxml(html, 'html', {
-        events: eventHandler ? {
-          tap: eventHandler
-        } : undefined
+        events: eventHandler
+          ? {
+              tap: eventHandler,
+            }
+          : undefined,
       })
     } else if (contentType === 'markdown') {
       towxmlNodes = app.towxml(html, 'markdown', {
-        events: eventHandler ? {
-          tap: eventHandler
-        } : undefined
+        events: eventHandler
+          ? {
+              tap: eventHandler,
+            }
+          : undefined,
       })
     } else {
       // 纯文本
       towxmlNodes = app.towxml(html, 'text')
     }
-    
+
     return towxmlNodes
   } catch (error) {
     console.error('towxml解析错误:', error)

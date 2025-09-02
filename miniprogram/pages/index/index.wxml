@@ -24,6 +24,7 @@
   bind:userInfoUpdated="onUserInfoUpdated"
 />
 
+
 <!-- 消息列表组件 -->
 <message-list
   messages="{{ messages }}"

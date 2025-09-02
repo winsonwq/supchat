@@ -36,6 +36,7 @@ import {
   MessageBuilder,
   Message // 向后兼容的类型
 } from '../types/message.js'
+import chatService from './chat.js'
 
 // 流式响应回调类型
 export type StreamCallback = (streamContent: StreamContent) => void
@@ -54,6 +55,7 @@ export class AIService {
   private renderMessages: RenderMessageHistory = [] // 内部渲染消息
   private currentRequestTask: WxRequestTask | null = null
   private chatHistoryStorage = ChatHistoryStorageFactory.getInstance()
+  private currentChatId: string | null = null // 当前聊天会话ID
 
   static getInstance(): AIService {
     if (!AIService.instance) {
@@ -86,6 +88,18 @@ export class AIService {
     if (activeSession) {
       this.chatHistoryStorage.addMessage(activeSession.id, renderMessage)
     }
+
+    // 如果是工具消息，也通过云函数存储到数据库
+    if (role === 'tool') {
+      const chatId = this.currentChatId || activeSession?.id
+      if (chatId) {
+        this.storeToolMessageToCloud(chatId, renderMessage).catch(error => {
+          console.error('存储工具消息到云函数失败:', error)
+        })
+      } else {
+        console.warn('无法存储工具消息：没有可用的聊天会话ID')
+      }
+    }
   }
 
   // 获取所有消息（包括系统消息） - 用于 AI 通信
@@ -97,6 +111,33 @@ export class AIService {
     
     const aiMessages = MessageConverter.renderToAIHistory(this.renderMessages)
     return [systemMessage, ...aiMessages]
+  }
+
+  // 设置当前聊天会话ID
+  setCurrentChatId(chatId: string) {
+    this.currentChatId = chatId
+    console.log('AI服务设置当前聊天会话ID:', chatId)
+  }
+
+  // 获取当前聊天会话ID
+  getCurrentChatId(): string | null {
+    return this.currentChatId
+  }
+
+  // 将工具消息存储到云函数
+  private async storeToolMessageToCloud(chatId: string, message: RenderMessage) {
+    try {
+      await chatService.addMessage({
+        chatId,
+        role: message.role,
+        content: message.content,
+        tool_call_id: message.tool_call_id,
+      })
+      console.log('工具消息已存储到云函数:', message)
+    } catch (error) {
+      console.error('存储工具消息到云函数失败:', error)
+      throw error
+    }
   }
 
   // 获取所有消息（用于渲染）
