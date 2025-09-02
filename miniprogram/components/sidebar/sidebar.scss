@@ -73,16 +73,8 @@
   height: 40px;
 }
 
-.edit-mode-btn:hover {
-  background-color: #f0f0f0;
-}
-
 .edit-mode-btn--active {
   background-color: #e3f2fd;
-}
-
-.edit-mode-btn--active:hover {
-  background-color: #bbdefb;
 }
 
 /* 侧边栏内容 */
@@ -108,13 +100,9 @@
   justify-content: space-between;
 }
 
-.chat-session-item:hover {
-  background-color: #f5f5f5;
-}
-
 .chat-session-item--active {
-  background-color: #e6f3ff;
-  border-color: #1976d2;
+  background-color: #f5f5f5;
+  border-color: #e6e6e6;
 }
 
 .chat-session-item--edit-mode {
@@ -122,12 +110,7 @@
   opacity: 0.8;
 }
 
-.chat-session-item--edit-mode:hover {
-  background-color: transparent;
-}
-
 .chat-session-item--edit-mode.chat-session-item--active {
-  background-color: #e6f3ff;
   opacity: 1;
 }
 
@@ -153,13 +136,11 @@
 
 .chat-session-actions {
   margin-left: 8px;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.2s ease;
 }
 
-.chat-session-item:hover .chat-session-actions {
-  opacity: 1;
-}
+/* 移除 hover 依赖，操作区默认可见 */
 
 .chat-session-actions--visible {
   opacity: 1;
@@ -177,15 +158,6 @@
   justify-content: center;
   min-width: 40px;
   height: 40px;
-}
-
-.delete-session-btn:hover {
-  background-color: #ffeaea;
-  transform: scale(1.05);
-}
-
-.delete-session-btn:active {
-  transform: scale(0.95);
 }
 
 .empty-state {
