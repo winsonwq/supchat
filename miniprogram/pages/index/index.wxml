@@ -35,7 +35,6 @@
   chatScrollTopPadding="{{ chatScrollTopPadding }}"
   bind:scrollToLatest="onScrollToLatest"
   bind:messageTap="onMessageTap"
-  bind:messageLongPress="onMessageLongPress"
 />
 
 <!-- 输入组件 -->

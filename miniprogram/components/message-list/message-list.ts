@@ -64,10 +64,6 @@ Component({
       this.triggerEvent('messageTap', { messageIndex })
     },
 
-    // 消息长按事件
-    onMessageLongPress(e: any) {
-      const { messageIndex } = e.currentTarget.dataset
-      this.triggerEvent('messageLongPress', { messageIndex })
-    },
+    
   },
 })
