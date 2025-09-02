@@ -1,4 +1,5 @@
 import getSafeArea from '../../lib/utils/safe-area'
+import { formatTime } from '../../lib/utils/date'
 import { ProfileVO } from '../../lib/types/profile'
 import { ChatSession } from '../../lib/types/chat-history'
 import { appDispatch, rootStore } from '../../lib/state/states/root'
@@ -79,8 +80,16 @@ Component({
       // 移除自动退出编辑模式的逻辑，删除成功后应该保持编辑模式
       // 让用户手动控制何时退出编辑模式
       
+      // 预先格式化时间，供 WXML 直接渲染
+      const withDisplayTime = sorted.map((s) => ({
+        ...s,
+        // 默认格式
+        displayTime: formatTime(s.updatedAt),
+      }))
+      
       this.setData({
-        sortedChatSessions: sorted
+        // 提供带有 displayTime 的列表
+        sortedChatSessions: withDisplayTime
       })
     }
   },
@@ -237,38 +246,8 @@ Component({
       // 空方法，仅用于阻止事件冒泡
     },
 
-    // 格式化时间
-    formatTime(timestamp: number): string {
-      const now = Date.now()
-      const diff = now - timestamp
-      
-      // 小于1分钟
-      if (diff < 60000) {
-        return '刚刚'
-      }
-      
-      // 小于1小时
-      if (diff < 3600000) {
-        const minutes = Math.floor(diff / 60000)
-        return `${minutes}分钟前`
-      }
-      
-      // 小于24小时
-      if (diff < 86400000) {
-        const hours = Math.floor(diff / 3600000)
-        return `${hours}小时前`
-      }
-      
-      // 小于7天
-      if (diff < 604800000) {
-        const days = Math.floor(diff / 86400000)
-        return `${days}天前`
-      }
-      
-      // 超过7天，显示具体日期
-      const date = new Date(timestamp)
-      return `${date.getMonth() + 1}月${date.getDate()}日`
-    },
+    // 直接复用工具方法为组件方法
+    formatTime,
 
     // 组件其他方法...
 

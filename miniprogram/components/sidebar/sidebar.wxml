@@ -32,7 +32,7 @@
       >
         <view class="chat-session-content">
           <view class="chat-session-title">{{item.title || '未命名'}}</view>
-          <view class="chat-session-time">{{formatTime(item.updatedAt)}}</view>
+          <view class="chat-session-time">{{item.displayTime}}</view>
         </view>
         <view class="chat-session-actions {{isEditMode ? 'chat-session-actions--visible' : ''}}">
           <view 

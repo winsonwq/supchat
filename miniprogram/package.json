@@ -1,0 +1,9 @@
+{
+  "name": "miniprogram",
+  "keywords": [],
+  "author": "Wang Qiu",
+  "license": "ISC",
+  "dependencies": {
+    "dayjs": "^1.11.18"
+  }
+}
