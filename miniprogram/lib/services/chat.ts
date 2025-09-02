@@ -62,17 +62,25 @@ export class ChatService {
     }
 
     // 部分后端返回的消息内字段使用 camelCase，这里做一次兼容映射
-    const chats = (result.data as any[]).map((c: any) => {
+    type RawMessage = Partial<RenderMessage> & {
+      toolCalls?: ToolCall[]
+      toolCallId?: string
+    }
+    type RawChat = Omit<ChatSession, 'messages'> & {
+      messages?: RawMessage[]
+    }
+
+    const chats = (result.data as RawChat[]).map((c) => {
       if (Array.isArray(c?.messages)) {
-        c.messages = c.messages.map((m: any) => {
-          const mapped: any = { ...m }
+        c.messages = c.messages.map((m: RawMessage) => {
+          const mapped: Record<string, unknown> = { ...m }
           if (mapped.tool_calls === undefined && mapped.toolCalls !== undefined) {
             mapped.tool_calls = mapped.toolCalls
           }
           if (mapped.tool_call_id === undefined && mapped.toolCallId !== undefined) {
             mapped.tool_call_id = mapped.toolCallId
           }
-          return mapped
+          return (mapped as unknown) as RenderMessage
         })
       }
       return c
@@ -113,15 +121,15 @@ export class ChatService {
       const rawMessages = messagesResult.ok ? (messagesResult.data as any[]) : []
 
       // 统一字段：将后端 camelCase 字段映射到前端使用的下划线风格
-      const messages: RenderMessage[] = rawMessages.map((m: any) => {
-        const mapped: any = { ...m }
+      const messages: RenderMessage[] = rawMessages.map((m) => {
+        const mapped: Record<string, unknown> = { ...m }
         if (mapped.tool_calls === undefined && mapped.toolCalls !== undefined) {
           mapped.tool_calls = mapped.toolCalls
         }
         if (mapped.tool_call_id === undefined && mapped.toolCallId !== undefined) {
           mapped.tool_call_id = mapped.toolCallId
         }
-        return mapped as RenderMessage
+        return (mapped as unknown) as RenderMessage
       })
 
       return {
@@ -176,15 +184,20 @@ export class ChatService {
    */
   async addMessage(
     options: AddMessageOptions,
-  ): Promise<{ message: any; chat: ChatSession }> {
+  ): Promise<{ message: RenderMessage; chat: ChatSession }> {
     const { chatId, role, content, tool_calls, tool_call_id } = options
 
     // 构建消息数据
-    const messageData: any = { 
-      role, 
+    const messageData: {
+      role: typeof role
+      content: RenderNode
+      toolCalls?: ToolCall[]
+      toolCallId?: string
+    } = {
+      role,
       content,
       ...(tool_calls && { toolCalls: tool_calls }),
-      ...(tool_call_id && { toolCallId: tool_call_id })
+      ...(tool_call_id && { toolCallId: tool_call_id }),
     }
 
     const result = await storage.create(`/chats/${chatId}/messages`, messageData)
@@ -200,7 +213,7 @@ export class ChatService {
     }
 
     return {
-      message: result.data,
+      message: result.data as RenderMessage,
       chat,
     }
   }
@@ -263,46 +276,7 @@ export class ChatService {
     }
   }
 
-  /**
-   * 测试新的 addMessage 功能
-   */
-  async testAddMessageWithComplexContent(): Promise<boolean> {
-    try {
-      // 创建一个测试聊天
-      const chat = await this.createChat({ title: '测试复杂内容' })
-      
-      // 测试添加包含 tool_calls 的消息
-      const result = await this.addMessage({
-        chatId: chat.id,
-        role: 'assistant',
-        content: '这是一个测试消息',
-        tool_calls: [
-          {
-            id: 'test_tool_1',
-            type: 'function',
-            function: {
-              name: 'test_function',
-              arguments: '{"param": "value"}'
-            }
-          }
-        ]
-      })
-
-      // 测试添加 tool 角色的消息
-      const toolResult = await this.addMessage({
-        chatId: chat.id,
-        role: 'tool',
-        content: '工具执行结果: [1, 2, 3]',
-        tool_call_id: 'test_tool_1'
-      })
-
-      console.log('测试成功:', { result, toolResult })
-      return true
-    } catch (error) {
-      console.error('测试失败:', error)
-      return false
-    }
-  }
+  
 }
 
 export default ChatService.getInstance()

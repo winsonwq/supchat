@@ -34,46 +34,13 @@
   font-size: 28rpx;
 }
 
-/* 按钮样式 */
-.btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6rpx;
-  padding: 12rpx 16rpx;
-  border-radius: 20rpx;
-  font-size: 24rpx;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-tiny {
-  background-color: #f3f4f6;
-  color: #374151;
-}
-
-.btn-tiny:active {
-  background-color: #e5e7eb;
-}
-
+.btn-cancel,
 .btn-send {
-  background-color: #dbeafe;
-  color: #1d4ed8;
-  padding: 16rpx 24rpx;
+  background-color: var(--color-primary) !important;
+  color: white;
 }
 
-.btn-send.active {
-  background-color: #3b82f6;
-  color: #ffffff;
-}
-
-.btn-send:disabled {
-  background-color: #f3f4f6;
-  color: #9ca3af;
-  cursor: not-allowed;
-}
+/* 使用 tailwind 工具类替代，自定义样式移除 */
 
 .btn-voice-tip {
   background-color: #f3f4f6;

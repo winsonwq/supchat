@@ -45,6 +45,8 @@ Component({
     wechatSIReady: false,
     // 实时语音识别相关
     isRealtimeRecognition: false, // 是否正在进行实时语音识别
+    // 是否可发送（基于去空白后的内容与加载状态）
+    canSend: false,
   },
 
   /**
@@ -83,6 +85,15 @@ Component({
     },
   },
 
+  observers: {
+    'inputMessage, isLoading, isStreaming': function (_inputMessage: string, _isLoading: boolean, _isStreaming: boolean) {
+      // 使用 properties 保证与外部绑定保持一致
+      const msg = (this as any).properties.inputMessage || ''
+      const canSend = !!(msg && msg.trim()) && !(this as any).properties.isLoading && !(this as any).properties.isStreaming
+      ;(this as any).setData({ canSend })
+    },
+  },
+
   /**
    * 组件的方法列表
    */
@@ -92,6 +103,7 @@ Component({
       const value = e.detail.value || ''
       this.setData({
         inputMessage: value,
+        canSend: !!value.trim() && !this.properties.isLoading && !this.properties.isStreaming,
       })
 
       // 如果当前是初始高度状态，且有内容输入，则移除初始高度限制

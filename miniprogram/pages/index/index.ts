@@ -183,7 +183,7 @@ Component({
         const query = wx.createSelectorQuery().in(this)
         query
           .select('.chat-scroll-view')
-          .boundingClientRect((rect: any) => {
+          .boundingClientRect((rect: WechatMiniprogram.BoundingClientRectCallbackResult | null) => {
             if (rect) {
               this.setData({
                 viewportHeight: viewportHeight,
@@ -388,128 +388,19 @@ Component({
       })
 
       try {
-        // 添加用户消息到界面
-        const userMessage: Message = {
-          id: `msg_${Date.now()}_user`,
-          role: 'user',
-          content: messageContent,
-          plainContent: messageContent,
-          towxmlNodes: this.processMessageContent(messageContent),
-          timestamp: Date.now(),
-        }
+        const userMessage = this.createUserMessage(messageContent)
+        const assistantMessage = this.createAssistantPlaceholder()
+        this.appendMessages([userMessage, assistantMessage])
 
-        // 添加空的助手消息占位符
-        const assistantMessage: Message = {
-          id: `msg_${Date.now()}_assistant`,
-          role: 'assistant',
-          content: '',
-          plainContent: '',
-          towxmlNodes: undefined,
-          timestamp: Date.now(),
-        }
+        await this.saveUserMessageToDB(messageContent)
 
-        const newMessages = [
-          ...this.data.messages,
-          userMessage,
-          assistantMessage,
-        ]
-
-        this.setData({
-          messages: newMessages,
-        })
-
-        // 保存用户消息到数据库
-        if (this.data.currentSessionId) {
-          try {
-            await appDispatch(
-              addMessage({
-                chatId: this.data.currentSessionId,
-                role: 'user',
-                content: messageContent,
-              }),
-            )
-          } catch (error) {
-            console.error('保存用户消息失败:', error)
-          }
-        }
-
-        // 滚动到用户消息（智能滚动到顶部）
         this.scrollToUserMessageTop()
 
-        // 定义流式响应回调
-        const onStream: StreamCallback = (streamContent) => {
-          const { content, type, isComplete, toolCalls, currentToolCall } =
-            streamContent
+        const onStream: StreamCallback = (streamContent) =>
+          this.handleStreamUpdate(streamContent)
 
-          // 处理当前工具调用显示
-          if (currentToolCall) {
-            // 更新助手消息，显示当前正在调用的工具
-            this.updateAssistantMessage(content, toolCalls, currentToolCall)
-            this.scrollToLatestMessage()
-            return
-          }
-
-          // 根据类型处理不同的消息
-          if (type === StreamContentType.TOOL) {
-            // 添加工具调用消息作为独立消息
-            const toolMessage: Message = {
-              id: `msg_${Date.now()}_tool`,
-              role: 'tool',
-              content: content,
-              plainContent: typeof content === 'string' ? content : '',
-              towxmlNodes: this.processMessageContent(content),
-              timestamp: Date.now(),
-            }
-
-            const updatedMessages = [...this.data.messages, toolMessage]
-            this.setData({
-              messages: updatedMessages,
-            })
-          } else {
-            this.updateAssistantMessage(content, toolCalls, undefined)
-          }
-
-          // 尝试持久化包含 tool_calls 的助手消息（仅一次）
-          // 如果 AI 层指示需要持久化一次含 tool_calls 的助手计划消息，则执行一次
-          if (streamContent.shouldPersistAssistantToolPlan) {
-            console.log(
-              'streamContent.shouldPersistAssistantToolPlan',
-              streamContent.shouldPersistAssistantToolPlan,
-            )
-            this.maybePersistAssistantToolPlan(streamContent)
-          }
-
-          // 实时滚动到最新消息
-          this.scrollToLatestMessage()
-
-          // 如果流式响应完成
-          if (isComplete) {
-            this.setData({
-              isLoading: false,
-              isStreaming: false,
-            })
-
-            if (this.data.currentSessionId) {
-              const finalContent =
-                typeof content === 'string' ? content : JSON.stringify(content)
-              appDispatch(
-                addMessage({
-                  chatId: this.data.currentSessionId,
-                  role: 'assistant',
-                  content: finalContent,
-                  tool_calls: toolCalls,
-                }),
-              )
-            }
-
-            this.loadMessageHistory(this.data.currentSessionId)
-          }
-        }
-
-        // 设置AI服务的当前聊天会话ID
         this.getAIService().setCurrentChatId(this.data.currentSessionId)
 
-        // 发送流式消息
         await this.getAIService().sendMessageStream(messageContent, onStream)
       } catch (error) {
         console.error('发送消息失败:', error)
@@ -521,6 +412,109 @@ Component({
           isLoading: false,
           isStreaming: false,
         })
+      }
+    },
+
+    // 构建用户消息
+    createUserMessage(content: string): Message {
+      return {
+        id: `msg_${Date.now()}_user`,
+        role: 'user',
+        content,
+        plainContent: content,
+        towxmlNodes: this.processMessageContent(content),
+        timestamp: Date.now(),
+      }
+    },
+
+    // 构建助手占位消息
+    createAssistantPlaceholder(): Message {
+      return {
+        id: `msg_${Date.now()}_assistant`,
+        role: 'assistant',
+        content: '',
+        plainContent: '',
+        towxmlNodes: undefined,
+        timestamp: Date.now(),
+      }
+    },
+
+    // 追加消息到当前列表
+    appendMessages(messages: Message[]) {
+      const newMessages = [...this.data.messages, ...messages]
+      this.setData({
+        messages: newMessages,
+      })
+    },
+
+    // 保存用户消息到数据库（若有会话ID）
+    async saveUserMessageToDB(content: string) {
+      if (!this.data.currentSessionId) return
+      try {
+        await appDispatch(
+          addMessage({
+            chatId: this.data.currentSessionId,
+            role: 'user',
+            content,
+          }),
+        )
+      } catch (error) {
+        console.error('保存用户消息失败:', error)
+      }
+    },
+
+    // 处理流式内容更新
+    handleStreamUpdate(streamContent: StreamContent) {
+      const { content, type, isComplete, toolCalls, currentToolCall } =
+        streamContent
+
+      if (currentToolCall) {
+        this.updateAssistantMessage(content, toolCalls, currentToolCall)
+        this.scrollToLatestMessage()
+        return
+      }
+
+      if (type === StreamContentType.TOOL) {
+        const toolMessage: Message = {
+          id: `msg_${Date.now()}_tool`,
+          role: 'tool',
+          content,
+          plainContent: typeof content === 'string' ? content : '',
+          towxmlNodes: this.processMessageContent(content),
+          timestamp: Date.now(),
+        }
+        const updatedMessages = [...this.data.messages, toolMessage]
+        this.setData({ messages: updatedMessages })
+      } else {
+        this.updateAssistantMessage(content, toolCalls, undefined)
+      }
+
+      if (streamContent.shouldPersistAssistantToolPlan) {
+        this.maybePersistAssistantToolPlan(streamContent)
+      }
+
+      this.scrollToLatestMessage()
+
+      if (isComplete) {
+        this.setData({
+          isLoading: false,
+          isStreaming: false,
+        })
+
+        if (this.data.currentSessionId) {
+          const finalContent =
+            typeof content === 'string' ? content : JSON.stringify(content)
+          appDispatch(
+            addMessage({
+              chatId: this.data.currentSessionId,
+              role: 'assistant',
+              content: finalContent,
+              tool_calls: toolCalls,
+            }),
+          )
+        }
+
+        this.loadMessageHistory(this.data.currentSessionId)
       }
     },
 
@@ -564,10 +558,49 @@ Component({
     // 取消当前请求
     cancelRequest() {
       this.getAIService().cancelCurrentRequest()
+
+      // 持久化当前被中断的助手消息（如果有内容）
+      try {
+        const msgs = this.data.messages
+        if (msgs.length > 0 && this.data.currentSessionId) {
+          // 从末尾向前找到最后一条助手消息
+          for (let i = msgs.length - 1; i >= 0; i--) {
+            const m = msgs[i]
+            if (m.role === 'assistant') {
+              const finalContent =
+                typeof m.content === 'string'
+                  ? m.content
+                  : JSON.stringify(m.content)
+              if (finalContent && finalContent.trim()) {
+                appDispatch(
+                  addMessage({
+                    chatId: this.data.currentSessionId,
+                    role: 'assistant',
+                    content: finalContent,
+                    tool_calls: m.tool_calls,
+                  }),
+                ).catch((error) => {
+                  console.error('保存中断的助手消息失败:', error)
+                })
+              }
+              break
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('处理中断消息时出错:', e)
+      }
+
       this.setData({
         isLoading: false,
         isStreaming: false,
       })
+
+      // 刷新一次历史，以确保UI与数据库同步
+      if (this.data.currentSessionId) {
+        this.loadMessageHistory(this.data.currentSessionId)
+      }
+
       wx.showToast({
         title: '已取消',
         icon: 'success',
@@ -660,7 +693,6 @@ Component({
     // 选择聊天会话
     async selectChatSession(e: WXEvent<{ sessionId: string }>) {
       const { sessionId } = e.detail
-      console.log('选择会话:', sessionId)
 
       try {
         await appDispatch(setCurrentChat(sessionId))
@@ -689,8 +721,6 @@ Component({
 
     // 创建新话题
     async createNewTopic() {
-      console.log('创建新话题')
-
       try {
         const newSession = await appDispatch(createChat({ title: '新话题' }))
 
@@ -752,21 +782,17 @@ Component({
     },
 
     // 删除聊天会话
-    async deleteChatSession(e: any) {
-      console.log('主页收到删除事件:', e)
+    async deleteChatSession(e: WXEvent<{ sessionId: string }>) {
       const { sessionId } = e.detail
-      console.log('要删除的会话ID:', sessionId)
 
       wx.showModal({
         title: '确认删除',
         content: '确定要删除这个聊天会话吗？删除后无法恢复。',
         success: async (res) => {
           if (res.confirm) {
-            console.log('用户确认删除')
             try {
               // 删除聊天会话（这会自动更新redux状态）
               await appDispatch(deleteChat(sessionId))
-              console.log('删除成功')
 
               // 不需要重新获取聊天列表，redux已经自动更新了
               // 从redux状态中获取最新的chats
@@ -838,9 +864,7 @@ Component({
     },
 
     // 处理消息点击事件
-    onMessageTap(e: any) {
-      const { messageIndex } = e.detail
-      console.log('消息点击:', messageIndex)
+    onMessageTap(_e: WXEvent<{ messageIndex: number }>) {
       // 可以在这里添加消息点击的逻辑
     },
   },

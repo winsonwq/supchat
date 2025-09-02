@@ -64,12 +64,31 @@
       <view wx:if="{{ isVoiceMode }}" style="width:36px"></view>
     </view>
     
-    <!-- MCP 服务按钮 -->
+    <!-- MCP 服务按钮 + 发送/停止按钮 -->
     <view class="w-full flex align-center justify-between">
       <view class="flex align-center gap-4">
         <button class="btn btn-tiny" catchtap="onOpenMcpSheet">
           <svg-icon name="server" size="40"></svg-icon>
           MCP 服务
+        </button>
+      </view>
+
+      <view class="flex align-center gap-4">
+        <button
+          wx:if="{{ isLoading || isStreaming }}"
+          class="btn-cancel btn btn-icon bg-black text-white"
+          bindtap="onCancel"
+        >
+          <svg-icon name="stop" size="36" color="white"></svg-icon>
+        </button>
+
+        <button
+          wx:elif="{{ !isLoading && !isStreaming }}"
+          class="btn-send btn btn-icon bg-black text-white"
+          bindtap="onSend"
+          disabled="{{ !canSend }}"
+        >
+          <svg-icon name="send-fill" size="36" color="white"></svg-icon>
         </button>
       </view>
     </view>

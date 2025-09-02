@@ -46,6 +46,8 @@ export class AIService {
   private currentRequestTask: WxRequestTask | null = null
   private chatHistoryStorage = ChatHistoryStorageFactory.getInstance()
   private currentChatId: string | null = null // 当前聊天会话ID
+  private isCancelled: boolean = false // 取消标记：用于软中断后续处理
+  private streamingIntervalId: number | null = null // 非流式模拟的 interval ID
 
   static getInstance(): AIService {
     if (!AIService.instance) {
@@ -286,6 +288,8 @@ export class AIService {
     userMessage: string,
     onStream: StreamCallback,
   ): Promise<void> {
+    // 重置取消标记
+    this.isCancelled = false
     // 检查AI配置是否有效
     if (!this.isActiveConfigValid()) {
       const errorMessage =
@@ -313,11 +317,20 @@ export class AIService {
           ...config,
           success: (response: HttpResponse) => {
             console.log('流式请求成功:', response)
+            if (this.isCancelled) {
+              // 已被取消：不再处理
+              resolve()
+              return
+            }
             this.handleStreamResponse(response, onStream, resolve, reject)
           },
           fail: (error: unknown) => {
             console.error('流式请求失败:', error)
             // 如果流式请求失败，回退到非流式模式
+            if (this.isCancelled) {
+              resolve()
+              return
+            }
             this.fallbackToNonStream(userMessage, onStream, resolve, reject)
           },
         })
@@ -347,6 +360,10 @@ export class AIService {
     resolve: () => void,
     reject: (error: unknown) => void,
   ) {
+    if (this.isCancelled) {
+      resolve()
+      return
+    }
     if (response.statusCode === 200) {
       try {
         const data = response.data
@@ -354,14 +371,26 @@ export class AIService {
           await this.processStreamData(data, onStream, resolve)
         } else {
           // 如果不是字符串格式，回退到非流式模式
+          if (this.isCancelled) {
+            resolve()
+            return
+          }
           this.fallbackToNonStream('', onStream, resolve, reject)
         }
       } catch (error) {
         console.error('处理流式响应失败:', error)
+        if (this.isCancelled) {
+          resolve()
+          return
+        }
         this.fallbackToNonStream('', onStream, resolve, reject)
       }
     } else {
       console.error('API响应错误:', response)
+      if (this.isCancelled) {
+        resolve()
+        return
+      }
       this.fallbackToNonStream('', onStream, resolve, reject)
     }
   }
@@ -378,10 +407,18 @@ export class AIService {
     let toolCalls: ToolCall[] = []
 
     for (const line of lines) {
+      if (this.isCancelled) {
+        resolve()
+        return
+      }
       if (line.startsWith('data: ')) {
         const jsonData = line.slice(6)
         if (jsonData === '[DONE]') {
           // 流式响应结束
+          if (this.isCancelled) {
+            resolve()
+            return
+          }
           await this.handleStreamCompletion(
             assistantContent,
             hasToolCalls,
@@ -398,13 +435,15 @@ export class AIService {
 
           if (delta?.content) {
             assistantContent += delta.content
-            onStream(
-              createStreamContent(
-                assistantContent,
-                StreamContentType.NORMAL,
-                false,
-              ),
-            )
+            if (!this.isCancelled) {
+              onStream(
+                createStreamContent(
+                  assistantContent,
+                  StreamContentType.NORMAL,
+                  false,
+                ),
+              )
+            }
           }
 
           // 检查是否有工具调用
@@ -646,11 +685,19 @@ export class AIService {
       return
     }
 
+    if (this.isCancelled) {
+      return
+    }
+
     let currentContent = ''
     const characters = content.split('')
     let index = 0
 
     const streamInterval = setInterval(() => {
+      if (this.isCancelled) {
+        clearInterval(streamInterval)
+        return
+      }
       if (index < characters.length) {
         currentContent += characters[index]
         onStream(
@@ -664,6 +711,10 @@ export class AIService {
         )
       }
     }, 30)
+
+    // 记录interval，取消时清除
+    // 在小程序环境下 setInterval 返回 number
+    this.streamingIntervalId = streamInterval as unknown as number
   }
 
   // 回退到非流式模式
@@ -673,6 +724,10 @@ export class AIService {
     resolve: () => void,
     reject: (error: unknown) => void,
   ) {
+    if (this.isCancelled) {
+      resolve()
+      return
+    }
     try {
       console.log('回退到非流式模式')
 
@@ -706,14 +761,21 @@ export class AIService {
           } // 传递 toolCalls 以便显示工具调用信息，并标记需持久化一次
 
           // 处理工具调用
-          await this.handleToolCalls(toolCalls, onStream)
+          if (!this.isCancelled) {
+            await this.handleToolCalls(toolCalls, onStream)
+          } else {
+            resolve()
+            return
+          }
         } else {
           const fullResponse =
             message?.content || '抱歉，我没有收到有效的回复。'
           this.addMessage('assistant', fullResponse)
 
           // 模拟流式效果
-          this.simulateStreamingEffect(fullResponse, onStream)
+          if (!this.isCancelled) {
+            this.simulateStreamingEffect(fullResponse, onStream)
+          }
           resolve()
         }
       } else {
@@ -721,13 +783,15 @@ export class AIService {
       }
     } catch (error) {
       console.error('非流式模式也失败:', error)
-      onStream(
-        createStreamContent(
-          '抱歉，服务暂时不可用，请稍后重试。',
-          StreamContentType.ERROR,
-          true,
-        ),
-      )
+      if (!this.isCancelled) {
+        onStream(
+          createStreamContent(
+            '抱歉，服务暂时不可用，请稍后重试。',
+            StreamContentType.ERROR,
+            true,
+          ),
+        )
+      }
       reject(error)
     }
   }
@@ -853,6 +917,11 @@ export class AIService {
 
   // 取消当前请求
   cancelCurrentRequest() {
+    this.isCancelled = true
+    if (this.streamingIntervalId !== null) {
+      clearInterval(this.streamingIntervalId as unknown as number)
+      this.streamingIntervalId = null
+    }
     if (this.currentRequestTask) {
       this.currentRequestTask.abort()
       this.currentRequestTask = null
