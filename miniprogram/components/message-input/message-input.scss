@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   z-index: 50;
-  background-color: #f9f9f9;
+  background: linear-gradient(to top, #fff 50%, rgba(255,255,255,0) 100%);
 }
 
 /* 输入框样式 - 需要特殊的圆角和高度限制 */

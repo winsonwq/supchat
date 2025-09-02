@@ -7,5 +7,6 @@
     "message-item": "/components/message-item/message-item",
     "message-list": "/components/message-list/message-list",
     "svg-icon": "/components/svg-icon/svg-icon"
-  }
+  },
+  "disableScroll": true
 }

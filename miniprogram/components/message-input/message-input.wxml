@@ -24,12 +24,11 @@
           value="{{ inputMessage }}"
           bindinput="onInputChange"
           bindconfirm="onConfirm"
-          confirm-type="send"
           disabled="{{ isLoading }}"
           auto-height="{{ !textareaInitialHeight }}"
           maxlength="1000"
           show-confirm-bar="false"
-          cursor-spacing="20"
+          cursor-spacing="16"
           autofocus
         />
         
