@@ -5,7 +5,7 @@ import storage from './storage'
 
 export interface CreateChatOptions {
   title?: string
-  firstMessage?: Omit<RenderMessage, 'id' | 'timestamp'>
+  firstMessage?: Omit<RenderMessage, 'id' | 'createdAt'>
 }
 
 export interface UpdateChatOptions {

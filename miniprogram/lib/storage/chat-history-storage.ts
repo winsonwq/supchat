@@ -161,7 +161,7 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
    */
   addMessage(
     sessionId: string,
-    message: Omit<RenderMessage, 'id' | 'timestamp'>,
+    message: Omit<RenderMessage, 'id' | 'createdAt'>,
   ): boolean {
     try {
       const sessions = this.getAllSessions()
@@ -181,7 +181,7 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
         content: serializedContent,
         plainContent: message.plainContent || MessageConverter.extractPlainText(message.content),
         id: MessageConverter.generateMessageId(),
-        timestamp: Date.now(),
+        createdAt: new Date().toISOString(),
       }
 
       // 添加消息到会话

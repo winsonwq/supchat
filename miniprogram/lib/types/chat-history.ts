@@ -40,7 +40,7 @@ export interface ChatHistoryStorage {
   updateSession(sessionId: string, updates: Partial<ChatSession>): boolean
   
   // 添加消息到会话
-  addMessage(sessionId: string, message: Omit<RenderMessage, 'id' | 'timestamp'>): boolean
+  addMessage(sessionId: string, message: Omit<RenderMessage, 'id' | 'createdAt'>): boolean
   
   // 获取当前活跃会话
   getActiveSession(): ChatSession | null
@@ -76,7 +76,7 @@ export interface AsyncChatHistoryStorage {
   deleteSession(sessionId: string): Promise<boolean>
   
   // 添加消息到会话
-  addMessage(sessionId: string, message: Omit<RenderMessage, 'id' | 'timestamp'>): Promise<RenderMessage>
+  addMessage(sessionId: string, message: Omit<RenderMessage, 'id' | 'createdAt'>): Promise<RenderMessage>
   
   // 获取当前活跃会话
   getActiveSession(): Promise<ChatSession | null>

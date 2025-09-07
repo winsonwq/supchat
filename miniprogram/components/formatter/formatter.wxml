@@ -1,0 +1,2 @@
+<!-- 通用格式化组件 -->
+<text class="{{ className }}">{{ formattedValue }}</text>

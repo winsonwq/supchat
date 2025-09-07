@@ -20,7 +20,7 @@ export interface RenderMessage {
   towxmlNodes?: TowxmlNode
   tool_call_id?: string
   tool_calls?: ToolCall[]
-  timestamp: number
+  createdAt: string
 }
 
 export type RenderMessageHistory = RenderMessage[]
@@ -52,7 +52,7 @@ export class MessageConverter {
       plainContent: typeof content === 'string' ? content : this.extractPlainText(content),
       tool_call_id: aiMessage.tool_call_id,
       tool_calls: aiMessage.tool_calls,
-      timestamp: Date.now(),
+      createdAt: new Date().toISOString(),
     }
   }
 
@@ -112,7 +112,7 @@ export class MessageBuilder {
       role: 'user',
       content,
       plainContent: content,
-      timestamp: Date.now(),
+      createdAt: new Date().toISOString(),
     }
   }
 
@@ -123,7 +123,7 @@ export class MessageBuilder {
       content,
       plainContent: MessageConverter.extractPlainText(content),
       tool_calls: toolCalls,
-      timestamp: Date.now(),
+      createdAt: new Date().toISOString(),
     }
   }
 
@@ -134,7 +134,7 @@ export class MessageBuilder {
       content,
       plainContent: MessageConverter.extractPlainText(content),
       tool_call_id: toolCallId,
-      timestamp: Date.now(),
+      createdAt: new Date().toISOString(),
     }
   }
 
@@ -144,7 +144,7 @@ export class MessageBuilder {
       role: 'system',
       content,
       plainContent: content,
-      timestamp: Date.now(),
+      createdAt: new Date().toISOString(),
     }
   }
 }

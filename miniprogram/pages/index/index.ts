@@ -442,7 +442,7 @@ Component({
         content,
         plainContent: content,
         towxmlNodes: this.processMessageContent(content),
-        timestamp: Date.now(),
+        createdAt: new Date().toISOString(),
       }
     },
 
@@ -454,7 +454,7 @@ Component({
         content: '',
         plainContent: '',
         towxmlNodes: undefined,
-        timestamp: Date.now(),
+        createdAt: new Date().toISOString(),
       }
     },
 
@@ -500,7 +500,7 @@ Component({
           content,
           plainContent: typeof content === 'string' ? content : '',
           towxmlNodes: this.processMessageContent(content),
-          timestamp: Date.now(),
+          createdAt: new Date().toISOString(),
         }
         const updatedMessages = [...this.data.messages, toolMessage]
         this.setData({ messages: updatedMessages })

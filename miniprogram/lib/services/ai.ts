@@ -70,7 +70,7 @@ export class AIService {
       plainContent: MessageConverter.extractPlainText(content || ''),
       tool_call_id,
       tool_calls,
-      timestamp: Date.now(),
+      createdAt: new Date().toISOString(),
     }
 
     this.renderMessages.push(renderMessage)

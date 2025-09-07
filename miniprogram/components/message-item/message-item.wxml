@@ -7,7 +7,6 @@
     id="message-{{ messageIndex }}"
     class="p-6 space-y-4 bg-gray-100 text-gray-800 rounded-lg overflow-hidden"
   >
-    <!-- 卡片头部 -->
     <view class="flex items-center justify-between">
       <text class="card-title text-xs font-medium text-gray-600">用户</text>
     </view>
@@ -46,9 +45,15 @@
   id="message-{{ messageIndex }}"
   class="p-6 space-y-4 {{ isLoading ? 'text-gray-800' : message.role === 'tool' ? 'text-gray-800 rounded-lg overflow-hidden' : 'text-gray-800' }}"
 >
-  <!-- 卡片头部 -->
-  <view class="flex items-center justify-between">
-    <text class="card-title text-xs font-medium text-gray-600">{{ isLoading ? 'AI助手' : message.role === 'tool' ? '工具' : 'AI助手' }}</text>
+   <view class="flex flex-col">
+    <!-- 卡片头部 -->
+    <view class="flex items-center justify-between">
+      <text class="card-title text-xs font-medium text-gray-600">{{ isLoading ? 'AI助手' : message.role === 'tool' ? '工具' : 'AI助手' }}</text>
+    </view>
+    <!-- 时间显示 -->
+    <view class="flex items-center">
+      <formatter type="datetime" value="{{ message.createdAt }}" format="YYYY-MM-DD HH:mm" className="text-xs text-gray-500" />
+    </view>
   </view>
   
   <!-- 工具调用信息 - 循环渲染当前调用的工具 -->
