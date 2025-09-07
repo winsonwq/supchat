@@ -1,6 +1,13 @@
 import { z } from 'zod'
 import { safeParse } from './user-schema.mjs'
 
+// AI 配置信息（不包含敏感信息）
+const aiconfigSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  model: z.string(),
+}).optional()
+
 // Message 基础字段
 export const messageBaseSchema = z.object({
   chatId: z.string().min(1, 'chatId 必填'),
@@ -10,6 +17,7 @@ export const messageBaseSchema = z.object({
   toolCalls: z.any().optional(),
   toolCallId: z.string().optional(),
   toolResult: z.any().optional(),
+  aiconfig: aiconfigSchema,
   isDeleted: z.boolean().default(false),
 })
 

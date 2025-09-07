@@ -48,7 +48,11 @@
    <view class="flex flex-col">
     <!-- 卡片头部 -->
     <view class="flex items-center justify-between">
-      <text class="card-title text-xs font-medium text-gray-600">{{ isLoading ? 'AI助手' : message.role === 'tool' ? '工具' : 'AI助手' }}</text>
+      <view wx:if="{{ message.aiconfig }}" class="flex items-center space-x-1 text-sm font-medium">
+        <text>{{ message.aiconfig.name }}</text>
+        <text>({{ message.aiconfig.model }})</text>
+      </view>
+      <text wx:else class="card-title text-sm font-medium text-gray-600">{{ isLoading ? 'AI助手' : message.role === 'tool' ? '工具' : 'AI助手' }}</text>
     </view>
     <!-- 时间显示 -->
     <view class="flex items-center">

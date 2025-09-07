@@ -63,6 +63,14 @@ export class AIService {
     tool_call_id?: string,
     tool_calls?: ToolCall[],
   ) {
+    // 获取当前激活的AI配置信息（不包含敏感信息）
+    const activeConfig = AIConfigStorage.getActiveConfig()
+    const aiconfig = activeConfig ? {
+      id: activeConfig.id,
+      name: activeConfig.name,
+      model: activeConfig.model
+    } : undefined
+
     const renderMessage: RenderMessage = {
       id: MessageConverter.generateMessageId(),
       role,
@@ -70,6 +78,7 @@ export class AIService {
       plainContent: MessageConverter.extractPlainText(content || ''),
       tool_call_id,
       tool_calls,
+      aiconfig,
       createdAt: new Date().toISOString(),
     }
 
@@ -128,6 +137,7 @@ export class AIService {
         role: message.role,
         content: message.content,
         tool_call_id: message.tool_call_id,
+        aiconfig: message.aiconfig,
       })
       console.log('工具消息已存储到云函数:', message)
     } catch (error) {

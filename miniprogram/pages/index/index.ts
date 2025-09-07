@@ -12,6 +12,7 @@ import { ProfileVO } from '../../lib/types/profile'
 import { ChatSession } from '../../lib/types/chat-history'
 import { BaseComponent } from '../../lib/mcp/components/base-component.js'
 import { processMessageContent as processContentWithParser } from '../../lib/utils/content-parser.js'
+import { AIConfigStorage } from '../../lib/storage/ai-config-storage.js'
 
 import { ComponentManager } from '../../lib/mcp/components/component-manager.js'
 import { appDispatch, rootStore } from '../../lib/state/states/root'
@@ -115,6 +116,14 @@ Component({
         return
       }
 
+      // 获取当前激活的AI配置信息（不包含敏感信息）
+      const activeConfig = AIConfigStorage.getActiveConfig()
+      const aiconfig = activeConfig ? {
+        id: activeConfig.id,
+        name: activeConfig.name,
+        model: activeConfig.model
+      } : undefined
+
       const partialContent =
         typeof content === 'string' ? content : JSON.stringify(content)
       appDispatch(
@@ -123,6 +132,7 @@ Component({
           role: 'assistant',
           content: partialContent,
           tool_calls: toolCalls,
+          aiconfig,
         }),
       ).catch((error) => {
         console.error('保存含工具计划的助手消息失败:', error)
@@ -374,7 +384,7 @@ Component({
     },
 
     // 处理 AI 配置变化事件
-    onAiConfigChange(e: WxEvent<{ id: string }>) {
+    onAiConfigChange(e: WxEvent) {
       const configId = e.detail?.id
       console.log('AI 配置已切换:', configId)
       // AI 服务会自动使用新的激活配置，无需额外处理
@@ -386,7 +396,7 @@ Component({
     },
 
     // 处理 MCP 配置变化事件
-    onMcpChange(e: WxEvent<{ id: string }>) {
+    onMcpChange(e: WxEvent) {
       const configId = e.detail?.id
       console.log('MCP 配置已切换:', configId)
       // MCP 配置变化处理逻辑
@@ -436,24 +446,42 @@ Component({
 
     // 构建用户消息
     createUserMessage(content: string): Message {
+      // 获取当前激活的AI配置信息（不包含敏感信息）
+      const activeConfig = AIConfigStorage.getActiveConfig()
+      const aiconfig = activeConfig ? {
+        id: activeConfig.id,
+        name: activeConfig.name,
+        model: activeConfig.model
+      } : undefined
+
       return {
         id: `msg_${Date.now()}_user`,
         role: 'user',
         content,
         plainContent: content,
         towxmlNodes: this.processMessageContent(content),
+        aiconfig,
         createdAt: new Date().toISOString(),
       }
     },
 
     // 构建助手占位消息
     createAssistantPlaceholder(): Message {
+      // 获取当前激活的AI配置信息（不包含敏感信息）
+      const activeConfig = AIConfigStorage.getActiveConfig()
+      const aiconfig = activeConfig ? {
+        id: activeConfig.id,
+        name: activeConfig.name,
+        model: activeConfig.model
+      } : undefined
+
       return {
         id: `msg_${Date.now()}_assistant`,
         role: 'assistant',
         content: '',
         plainContent: '',
         towxmlNodes: undefined,
+        aiconfig,
         createdAt: new Date().toISOString(),
       }
     },
@@ -470,11 +498,20 @@ Component({
     async saveUserMessageToDB(content: string) {
       if (!this.data.currentSessionId) return
       try {
+        // 获取当前激活的AI配置信息（不包含敏感信息）
+        const activeConfig = AIConfigStorage.getActiveConfig()
+        const aiconfig = activeConfig ? {
+          id: activeConfig.id,
+          name: activeConfig.name,
+          model: activeConfig.model
+        } : undefined
+
         await appDispatch(
           addMessage({
             chatId: this.data.currentSessionId,
             role: 'user',
             content,
+            aiconfig,
           }),
         )
       } catch (error) {
@@ -494,12 +531,21 @@ Component({
       }
 
       if (type === StreamContentType.TOOL) {
+        // 获取当前激活的AI配置信息（不包含敏感信息）
+        const activeConfig = AIConfigStorage.getActiveConfig()
+        const aiconfig = activeConfig ? {
+          id: activeConfig.id,
+          name: activeConfig.name,
+          model: activeConfig.model
+        } : undefined
+
         const toolMessage: Message = {
           id: `msg_${Date.now()}_tool`,
           role: 'tool',
           content,
           plainContent: typeof content === 'string' ? content : '',
           towxmlNodes: this.processMessageContent(content),
+          aiconfig,
           createdAt: new Date().toISOString(),
         }
         const updatedMessages = [...this.data.messages, toolMessage]
@@ -521,6 +567,14 @@ Component({
         })
 
         if (this.data.currentSessionId) {
+          // 获取当前激活的AI配置信息（不包含敏感信息）
+          const activeConfig = AIConfigStorage.getActiveConfig()
+          const aiconfig = activeConfig ? {
+            id: activeConfig.id,
+            name: activeConfig.name,
+            model: activeConfig.model
+          } : undefined
+
           const finalContent =
             typeof content === 'string' ? content : JSON.stringify(content)
           appDispatch(
@@ -529,6 +583,7 @@ Component({
               role: 'assistant',
               content: finalContent,
               tool_calls: toolCalls,
+              aiconfig,
             }),
           )
         }
@@ -896,8 +951,8 @@ Component({
 
         wx.hideLoading()
 
-        if (result.result && result.result.ok && result.result.data) {
-          const newTitle = result.result.data.title
+        if (result.result && typeof result.result === 'object' && 'ok' in result.result && result.result.ok && 'data' in result.result && result.result.data) {
+          const newTitle = (result.result as any).data.title
           
           // 更新本地聊天会话列表
           const updatedChatSessions = this.data.chatSessions.map(chat => {
@@ -916,7 +971,7 @@ Component({
             icon: 'success'
           })
         } else {
-          throw new Error(result.result?.error || '生成标题失败')
+          throw new Error((result.result as any)?.error || '生成标题失败')
         }
       } catch (error) {
         wx.hideLoading()

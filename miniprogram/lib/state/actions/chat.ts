@@ -21,6 +21,11 @@ export interface AddMessageParams {
   content: RenderNode
   tool_calls?: ToolCall[]
   tool_call_id?: string
+  aiconfig?: {
+    id: string
+    name: string
+    model: string
+  }
 }
 
 export enum ChatActionType {
@@ -70,13 +75,14 @@ export const deleteChat = createAsyncThunk(
 export const addMessage = createAsyncThunk(
   ChatActionType.ADD_MESSAGE,
   async (params: AddMessageParams) => {
-    const { chatId, role, content, tool_calls, tool_call_id } = params
+    const { chatId, role, content, tool_calls, tool_call_id, aiconfig } = params
     const result = await chatService.addMessage({ 
       chatId, 
       role, 
       content, 
       tool_calls, 
-      tool_call_id 
+      tool_call_id,
+      aiconfig
     })
 
     return {

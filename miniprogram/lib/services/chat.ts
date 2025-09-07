@@ -19,6 +19,11 @@ export interface AddMessageOptions {
   content: RenderNode
   tool_calls?: ToolCall[]
   tool_call_id?: string
+  aiconfig?: {
+    id: string
+    name: string
+    model: string
+  }
 }
 
 export interface ChatWithMessages extends ChatSession {
@@ -185,7 +190,7 @@ export class ChatService {
   async addMessage(
     options: AddMessageOptions,
   ): Promise<{ message: RenderMessage; chat: ChatSession }> {
-    const { chatId, role, content, tool_calls, tool_call_id } = options
+    const { chatId, role, content, tool_calls, tool_call_id, aiconfig } = options
 
     // 构建消息数据
     const messageData: {
@@ -193,11 +198,17 @@ export class ChatService {
       content: RenderNode
       toolCalls?: ToolCall[]
       toolCallId?: string
+      aiconfig?: {
+        id: string
+        name: string
+        model: string
+      }
     } = {
       role,
       content,
       ...(tool_calls && { toolCalls: tool_calls }),
       ...(tool_call_id && { toolCallId: tool_call_id }),
+      ...(aiconfig && { aiconfig }),
     }
 
     const result = await storage.create(`/chats/${chatId}/messages`, messageData)
