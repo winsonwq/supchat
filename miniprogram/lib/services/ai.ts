@@ -293,7 +293,7 @@ export class AIService {
     // 检查AI配置是否有效
     if (!this.isActiveConfigValid()) {
       const errorMessage =
-        '❌ AI配置无效或未激活，请先在设置中配置并激活AI服务\n\n💡 前往：设置 → AI设置'
+        '❌ AI配置无效或未选择，请先选择一个有效的AI配置\n\n💡 点击输入框左侧的AI配置按钮'
       this.addMessage('assistant', errorMessage)
       onStream(createStreamContent(errorMessage, StreamContentType.ERROR, true))
       return
@@ -801,7 +801,7 @@ export class AIService {
     // 检查AI配置是否有效
     if (!this.isActiveConfigValid()) {
       const errorMessage =
-        '❌ AI配置无效或未激活，请先在设置中配置并激活AI服务\n\n💡 前往：设置 → AI设置'
+        '❌ AI配置无效或未选择，请先选择一个有效的AI配置\n\n💡 点击输入框左侧的AI配置按钮'
       this.addMessage('assistant', errorMessage)
       return errorMessage
     }
