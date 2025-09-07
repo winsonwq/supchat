@@ -41,7 +41,7 @@
             bindtap="generateChatTitle" 
             data-session-id="{{item.id}}"
           >
-            <svg-icon name="tool" size="32" color="#1976d2" />
+            <svg-icon name="ai-generate-text" size="32" color="#1976d2" />
           </view>
           <view 
             wx:if="{{isEditMode}}"
