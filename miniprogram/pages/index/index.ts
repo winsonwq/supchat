@@ -866,6 +866,68 @@ Component({
       })
     },
 
+    // 生成聊天标题
+    async generateChatTitle(e: WXEvent<{ sessionId: string }>) {
+      const { sessionId } = e.detail
+      
+      if (!sessionId) {
+        wx.showToast({
+          title: '生成失败：会话ID为空',
+          icon: 'error'
+        })
+        return
+      }
+
+      try {
+        // 显示加载提示
+        wx.showLoading({
+          title: '正在生成标题...',
+          mask: true
+        })
+
+        // 调用云函数生成标题
+        const result = await wx.cloud.callFunction({
+          name: 'supchat',
+          data: {
+            route: `/chats/${sessionId}/generate-title`,
+            method: 'POST'
+          }
+        })
+
+        wx.hideLoading()
+
+        if (result.result && result.result.ok && result.result.data) {
+          const newTitle = result.result.data.title
+          
+          // 更新本地聊天会话列表
+          const updatedChatSessions = this.data.chatSessions.map(chat => {
+            if (chat.id === sessionId) {
+              return { ...chat, title: newTitle }
+            }
+            return chat
+          })
+          
+          this.setData({
+            chatSessions: updatedChatSessions
+          })
+
+          wx.showToast({
+            title: '标题生成成功',
+            icon: 'success'
+          })
+        } else {
+          throw new Error(result.result?.error || '生成标题失败')
+        }
+      } catch (error) {
+        wx.hideLoading()
+        console.error('生成标题失败:', error)
+        wx.showToast({
+          title: '生成标题失败',
+          icon: 'error'
+        })
+      }
+    },
+
     // 打开设置页面
     openSettings() {
       this.setData({

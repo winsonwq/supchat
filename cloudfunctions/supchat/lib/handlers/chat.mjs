@@ -122,6 +122,97 @@ export default [
       console.error('删除会话失败:', error)
       return { error: error.message }
     }
+  }),
+
+  // 生成聊天标题
+  POST('/chats/:id/generate-title', auth, async ({ params, authUserId }) => {
+    try {
+      const { id } = params || {}
+      if (!id) return { error: '缺少会话 ID' }
+      
+      const chat = await Chat.findById(id)
+      if (!chat || chat.isDeleted) return { error: '会话不存在' }
+      if (chat.userId !== authUserId) return { error: '未授权访问该会话' }
+
+      // 获取会话的消息
+      const messages = await Message.findByChat(id, { limit: 50, order: 'asc' })
+      
+      if (!messages || messages.length === 0) {
+        return { error: '会话中没有消息，无法生成标题' }
+      }
+
+      // 构建消息内容用于AI分析
+      const messageTexts = messages
+        .filter(msg => msg.role === 'user' || msg.role === 'assistant')
+        .slice(0, 10) // 只取前10条消息
+        .map(msg => {
+          let content = ''
+          if (typeof msg.content === 'string') {
+            content = msg.content
+          } else if (Array.isArray(msg.content)) {
+            content = msg.content.map(item => 
+              typeof item === 'string' ? item : JSON.stringify(item)
+            ).join(' ')
+          } else if (typeof msg.content === 'object' && msg.content !== null) {
+            if (msg.content.text) content = msg.content.text
+            else if (msg.content.content) content = msg.content.content
+            else content = JSON.stringify(msg.content)
+          }
+          return `${msg.role}: ${content}`
+        })
+        .join('\n')
+
+      // 调用AI生成标题
+      const titlePrompt = `请根据以下对话内容生成一个简洁、准确的标题（不超过20个字符）：
+
+${messageTexts}
+
+请只返回标题内容，不要包含其他解释或格式。`
+
+      // 这里需要调用AI服务，暂时使用简单的规则生成标题
+      let generatedTitle = '新对话'
+      
+      if (messageTexts.length > 0) {
+        // 提取第一条用户消息的前20个字符作为标题
+        const firstUserMessage = messages.find(msg => msg.role === 'user')
+        if (firstUserMessage) {
+          let content = ''
+          if (typeof firstUserMessage.content === 'string') {
+            content = firstUserMessage.content
+          } else if (Array.isArray(firstUserMessage.content)) {
+            content = firstUserMessage.content.map(item => 
+              typeof item === 'string' ? item : JSON.stringify(item)
+            ).join(' ')
+          } else if (typeof firstUserMessage.content === 'object' && firstUserMessage.content !== null) {
+            if (firstUserMessage.content.text) content = firstUserMessage.content.text
+            else if (firstUserMessage.content.content) content = firstUserMessage.content.content
+            else content = JSON.stringify(firstUserMessage.content)
+          }
+          
+          // 清理内容并截取
+          generatedTitle = content
+            .replace(/[^\u4e00-\u9fa5a-zA-Z0-9\s]/g, '') // 只保留中文、英文、数字和空格
+            .trim()
+            .substring(0, 20)
+          
+          if (!generatedTitle) {
+            generatedTitle = '新对话'
+          }
+        }
+      }
+
+      // 更新聊天会话的标题
+      await chat.update({ title: generatedTitle })
+
+      return { 
+        success: true, 
+        title: generatedTitle,
+        message: '标题生成成功' 
+      }
+    } catch (error) {
+      console.error('生成标题失败:', error)
+      return { error: error.message }
+    }
   })
 ]
 

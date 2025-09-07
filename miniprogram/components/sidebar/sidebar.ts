@@ -255,5 +255,21 @@ Component({
     openSettings() {
       this.triggerEvent('openSettings', {}, {})
     },
+
+    // 生成聊天标题
+    generateChatTitle(e: any) {
+      const sessionId = e.currentTarget.dataset.sessionId
+      if (!sessionId) {
+        console.error('会话ID为空，无法生成标题')
+        wx.showToast({
+          title: '生成失败：会话ID为空',
+          icon: 'error'
+        })
+        return
+      }
+      
+      // 触发生成标题事件，让父组件处理
+      this.triggerEvent('generateChatTitle', { sessionId }, {})
+    },
   },
 })

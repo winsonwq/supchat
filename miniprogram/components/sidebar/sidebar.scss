@@ -135,6 +135,9 @@
 }
 
 .chat-session-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-left: 8px;
   opacity: 1;
   transition: opacity 0.2s ease;
@@ -144,6 +147,25 @@
 
 .chat-session-actions--visible {
   opacity: 1;
+}
+
+.generate-title-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  margin-right: 8px;
+}
+
+.generate-title-btn:hover {
+  background-color: #e3f2fd;
 }
 
 .delete-session-btn {

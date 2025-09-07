@@ -20,6 +20,7 @@
   bind:selectChatSession="selectChatSession"
   bind:createNewTopic="createNewTopic"
   bind:deleteChatSession="deleteChatSession"
+  bind:generateChatTitle="generateChatTitle"
   bind:openSettings="openSettings"
   bind:userInfoUpdated="onUserInfoUpdated"
 />

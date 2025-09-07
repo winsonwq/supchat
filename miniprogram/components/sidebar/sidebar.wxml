@@ -37,6 +37,14 @@
         <view class="chat-session-actions {{isEditMode ? 'chat-session-actions--visible' : ''}}">
           <view 
             wx:if="{{isEditMode}}"
+            class="generate-title-btn" 
+            bindtap="generateChatTitle" 
+            data-session-id="{{item.id}}"
+          >
+            <svg-icon name="tool" size="32" color="#1976d2" />
+          </view>
+          <view 
+            wx:if="{{isEditMode}}"
             class="delete-session-btn" 
             bindtap="deleteChatSession" 
             data-session-id="{{item.id}}"
