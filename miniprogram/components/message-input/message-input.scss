@@ -142,3 +142,56 @@
   text-align: center;
   color: #9ca3af;
 }
+
+/* AI 配置列表 */
+.ai-config-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.ai-config-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 16rpx;
+  border-bottom: 1rpx solid #f3f4f6;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.ai-config-item:hover {
+  background-color: #f9fafb;
+}
+
+.ai-config-item:active {
+  background-color: #f3f4f6;
+}
+
+.ai-config-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  flex: 1;
+}
+
+.ai-config-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #111827;
+}
+
+.ai-config-model {
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.ai-config-radio {
+  margin-left: 16rpx;
+}
+
+.ai-config-empty {
+  padding: 32rpx 12rpx;
+  text-align: center;
+  color: #9ca3af;
+}

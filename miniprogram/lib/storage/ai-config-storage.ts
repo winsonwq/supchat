@@ -12,7 +12,14 @@ export class AIConfigStorage {
   static getAllConfigs(): AIConfig[] {
     try {
       const data = wx.getStorageSync(STORAGE_KEY)
-      return data ? JSON.parse(data) : []
+      const configs = data ? JSON.parse(data) : []
+      
+      // 确保 isActive 状态与当前激活的配置ID同步
+      const activeConfigId = this.getActiveConfigId()
+      return configs.map(config => ({
+        ...config,
+        isActive: config.id === activeConfigId
+      }))
     } catch (error) {
       console.error('获取AI配置失败:', error)
       return []

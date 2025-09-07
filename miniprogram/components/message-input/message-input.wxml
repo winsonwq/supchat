@@ -63,12 +63,16 @@
       <view wx:if="{{ isVoiceMode }}" style="width:36px"></view>
     </view>
     
-    <!-- MCP 服务按钮 + 发送/停止按钮 -->
+    <!-- AI 配置按钮 + MCP 服务按钮 + 发送/停止按钮 -->
     <view class="w-full flex align-center justify-between">
       <view class="flex align-center gap-4">
-        <button class="btn btn-tiny" catchtap="onOpenMcpSheet">
+        <button class="btn btn-tiny" catchtap="onOpenAiConfigSheet">
           <svg-icon name="server" size="40"></svg-icon>
-          MCP 服务
+          AI 配置
+        </button>
+        <button class="btn btn-tiny" catchtap="onOpenMcpSheet">
+          <svg-icon name="tool" size="40"></svg-icon>
+          MCP
         </button>
       </view>
 
@@ -97,6 +101,28 @@
   <view class="text-center text-xs text-gray-400 leading-tight">
     内容由 AI 生成，仅供参考
   </view>
+
+  <!-- AI 配置选择抽屉 -->
+  <bottom-sheet visible="{{ aiConfigSheetVisible }}" title="AI 配置" bind:close="onCloseAiConfigSheet">
+    <view class="ai-config-list">
+      <block wx:if="{{ aiConfigs.length > 0 }}">
+        <block wx:for="{{ aiConfigs }}" wx:key="id">
+          <view class="ai-config-item" bindtap="onSelectAiConfig" data-id="{{ item.id }}">
+            <view class="ai-config-meta">
+              <text class="ai-config-name">{{ item.name }}</text>
+              <text class="ai-config-model">{{ item.model }}</text>
+            </view>
+            <view class="ai-config-radio">
+              <radio checked="{{ item.isActive }}"></radio>
+            </view>
+          </view>
+        </block>
+      </block>
+      <view class="ai-config-empty" wx:else>
+        <text>暂无 AI 配置，可前往设置添加</text>
+      </view>
+    </view>
+  </bottom-sheet>
 
   <!-- MCP 选择抽屉 -->
   <bottom-sheet visible="{{ mcpSheetVisible }}" title="MCP 服务" bind:close="onCloseMcpSheet">

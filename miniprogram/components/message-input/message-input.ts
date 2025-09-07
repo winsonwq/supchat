@@ -1,6 +1,7 @@
 // message-input.ts
 import { WxEvent } from '../../lib/mcp/types.js'
 import { MCPConfigStorage } from '../../lib/storage/mcp-config-storage'
+import { AIConfigStorage } from '../../lib/storage/ai-config-storage'
 import getSafeArea from '../../lib/utils/safe-area'
 import wechatSI, { WechatSIOptions } from '../../lib/mcp/tools/wechat-si'
 
@@ -33,6 +34,9 @@ Component({
     bottomSafeHeight: 0,
     mcpSheetVisible: false,
     mcpConfigs: [] as any[],
+    // AI 配置相关状态
+    aiConfigSheetVisible: false,
+    aiConfigs: [] as any[],
     // 新增语音输入相关状态
     isVoiceMode: false, // 是否为语音输入模式
     isRecording: false, // 是否正在录音
@@ -63,6 +67,8 @@ Component({
       })
       // 载入 MCP 配置
       this.loadMcpConfigs()
+      // 载入 AI 配置
+      this.loadAiConfigs()
       // 初始化录音管理器
       this.initRecorderManager()
       // 初始化微信同声传译插件
@@ -165,6 +171,70 @@ Component({
       MCPConfigStorage.toggleConfigEnabled(id)
       this.loadMcpConfigs()
       this.triggerEvent('mcpchange', { id })
+    },
+
+    // AI 配置相关方法
+    onOpenAiConfigSheet() {
+      this.setData({ aiConfigSheetVisible: true })
+    },
+    onCloseAiConfigSheet() {
+      this.setData({ aiConfigSheetVisible: false })
+    },
+    loadAiConfigs() {
+      const configs = AIConfigStorage.getAllConfigs()
+      this.setData({ aiConfigs: configs })
+    },
+    onSelectAiConfig(e: WxEvent) {
+      console.log('🎯 onSelectAiConfig 被调用', e)
+      console.log('事件详情:', {
+        type: e.type,
+        currentTarget: e.currentTarget,
+        target: e.target,
+        dataset: (e.currentTarget as any).dataset
+      })
+      
+      const id = (e.currentTarget as any).dataset.id as string
+      console.log('选择AI配置ID:', id)
+      
+      if (!id) {
+        console.error('❌ 未获取到配置ID')
+        wx.showToast({
+          title: '配置ID无效',
+          icon: 'error',
+        })
+        return
+      }
+      
+      // 先显示一个测试提示
+      wx.showToast({
+        title: `点击了配置: ${id}`,
+        icon: 'none',
+        duration: 2000,
+      })
+      
+      // 设置激活配置
+      const success = AIConfigStorage.setActiveConfig(id)
+      if (success) {
+        // 重新加载配置以更新UI状态
+        this.loadAiConfigs()
+        // 触发配置变化事件
+        this.triggerEvent('aiconfigchange', { id })
+        
+        console.log('✅ AI配置切换成功:', id)
+        setTimeout(() => {
+          wx.showToast({
+            title: 'AI配置已切换',
+            icon: 'success',
+            duration: 1500,
+          })
+        }, 2000)
+      } else {
+        console.error('❌ AI配置切换失败:', id)
+        wx.showToast({
+          title: '配置切换失败',
+          icon: 'error',
+        })
+      }
     },
 
     // 新增语音输入相关方法

@@ -373,6 +373,25 @@ Component({
       this.sendMessage(message)
     },
 
+    // 处理 AI 配置变化事件
+    onAiConfigChange(e: WxEvent<{ id: string }>) {
+      const configId = e.detail?.id
+      console.log('AI 配置已切换:', configId)
+      // AI 服务会自动使用新的激活配置，无需额外处理
+      wx.showToast({
+        title: 'AI 配置已切换',
+        icon: 'success',
+        duration: 1500,
+      })
+    },
+
+    // 处理 MCP 配置变化事件
+    onMcpChange(e: WxEvent<{ id: string }>) {
+      const configId = e.detail?.id
+      console.log('MCP 配置已切换:', configId)
+      // MCP 配置变化处理逻辑
+    },
+
     // 发送消息（流式模式）
     async sendMessage(message?: string) {
       const messageContent = message || this.data.inputMessage.trim()

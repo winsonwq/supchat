@@ -23,23 +23,18 @@
       <view 
         wx:for="{{ configs }}" 
         wx:key="id" 
-        class="config-item {{ item.isActive ? 'config-item--active' : '' }}"
-        bindtap="onSelectConfig"
-        data-id="{{ item.id }}"
+        class="config-item"
       >
         <view class="config-content">
-          <view class="config-check" wx:if="{{ item.isActive }}">
-            <svg-icon name="check" size="28" color="white"></svg-icon>
-          </view>
           <view class="config-main">
             <text class="config-name">{{ item.name }}</text>
             <text class="config-detail">{{ item.model }}</text>
           </view>
           <view class="config-actions">
-            <button class="action-btn" catchtap="onEditConfig" data-id="{{ item.id }}">
+            <button class="btn btn-icon" catchtap="onEditConfig" data-id="{{ item.id }}">
               <svg-icon name="edit" size="32" color="gray"></svg-icon>
             </button>
-            <button class="action-btn" catchtap="onDeleteConfig" data-id="{{ item.id }}">
+            <button class="btn btn-icon" catchtap="onDeleteConfig" data-id="{{ item.id }}">
               <svg-icon name="delete" size="32" color="gray"></svg-icon>
             </button>
           </view>

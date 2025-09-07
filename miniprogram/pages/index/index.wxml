@@ -45,4 +45,6 @@
   bind:inputchange="onInputChange"
   bind:send="onSendMessage"
   bind:cancel="cancelRequest"
+  bind:aiconfigchange="onAiConfigChange"
+  bind:mcpchange="onMcpChange"
 ></message-input>

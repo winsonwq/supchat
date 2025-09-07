@@ -67,9 +67,6 @@
   border-bottom: none;
 }
 
-.config-item--active {
-  background-color: #f8f9ff;
-}
 
 .config-content {
   display: flex;
@@ -78,16 +75,6 @@
   gap: 24rpx;
 }
 
-.config-check {
-  width: 48rpx;
-  height: 48rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--color-primary);
-  border-radius: 50%;
-  flex-shrink: 0;
-}
 
 .config-main {
   flex: 1;
@@ -114,32 +101,7 @@
   gap: 16rpx;
 }
 
-.action-btn {
-  min-width: 80rpx;
-  height: 64rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8rpx;
-  background-color: #f5f5f5;
-  transition: background-color 0.2s ease;
-  padding: 16rpx;
-  border: none;
-  outline: none;
-  font-size: inherit;
-  line-height: inherit;
-  cursor: pointer;
-}
 
-.action-btn:active {
-  background-color: #e5e5e5;
-}
-
-.action-icon {
-  font-size: 24rpx;
-  color: #666666;
-  font-weight: 500;
-}
 
 /* 空状态 */
 .empty-state {

@@ -1,7 +1,6 @@
 // ai-settings.ts
 import { AIConfig } from '../../lib/types/ai-config'
 import { AIConfigStorage } from '../../lib/storage/ai-config-storage'
-import { refreshEnvConfig } from '../../lib/config/env'
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
 
 Page({
@@ -10,7 +9,6 @@ Page({
    */
   data: {
     configs: [] as AIConfig[],
-    activeConfig: null as AIConfig | null,
     contentPaddingTop: 0
   },
 
@@ -37,11 +35,9 @@ Page({
    */
   loadConfigs() {
     const configs = AIConfigStorage.getAllConfigs()
-    const activeConfig = AIConfigStorage.getActiveConfig()
     
     this.setData({
-      configs,
-      activeConfig
+      configs
     })
   },
 
@@ -65,45 +61,6 @@ Page({
   },
 
   /**
-   * 选择配置作为激活配置
-   */
-  onSelectConfig(e: any) {
-    const configId = e.currentTarget.dataset.id
-    const config = this.data.configs.find(c => c.id === configId)
-    
-    if (!config) return
-
-    // 如果当前配置已经是激活状态，则不做任何操作
-    if (config.isActive) {
-      return
-    }
-
-    wx.showModal({
-      title: '确认激活',
-      content: `是否将 "${config.name}" 设为当前激活的AI配置？`,
-      success: (res) => {
-        if (res.confirm) {
-          const success = AIConfigStorage.setActiveConfig(configId)
-          if (success) {
-            // 刷新环境配置，使新的AI设置立即生效
-            refreshEnvConfig()
-            wx.showToast({
-              title: '设置成功',
-              icon: 'success'
-            })
-            this.loadConfigs()
-          } else {
-            wx.showToast({
-              title: '设置失败',
-              icon: 'error'
-            })
-          }
-        }
-      }
-    })
-  },
-
-  /**
    * 删除配置
    */
   onDeleteConfig(e: any) {
@@ -118,10 +75,8 @@ Page({
       return
     }
 
-    // 如果要删除的是当前激活的配置，给出更明确的提示
-    const warningContent = config.isActive 
-      ? `"${config.name}" 是当前使用的配置，删除后将无激活配置。确定要删除吗？`
-      : `是否删除配置 "${config.name}"？删除后无法恢复。`
+    // 删除配置的提示
+    const warningContent = `是否删除配置 "${config.name}"？删除后无法恢复。`
 
     wx.showModal({
       title: '确认删除',
@@ -136,10 +91,6 @@ Page({
               title: '删除成功',
               icon: 'success'
             })
-            // 如果删除的是激活配置，刷新环境配置
-            if (config.isActive) {
-              refreshEnvConfig()
-            }
             this.loadConfigs()
           } else {
             wx.showToast({
