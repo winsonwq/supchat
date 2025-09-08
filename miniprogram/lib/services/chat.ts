@@ -148,6 +148,73 @@ export class ChatService {
   }
 
   /**
+   * 分页获取聊天消息
+   */
+  async getChatMessages(
+    chatId: string,
+    options: {
+      limit?: number
+      cursor?: string
+      order?: 'asc' | 'desc'
+    } = {}
+  ): Promise<{
+    messages: RenderMessage[]
+    hasMore: boolean
+    nextCursor?: string
+  }> {
+    try {
+      const { limit = 20, cursor, order = 'desc' } = options
+      
+      // 构建查询参数（兼容小程序环境，不使用 URLSearchParams）
+      const queryEntries: Array<[string, string]> = [
+        ['limit', String(limit)],
+        ['order', order],
+      ]
+      if (cursor) {
+        queryEntries.push(['cursor', cursor])
+      }
+      const queryString = queryEntries
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join('&')
+
+      const result = await storage.get(`/chats/${chatId}/messages?${queryString}`)
+      
+      if (!result.ok) {
+        throw new Error(result.error || '获取消息失败')
+      }
+
+      const rawMessages = result.data as any[]
+      
+      // 统一字段：将后端 camelCase 字段映射到前端使用的下划线风格
+      const messages: RenderMessage[] = rawMessages.map((m) => {
+        const mapped: Record<string, unknown> = { ...m }
+        if (mapped.tool_calls === undefined && mapped.toolCalls !== undefined) {
+          mapped.tool_calls = mapped.toolCalls
+        }
+        if (mapped.tool_call_id === undefined && mapped.toolCallId !== undefined) {
+          mapped.tool_call_id = mapped.toolCallId
+        }
+        return (mapped as unknown) as RenderMessage
+      })
+
+      // 判断是否还有更多消息
+      const hasMore = messages.length === limit
+      const nextCursor = hasMore && messages.length > 0 
+        ? messages[messages.length - 1].createdAt 
+        : undefined
+
+      return {
+        messages,
+        hasMore,
+        nextCursor,
+      }
+    } catch (error) {
+      console.error('分页获取消息失败:', error)
+      throw error
+    }
+  }
+
+  /**
    * 切换聊天（获取聊天数据和消息，用于显示）
    * 这个方法只获取数据，不更新数据库状态
    */

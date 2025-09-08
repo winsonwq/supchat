@@ -38,9 +38,22 @@ Component({
       type: Number,
       value: 0,
     },
+    // 是否正在加载更多消息
+    isLoadingMore: {
+      type: Boolean,
+      value: false,
+    },
+    // 是否还有更多消息
+    hasMoreMessages: {
+      type: Boolean,
+      value: true,
+    },
   },
 
-  data: {},
+  data: {
+    scrollTop: 0,
+    scrollIntoView: '',
+  },
 
   lifetimes: {
     attached() {
@@ -64,6 +77,27 @@ Component({
       this.triggerEvent('messageTap', { messageIndex })
     },
 
-    
+    // 滚动到顶部时触发加载更多
+    onScrollToUpper() {
+      const { isLoadingMore, hasMoreMessages } = this.properties
+      if (!isLoadingMore && hasMoreMessages) {
+        this.triggerEvent('loadMore')
+      }
+    },
+
+    // 滚动到底部时触发滚动到最新消息
+    onScrollToLower() {
+      this.triggerEvent('scrollToLatest')
+    },
+
+    // 滚动到指定位置
+    scrollToPosition(scrollTop: number) {
+      this.setData({ scrollTop })
+    },
+
+    // 滚动到指定元素
+    scrollIntoView(viewId: string) {
+      this.setData({ scrollIntoView: viewId })
+    },
   },
 })

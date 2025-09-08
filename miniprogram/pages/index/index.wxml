@@ -34,8 +34,11 @@
   emptyMessage="{{ emptyMessage }}"
   scrollViewHeight="{{ scrollViewHeight }}"
   chatScrollTopPadding="{{ chatScrollTopPadding }}"
+  isLoadingMore="{{ isLoadingMore }}"
+  hasMoreMessages="{{ hasMoreMessages }}"
   bind:scrollToLatest="onScrollToLatest"
   bind:messageTap="onMessageTap"
+  bind:loadMore="onLoadMore"
 />
 
 <!-- 输入组件 -->

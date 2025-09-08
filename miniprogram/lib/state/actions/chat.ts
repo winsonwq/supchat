@@ -28,6 +28,12 @@ export interface AddMessageParams {
   }
 }
 
+export interface LoadMoreMessagesParams {
+  chatId: string
+  cursor?: string
+  limit?: number
+}
+
 export enum ChatActionType {
   CREATE_CHAT = 'chat/createChat',
   FETCH_CHATS = 'chat/fetchChats',
@@ -40,6 +46,7 @@ export enum ChatActionType {
   SET_LOADING = 'chat/setLoading',
   SET_CHATS = 'chat/setChats',
   ADD_CHAT = 'chat/addChat',
+  LOAD_MORE_MESSAGES = 'chat/loadMoreMessages',
 }
 
 export const createChat = createAsyncThunk(
@@ -140,6 +147,24 @@ export const setLoading = createAsyncThunk(
   },
 )
 
+export const loadMoreMessages = createAsyncThunk(
+  ChatActionType.LOAD_MORE_MESSAGES,
+  async (params: LoadMoreMessagesParams) => {
+    const { chatId, cursor, limit } = params
+    const result = await chatService.getChatMessages(chatId, {
+      cursor,
+      limit,
+      order: 'desc',
+    })
+    return {
+      chatId,
+      messages: result.messages,
+      hasMore: result.hasMore,
+      nextCursor: result.nextCursor,
+    }
+  },
+)
+
 export type ChatAction =
   | Action<ChatActionType.CREATE_CHAT, ChatSession>
   | Action<ChatActionType.FETCH_CHATS, ChatSession[]>
@@ -158,3 +183,7 @@ export type ChatAction =
   | Action<ChatActionType.SET_LOADING, boolean>
   | Action<ChatActionType.SET_CHATS, ChatSession[]>
   | Action<ChatActionType.ADD_CHAT, ChatSession>
+  | Action<
+      ChatActionType.LOAD_MORE_MESSAGES,
+      { chatId: string; messages: RenderMessage[]; hasMore: boolean; nextCursor?: string }
+    >

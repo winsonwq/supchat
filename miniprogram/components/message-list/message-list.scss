@@ -28,3 +28,30 @@
 .welcome-container {
   padding-bottom: 150px;
 }
+
+/* 加载更多指示器样式 */
+.load-more-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  gap: 8px;
+}
+
+.load-more-text {
+  font-size: 14px;
+  color: #999;
+}
+
+/* 没有更多消息提示样式 */
+.no-more-messages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.no-more-text {
+  font-size: 12px;
+  color: #ccc;
+}

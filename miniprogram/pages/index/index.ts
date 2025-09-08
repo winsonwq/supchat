@@ -25,7 +25,7 @@ import {
   deleteChat,
   setCurrentChat,
   addMessage,
-  switchToChat,
+  loadMoreMessages,
 } from '../../lib/state/actions/chat'
 import { selectChats } from '../../lib/state/selectors/chat'
 
@@ -52,6 +52,11 @@ Component({
     viewportHeight: 0, // viewport 高度
     scrollViewHeight: 0, // 聊天区域高度
     chatScrollTopPadding: 0, // 聊天区域顶部间距
+
+    // 加载更多相关数据
+    isLoadingMore: false, // 是否正在加载更多消息
+    hasMoreMessages: true, // 是否还有更多消息
+    messageCursor: '', // 消息分页游标
 
     // 侧边栏相关数据
     sidebarOpen: false,
@@ -205,45 +210,48 @@ Component({
       })
     },
 
-    // 加载消息历史
+    // 加载消息历史（分页：默认取最新20条，正序展示）
     async loadMessageHistory(sessionId: string) {
       if (!sessionId) {
         return
       }
 
       try {
-        const chatWithMessages = await appDispatch(switchToChat(sessionId))
+        // 首次加载使用分页接口，按 desc 获取最新20条
+        const result = await appDispatch(
+          loadMoreMessages({ chatId: sessionId, limit: 20 })
+        )
 
-        if (chatWithMessages?.chatWithMessages?.messages) {
-          const processedHistory =
-            chatWithMessages.chatWithMessages.messages.map((msg) => {
-              return {
-                ...msg,
-                towxmlNodes: this.processMessageContent(msg.content),
-              }
-            })
+        if (result && typeof result === 'object' && 'messages' in result) {
+          // 后端按 desc 返回，这里正序展示
+          const latestBatchAsc = [...result.messages].reverse()
+          const processedHistory = latestBatchAsc.map((msg: RenderMessage) => ({
+            ...msg,
+            towxmlNodes: this.processMessageContent(msg.content),
+          }))
 
           this.setData({
             messages: processedHistory,
+            // 重置/设置分页状态
+            isLoadingMore: false,
+            hasMoreMessages: !!result.hasMore,
+            messageCursor: result.nextCursor || '',
           })
           this.scrollToLatestMessage()
+          return
         }
       } catch (error) {
         console.error('加载消息历史失败:', error)
-        // 如果从数据库加载失败，回退到本地历史
-        const history = this.getAIService().getMessageHistory()
-        const processedHistory = history.map((msg: RenderMessage) => {
-          return {
-            ...msg,
-            towxmlNodes: this.processMessageContent(msg.content),
-          }
-        })
-
-        this.setData({
-          messages: processedHistory,
-        })
-        this.scrollToLatestMessage()
       }
+
+      // 兜底：使用本地历史
+      const history = this.getAIService().getMessageHistory()
+      const processedHistory = history.map((msg: RenderMessage) => ({
+        ...msg,
+        towxmlNodes: this.processMessageContent(msg.content),
+      }))
+      this.setData({ messages: processedHistory })
+      this.scrollToLatestMessage()
     },
 
     // 初始化聊天会话
@@ -775,6 +783,10 @@ Component({
         this.setData({
           currentSessionId: sessionId,
           sidebarOpen: false,
+          // 重置加载更多状态
+          isLoadingMore: false,
+          hasMoreMessages: true,
+          messageCursor: '',
         })
 
         // 设置AI服务的当前聊天会话ID
@@ -1002,6 +1014,50 @@ Component({
     // 处理消息点击事件
     onMessageTap(_e: WXEvent<{ messageIndex: number }>) {
       // 可以在这里添加消息点击的逻辑
+    },
+
+    // 处理加载更多消息事件
+    async onLoadMore() {
+      const { currentSessionId, isLoadingMore, hasMoreMessages, messageCursor } = this.data
+      
+      if (!currentSessionId || isLoadingMore || !hasMoreMessages) {
+        return
+      }
+
+      try {
+        this.setData({ isLoadingMore: true })
+
+        const result = await appDispatch(loadMoreMessages({
+          chatId: currentSessionId,
+          cursor: messageCursor,
+          limit: 20,
+        }))
+
+        if (result && typeof result === 'object' && 'messages' in result) {
+          const { messages, hasMore, nextCursor } = result
+
+          // 新批次按 desc 返回，正序后插入到现有列表前端
+          const batchAsc = [...messages].reverse().map((m: RenderMessage) => ({
+            ...m,
+            towxmlNodes: this.processMessageContent(m.content),
+          }))
+
+          const currentMessages = this.data.messages
+          const merged = [...batchAsc, ...currentMessages]
+
+          this.setData({
+            messages: merged,
+            hasMoreMessages: hasMore,
+            messageCursor: nextCursor || '',
+          })
+        } else {
+          console.error('加载更多消息失败:', result)
+        }
+      } catch (error) {
+        console.error('加载更多消息异常:', error)
+      } finally {
+        this.setData({ isLoadingMore: false })
+      }
     },
   },
 })
