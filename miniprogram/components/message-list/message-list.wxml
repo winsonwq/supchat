@@ -12,6 +12,8 @@
   show-scrollbar="false"
 >
   <view style="padding-top: {{ chatScrollTopPadding }}px;">
+  <!-- 顶部加载更多提示 -->
+  <view wx:if="{{ isLoadingMore }}" class="text-center text-gray-500 py-2">加载中…</view>
   <!-- 欢迎消息 -->
   <view wx:if="{{ messages.length === 0 }}" class="flex justify-center items-center h-full">
     <view class="rounded-2xl text-center welcome-container">
@@ -40,17 +42,6 @@
     isStreaming="{{ false }}"
     isLoading="{{ true }}"
   />
-
-  <!-- 加载更多指示器 -->
-  <view wx:if="{{ isLoadingMore }}" class="load-more-indicator">
-    <spin size="small" />
-    <text class="load-more-text">加载更多消息...</text>
-  </view>
-
-  <!-- 没有更多消息提示 -->
-  <view wx:if="{{ !hasMoreMessages && messages.length > 0 && !isLoadingMore }}" class="no-more-messages">
-    <text class="no-more-text">没有更多消息了</text>
-  </view>
 
   <!-- 底部占位符，确保最后一个消息有足够的显示空间 -->
   <view wx:if="{{ messages.length !== 0 }}" class="bottom-placeholder" style="height: 50vh;"></view>
