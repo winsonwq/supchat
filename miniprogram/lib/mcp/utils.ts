@@ -100,6 +100,7 @@ export function buildToolCallResponse(
     
     if (result instanceof Error) {
       content = `错误: ${result.message}`
+      originalData = result // 错误对象本身作为原始数据
     } else if (result.data) {
       // 保存原始数据，用于聊天历史存储
       originalData = result.data

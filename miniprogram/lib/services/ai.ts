@@ -27,6 +27,7 @@ import {
   Message, // 向后兼容的类型
 } from '../types/message.js'
 import { ToolConfirmManager } from './tool-confirm-manager.js'
+import { ComponentRenderer } from '../mcp/components/component-renderer.js'
 import chatService from './chat.js'
 
 // 流式响应回调类型
@@ -584,8 +585,19 @@ export class AIService {
   private saveToolCallResults(toolResponses: any[]) {
     toolResponses.forEach((response) => {
       if (response.originalData) {
-        // 使用原始数据保存到聊天历史，而不是渲染后的HTML字符串
-        this.addMessage('tool', response.originalData, response.tool_call_id)
+        // 如果 originalData 是对象，需要转换为字符串
+        let content = response.originalData
+        if (typeof content === 'object' && content !== null) {
+          if (content instanceof Error) {
+            content = `错误: ${content.message}`
+          } else if (typeof content === 'object' && 'render' in content) {
+            // 如果是组件实例，使用 ComponentRenderer 渲染
+            content = ComponentRenderer.render(content)
+          } else {
+            content = JSON.stringify(content, null, 2)
+          }
+        }
+        this.addMessage('tool', content, response.tool_call_id)
       } else {
         // 如果没有原始数据，使用渲染后的内容
         this.addMessage('tool', response.content, response.tool_call_id)
@@ -636,7 +648,8 @@ export class AIService {
           error instanceof Error ? error : new Error('工具调用失败')
         toolResults.push(errorObj)
 
-        this.addMessage('tool', `错误: ${errorObj.message}`, call.id)
+        // 移除这里的addMessage调用，统一在saveToolCallResults中处理
+        // this.addMessage('tool', `错误: ${errorObj.message}`, call.id)
         const errorMessage = formatToolCallErrorMessage(
           call.function.name,
           errorObj.message,

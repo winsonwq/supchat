@@ -11,7 +11,7 @@
   enhanced="true"
   show-scrollbar="false"
 >
-  <view style="padding-top: {{ chatScrollTopPadding }}px;">
+  <view style="padding: 16px;padding-top: {{ chatScrollTopPadding }}px;">
   <!-- 顶部加载更多提示 -->
   <view wx:if="{{ isLoadingMore }}" class="text-center text-gray-500 py-2">加载中…</view>
   <!-- 欢迎消息 -->

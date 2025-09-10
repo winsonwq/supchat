@@ -1074,29 +1074,29 @@ Component({
     handleToolConfirmRequest(toolConfirmData: ToolConfirmData | undefined) {
       if (!toolConfirmData) return
 
-      // 获取当前激活的AI配置信息（不包含敏感信息）
-      const activeConfig = AIConfigStorage.getActiveConfig()
-      const aiconfig = activeConfig ? {
-        id: activeConfig.id,
-        name: activeConfig.name,
-        model: activeConfig.model
-      } : undefined
-
-      // 创建工具确认消息
-      const confirmMessage: Message = {
-        id: `msg_${Date.now()}_confirm`,
-        role: 'assistant',
-        content: '', // 确认消息不显示内容，只显示UI
-        plainContent: '',
-        towxmlNodes: undefined,
-        toolConfirmData, // 传递确认数据给消息项
-        aiconfig,
-        createdAt: new Date().toISOString(),
+      // 找到最后一个包含 tool_calls 的 assistant 消息
+      const updatedMessages = [...this.data.messages]
+      let lastAssistantIndex = -1
+      for (let i = updatedMessages.length - 1; i >= 0; i--) {
+        const msg = updatedMessages[i]
+        if (msg.role === 'assistant' && msg.tool_calls && msg.tool_calls.length > 0) {
+          lastAssistantIndex = i
+          break
+        }
       }
 
-      const updatedMessages = [...this.data.messages, confirmMessage]
-      this.setData({ messages: updatedMessages })
-      this.scrollToLatestMessage()
+      if (lastAssistantIndex !== -1) {
+        // 在现有的 assistant 消息中添加工具确认数据
+        updatedMessages[lastAssistantIndex] = {
+          ...updatedMessages[lastAssistantIndex],
+          toolConfirmData, // 添加确认数据到现有消息
+        }
+
+        this.setData({ messages: updatedMessages })
+        this.scrollToLatestMessage()
+      } else {
+        console.warn('未找到包含工具调用的助手消息来显示工具确认')
+      }
     },
 
     /**
@@ -1130,13 +1130,18 @@ Component({
     },
 
     /**
-     * 移除确认消息
+     * 移除确认数据
      */
     removeConfirmMessage(confirmId: string) {
-      const messages = this.data.messages.filter(msg => 
-        !(msg.toolConfirmData && msg.toolConfirmData.confirmId === confirmId)
-      )
-      this.setData({ messages })
+      const updatedMessages = this.data.messages.map(msg => {
+        if (msg.toolConfirmData && msg.toolConfirmData.confirmId === confirmId) {
+          // 移除工具确认数据，保留消息本身
+          const { toolConfirmData, ...msgWithoutConfirm } = msg
+          return msgWithoutConfirm
+        }
+        return msg
+      })
+      this.setData({ messages: updatedMessages })
     },
   },
 })

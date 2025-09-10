@@ -4,8 +4,7 @@
     "towxml": "/towxml/towxml",
     "svg-icon": "../svg-icon/svg-icon",
     "generic-dialog": "../generic-dialog/generic-dialog",
-    "formatter": "../formatter/formatter",
-    "tool-confirm": "../tool-confirm/tool-confirm"
+    "formatter": "../formatter/formatter"
   },
   "styleIsolation": "apply-shared"
 }

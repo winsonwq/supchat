@@ -1,6 +1,5 @@
 // message-item.ts
 import { Message } from '../../lib/types/message.js' // 使用新的消息类型定义
-import { ToolConfirmData } from '../../lib/mcp/types.js'
 
 Component({
   options: {
@@ -38,11 +37,6 @@ Component({
       type: Number,
       value: 0,
     },
-    // 工具确认数据
-    toolConfirmData: {
-      type: Object,
-      value: null as ToolConfirmData | null,
-    },
   },
 
   /**
@@ -54,6 +48,28 @@ Component({
     selectedToolCall: null as any,
     selectedToolIndex: -1,
     toolParamsFormatted: '',
+    // 工具确认参数格式化文本
+    formattedArguments: '',
+  },
+
+  observers: {
+    'message.toolConfirmData': function(toolConfirmData: any) {
+      if (toolConfirmData && toolConfirmData.arguments) {
+        let formattedArgs = ''
+        try {
+          formattedArgs = JSON.stringify(toolConfirmData.arguments, null, 2)
+        } catch (error) {
+          formattedArgs = String(toolConfirmData.arguments)
+        }
+        this.setData({
+          formattedArguments: formattedArgs
+        })
+      } else {
+        this.setData({
+          formattedArguments: ''
+        })
+      }
+    }
   },
 
   /**
@@ -105,7 +121,15 @@ Component({
      * 处理工具确认
      */
     onToolConfirm(event: any) {
-      const { confirmId } = event.detail
+      // 尝试从事件数据中获取confirmId，如果没有则从消息数据中获取
+      let confirmId = event.detail?.confirmId
+      if (!confirmId && event.currentTarget?.dataset?.confirmId) {
+        confirmId = event.currentTarget.dataset.confirmId
+      }
+      if (!confirmId && this.data.message?.toolConfirmData?.confirmId) {
+        confirmId = this.data.message.toolConfirmData.confirmId
+      }
+      
       console.log('工具确认:', confirmId)
       this.triggerEvent('toolConfirm', { confirmId })
     },
@@ -114,7 +138,15 @@ Component({
      * 处理工具取消
      */
     onToolCancel(event: any) {
-      const { confirmId } = event.detail
+      // 尝试从事件数据中获取confirmId，如果没有则从消息数据中获取
+      let confirmId = event.detail?.confirmId
+      if (!confirmId && event.currentTarget?.dataset?.confirmId) {
+        confirmId = event.currentTarget.dataset.confirmId
+      }
+      if (!confirmId && this.data.message?.toolConfirmData?.confirmId) {
+        confirmId = this.data.message.toolConfirmData.confirmId
+      }
+      
       console.log('工具取消:', confirmId)
       this.triggerEvent('toolCancel', { confirmId })
     },
