@@ -7,7 +7,7 @@ import {
   ToolConfirmData,
 } from '../../lib/mcp/types.js'
 import { ToolCall, TowxmlNode, WxEvent } from '../../lib/mcp/types.js'
-import { RenderMessage, Message } from '../../lib/types/message' // 使用新的消息类型
+import { RenderMessage } from '../../lib/types/message' // 使用新的消息类型
 import { ToolConfirmManager } from '../../lib/services/tool-confirm-manager.js'
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
 import { ProfileVO } from '../../lib/types/profile'
@@ -45,12 +45,12 @@ const app = getApp()
 
 Component({
   data: {
-    messages: [] as Message[],
+    messages: [] as RenderMessage[],
     inputMessage: '',
     isLoading: false,
     scrollToMessage: '',
     isStreaming: false, // 新增：标记是否正在流式响应
-    emptyMessage: {} as Message, // 空消息对象，用于加载状态
+    emptyMessage: {} as RenderMessage, // 空消息对象，用于加载状态
     viewportHeight: 0, // viewport 高度
     scrollViewHeight: 0, // 聊天区域高度
     chatScrollTopPadding: 0, // 聊天区域顶部间距
@@ -455,7 +455,7 @@ Component({
     },
 
     // 构建用户消息
-    createUserMessage(content: string): Message {
+    createUserMessage(content: string): RenderMessage {
       // 获取当前激活的AI配置信息（不包含敏感信息）
       const activeConfig = AIConfigStorage.getActiveConfig()
       const aiconfig = activeConfig ? {
@@ -476,7 +476,7 @@ Component({
     },
 
     // 构建助手占位消息
-    createAssistantPlaceholder(): Message {
+    createAssistantPlaceholder(): RenderMessage {
       // 获取当前激活的AI配置信息（不包含敏感信息）
       const activeConfig = AIConfigStorage.getActiveConfig()
       const aiconfig = activeConfig ? {
@@ -497,7 +497,7 @@ Component({
     },
 
     // 追加消息到当前列表
-    appendMessages(messages: Message[]) {
+    appendMessages(messages: RenderMessage[]) {
       const newMessages = [...this.data.messages, ...messages]
       this.setData({
         messages: newMessages,
@@ -555,7 +555,7 @@ Component({
           model: activeConfig.model
         } : undefined
 
-        const toolMessage: Message = {
+        const toolMessage: RenderMessage = {
           id: `msg_${Date.now()}_tool`,
           role: 'tool',
           content,

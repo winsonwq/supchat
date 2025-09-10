@@ -24,7 +24,6 @@ import {
   RenderMessage,
   RenderMessageHistory,
   MessageConverter,
-  Message, // 向后兼容的类型
 } from '../types/message.js'
 import { ToolConfirmManager } from './tool-confirm-manager.js'
 import { ComponentRenderer } from '../mcp/components/component-renderer.js'
@@ -942,12 +941,8 @@ export class AIService {
   }
 
   // 获取消息历史（不包括系统消息） - 向后兼容
-  getMessageHistory(): Message[] {
-    // 转换为旧格式以保持向后兼容
-    return this.renderMessages.map((msg) => ({
-      ...msg,
-      towxmlNodes: msg.towxmlNodes,
-    })) as Message[]
+  getMessageHistory(): RenderMessage[] {
+    return this.renderMessages
   }
 
   // 取消当前请求

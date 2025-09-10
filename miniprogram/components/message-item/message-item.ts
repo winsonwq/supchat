@@ -1,5 +1,5 @@
 // message-item.ts
-import { Message } from '../../lib/types/message.js' // 使用新的消息类型定义
+import { RenderMessage } from '../../lib/types/message.js' // 使用新的消息类型定义
 
 Component({
   options: {
@@ -10,7 +10,7 @@ Component({
     // 消息数据
     message: {
       type: Object,
-      value: {} as Message,
+      value: {} as RenderMessage,
     },
     // 消息索引
     messageIndex: {

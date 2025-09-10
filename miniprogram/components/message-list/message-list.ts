@@ -1,5 +1,5 @@
 // message-list.ts
-import { Message } from '../../lib/types/message.js'
+import { RenderMessage } from '../../lib/types/message.js'
 
 Component({
   options: {
@@ -11,7 +11,7 @@ Component({
     // 消息列表
     messages: {
       type: Array,
-      value: [] as Message[],
+      value: [] as RenderMessage[],
     },
     // 是否正在加载
     isLoading: {
@@ -26,7 +26,7 @@ Component({
     // 空消息对象，用于加载状态
     emptyMessage: {
       type: Object,
-      value: {} as Message,
+      value: {} as RenderMessage,
     },
     // 聊天区域高度
     scrollViewHeight: {

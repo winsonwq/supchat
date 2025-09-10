@@ -164,14 +164,3 @@ export class MessageBuilder {
     }
   }
 }
-
-// 向后兼容
-/** @deprecated 使用 RenderMessage 替代 */
-export interface Message extends RenderMessage {
-  towxmlNodes?: TowxmlNode
-}
-
-/** @deprecated 使用 MessageConverter.renderToAI 替代 */
-export function convertMessageForAI(message: Message): AIMessage {
-  return MessageConverter.renderToAI(message)
-}
