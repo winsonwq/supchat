@@ -31,6 +31,9 @@
     isLast="{{ index === messages.length - 1 }}"
     isStreaming="{{ isStreaming }}"
     scrollViewHeight="{{ scrollViewHeight }}"
+    toolConfirmData="{{ item.toolConfirmData }}"
+    bind:toolConfirm="onToolConfirm"
+    bind:toolCancel="onToolCancel"
   />
 
   <!-- 加载状态（仅在非流式模式下显示） -->

@@ -99,5 +99,17 @@ Component({
     scrollIntoView(viewId: string) {
       this.setData({ scrollIntoView: viewId })
     },
+
+    // 处理工具确认
+    onToolConfirm(event: any) {
+      const { confirmId } = event.detail
+      this.triggerEvent('toolConfirm', { confirmId })
+    },
+
+    // 处理工具取消
+    onToolCancel(event: any) {
+      const { confirmId } = event.detail
+      this.triggerEvent('toolCancel', { confirmId })
+    },
   },
 })

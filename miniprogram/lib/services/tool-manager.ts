@@ -4,6 +4,7 @@ import { MCPToolsService } from './mcp-tools.js'
 import { OpenRouterTool } from '../mcp/types.js'
 import { ToolCallResult } from '../mcp/types.js'
 import { executeToolCall } from '../mcp/utils.js'
+import { ToolConfirmManager } from './tool-confirm-manager.js'
 
 /**
  * 工具管理器
@@ -36,19 +37,39 @@ export class ToolManager {
    */
   async executeTool(
     toolName: string,
-    arguments_: Record<string, unknown>
+    arguments_: Record<string, unknown>,
+    onStreamCallback?: (content: any) => void
   ): Promise<ToolCallResult> {
     console.log(`工具管理器: 执行工具 ${toolName}`)
     
     // 检查是否为 MCP 工具
     if (MCPToolsService.isMCPTool(toolName)) {
       console.log(`工具管理器: 执行 MCP 工具 ${toolName}`)
+      
+      // 检查 MCP 工具是否需要用户确认
+      const mcpTool = MCPToolsService.findMCPToolByName(toolName)
+      if (mcpTool && mcpTool.needConfirm !== false) {
+        console.log(`MCP 工具 ${toolName} 需要用户确认`)
+        const confirmManager = ToolConfirmManager.getInstance()
+        const confirmed = await confirmManager.createConfirmRequest(
+          toolName,
+          { function: { name: toolName, arguments: JSON.stringify(arguments_) } },
+          arguments_,
+          onStreamCallback
+        )
+        if (!confirmed) {
+          console.log(`用户取消了 MCP 工具 ${toolName} 的执行`)
+          throw new Error('用户取消了操作')
+        }
+      }
+      
       return await MCPToolsService.executeMCPTool(toolName, arguments_)
     } else {
       console.log(`工具管理器: 执行本地工具 ${toolName}`)
       return await executeToolCall(toolName, arguments_, allTools)
     }
   }
+
 
   /**
    * 检查工具是否存在

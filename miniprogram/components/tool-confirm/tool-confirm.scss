@@ -1,0 +1,89 @@
+/* 工具确认组件样式 */
+.tool-confirm-container {
+  background: linear-gradient(135deg, #fef3cd 0%, #fde68a 100%);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin: 16rpx 0;
+  position: relative;
+}
+
+.tool-info {
+  margin-bottom: 24rpx;
+}
+
+.tool-header {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
+}
+
+.tool-icon {
+  color: #f59e0b;
+}
+
+.tool-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.tool-message {
+  font-size: 28rpx;
+  color: #a16207;
+  display: block;
+}
+
+.tool-arguments {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 24rpx;
+}
+
+.arguments-label {
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #a16207;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.arguments-content {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12rpx;
+  padding: 16rpx;
+  max-height: 200rpx;
+  overflow-y: auto;
+}
+
+.arguments-text {
+  font-size: 24rpx;
+  color: #92400e;
+  font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.tool-actions {
+  display: flex;
+  gap: 16rpx;
+  justify-content: flex-end;
+}
+
+.tool-actions .btn {
+  flex: 0 0 auto;
+  min-width: 120rpx;
+}
+
+/* 响应式调整 */
+@media (max-width: 750rpx) {
+  .tool-actions {
+    justify-content: stretch;
+  }
+  
+  .tool-actions .btn {
+    flex: 1;
+  }
+}

@@ -4,9 +4,11 @@ import {
   RenderNode,
   StreamContentType,
   StreamContent,
+  ToolConfirmData,
 } from '../../lib/mcp/types.js'
 import { ToolCall, TowxmlNode, WxEvent } from '../../lib/mcp/types.js'
 import { RenderMessage, Message } from '../../lib/types/message' // 使用新的消息类型
+import { ToolConfirmManager } from '../../lib/services/tool-confirm-manager.js'
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
 import { ProfileVO } from '../../lib/types/profile'
 import { ChatSession } from '../../lib/types/chat-history'
@@ -529,12 +531,18 @@ Component({
 
     // 处理流式内容更新
     handleStreamUpdate(streamContent: StreamContent) {
-      const { content, type, isComplete, toolCalls, currentToolCall } =
+      const { content, type, isComplete, toolCalls, currentToolCall, toolConfirmData } =
         streamContent
 
       if (currentToolCall) {
         this.updateAssistantMessage(content, toolCalls, currentToolCall)
         this.scrollToLatestMessage()
+        return
+      }
+
+      if (type === StreamContentType.TOOL_CONFIRM) {
+        // 处理工具确认请求
+        this.handleToolConfirmRequest(toolConfirmData)
         return
       }
 
@@ -1058,6 +1066,77 @@ Component({
       } finally {
         this.setData({ isLoadingMore: false })
       }
+    },
+
+    /**
+     * 处理工具确认请求
+     */
+    handleToolConfirmRequest(toolConfirmData: ToolConfirmData | undefined) {
+      if (!toolConfirmData) return
+
+      // 获取当前激活的AI配置信息（不包含敏感信息）
+      const activeConfig = AIConfigStorage.getActiveConfig()
+      const aiconfig = activeConfig ? {
+        id: activeConfig.id,
+        name: activeConfig.name,
+        model: activeConfig.model
+      } : undefined
+
+      // 创建工具确认消息
+      const confirmMessage: Message = {
+        id: `msg_${Date.now()}_confirm`,
+        role: 'assistant',
+        content: '', // 确认消息不显示内容，只显示UI
+        plainContent: '',
+        towxmlNodes: undefined,
+        toolConfirmData, // 传递确认数据给消息项
+        aiconfig,
+        createdAt: new Date().toISOString(),
+      }
+
+      const updatedMessages = [...this.data.messages, confirmMessage]
+      this.setData({ messages: updatedMessages })
+      this.scrollToLatestMessage()
+    },
+
+    /**
+     * 处理工具确认
+     */
+    onToolConfirm(event: any) {
+      const { confirmId } = event.detail
+      console.log('用户确认工具执行:', confirmId)
+      
+      // 移除确认消息
+      this.removeConfirmMessage(confirmId)
+      
+      // 通知确认管理器
+      const confirmManager = ToolConfirmManager.getInstance()
+      confirmManager.handleConfirm(confirmId)
+    },
+
+    /**
+     * 处理工具取消
+     */
+    onToolCancel(event: any) {
+      const { confirmId } = event.detail
+      console.log('用户取消工具执行:', confirmId)
+      
+      // 移除确认消息
+      this.removeConfirmMessage(confirmId)
+      
+      // 通知确认管理器
+      const confirmManager = ToolConfirmManager.getInstance()
+      confirmManager.handleCancel(confirmId)
+    },
+
+    /**
+     * 移除确认消息
+     */
+    removeConfirmMessage(confirmId: string) {
+      const messages = this.data.messages.filter(msg => 
+        !(msg.toolConfirmData && msg.toolConfirmData.confirmId === confirmId)
+      )
+      this.setData({ messages })
     },
   },
 })

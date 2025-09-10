@@ -26,6 +26,7 @@ import {
   MessageConverter,
   Message, // 向后兼容的类型
 } from '../types/message.js'
+import { ToolConfirmManager } from './tool-confirm-manager.js'
 import chatService from './chat.js'
 
 // 流式响应回调类型
@@ -48,6 +49,17 @@ export class AIService {
   private currentChatId: string | null = null // 当前聊天会话ID
   private isCancelled: boolean = false // 取消标记：用于软中断后续处理
   private streamingIntervalId: number | null = null // 非流式模拟的 interval ID
+
+  private constructor() {
+    // 初始化工具确认管理器回调
+    const confirmManager = ToolConfirmManager.getInstance()
+    confirmManager.setStreamCallback((content: StreamContent) => {
+      // 暂存回调，在发送消息时会被正确设置
+      this.pendingToolConfirmContent = content
+    })
+  }
+
+  private pendingToolConfirmContent: StreamContent | null = null
 
   static getInstance(): AIService {
     if (!AIService.instance) {
@@ -609,7 +621,7 @@ export class AIService {
         )
 
         // 使用工具管理器执行工具
-        const result = await toolManager.executeTool(call.function.name, args)
+        const result = await toolManager.executeTool(call.function.name, args, onStream)
         toolResults.push(result)
 
         // 移除这里的addMessage调用，现在在saveToolCallResults中统一处理

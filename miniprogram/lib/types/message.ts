@@ -28,6 +28,7 @@ export interface RenderMessage {
   towxmlNodes?: TowxmlNode
   tool_call_id?: string
   tool_calls?: ToolCall[]
+  toolConfirmData?: any // 工具确认数据
   aiconfig?: AIConfigInfo // 消息对应的AI配置信息
   createdAt: string
 }

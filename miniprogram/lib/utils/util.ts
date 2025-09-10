@@ -1,4 +1,4 @@
-import { ToolCallResult, StreamContent, StreamContentType, ToolCall, RenderNode } from '../mcp/types.js'
+import { ToolCallResult, StreamContent, StreamContentType, ToolCall, RenderNode, ToolConfirmData } from '../mcp/types.js'
 
 export const formatTime = (date: Date) => {
   const year = date.getFullYear()
@@ -40,13 +40,15 @@ export function createStreamContent(
   type: StreamContentType = StreamContentType.NORMAL,
   isComplete: boolean = false,
   toolCalls?: ToolCall[],
-  currentToolCall?: ToolCall
+  currentToolCall?: ToolCall,
+  toolConfirmData?: ToolConfirmData
 ): StreamContent {
   return {
     content,
     type,
     isComplete,
     toolCalls,
-    currentToolCall
+    currentToolCall,
+    toolConfirmData
   }
 }

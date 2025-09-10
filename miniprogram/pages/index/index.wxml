@@ -39,6 +39,8 @@
   bind:scrollToLatest="onScrollToLatest"
   bind:messageTap="onMessageTap"
   bind:loadMore="onLoadMore"
+  bind:toolConfirm="onToolConfirm"
+  bind:toolCancel="onToolCancel"
 />
 
 <!-- 输入组件 -->

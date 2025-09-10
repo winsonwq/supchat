@@ -1,5 +1,6 @@
 // message-item.ts
 import { Message } from '../../lib/types/message.js' // 使用新的消息类型定义
+import { ToolConfirmData } from '../../lib/mcp/types.js'
 
 Component({
   options: {
@@ -36,6 +37,11 @@ Component({
     scrollViewHeight: {
       type: Number,
       value: 0,
+    },
+    // 工具确认数据
+    toolConfirmData: {
+      type: Object,
+      value: null as ToolConfirmData | null,
     },
   },
 
@@ -93,6 +99,24 @@ Component({
         selectedToolIndex: -1,
         toolParamsFormatted: '',
       })
+    },
+
+    /**
+     * 处理工具确认
+     */
+    onToolConfirm(event: any) {
+      const { confirmId } = event.detail
+      console.log('工具确认:', confirmId)
+      this.triggerEvent('toolConfirm', { confirmId })
+    },
+
+    /**
+     * 处理工具取消
+     */
+    onToolCancel(event: any) {
+      const { confirmId } = event.detail
+      console.log('工具取消:', confirmId)
+      this.triggerEvent('toolCancel', { confirmId })
     },
   },
 })

@@ -1,0 +1,37 @@
+<!-- 工具确认组件 -->
+<view class="tool-confirm-container">
+  <!-- 工具信息 -->
+  <view class="tool-info">
+    <view class="tool-header">
+      <svg-icon name="tool" size="32" class="tool-icon" />
+      <text class="tool-name">{{ toolName }}</text>
+    </view>
+    <text class="tool-message">需要确认执行以下操作</text>
+  </view>
+
+  <!-- 参数展示 -->
+  <view wx:if="{{ argumentsText }}" class="tool-arguments">
+    <text class="arguments-label">参数：</text>
+    <view class="arguments-content">
+      <text class="arguments-text">{{ argumentsText }}</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="tool-actions">
+    <button 
+      class="btn btn-secondary btn-small" 
+      bindtap="onCancel"
+      data-confirm-id="{{ confirmId }}"
+    >
+      取消
+    </button>
+    <button 
+      class="btn btn-primary btn-small" 
+      bindtap="onConfirm"
+      data-confirm-id="{{ confirmId }}"
+    >
+      确认
+    </button>
+  </view>
+</view>

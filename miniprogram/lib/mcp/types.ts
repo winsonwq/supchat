@@ -149,7 +149,16 @@ export interface ParsedToolCallMessage {
 export enum StreamContentType {
   NORMAL = 'normal', // 普通内容
   TOOL = 'tool', // 工具调用消息
+  TOOL_CONFIRM = 'tool_confirm', // 工具确认消息
   ERROR = 'error', // 错误消息
+}
+
+// 工具确认数据
+export interface ToolConfirmData {
+  toolName: string
+  toolCall: ToolCall
+  arguments: Record<string, unknown>
+  confirmId: string // 唯一确认ID
 }
 
 // 流式内容对象
@@ -159,6 +168,7 @@ export interface StreamContent {
   isComplete: boolean
   toolCalls?: ToolCall[]
   currentToolCall?: ToolCall
+  toolConfirmData?: ToolConfirmData // 工具确认数据
   // 标识：是否应在前端侧持久化一次含 tool_calls 的助手计划消息
   shouldPersistAssistantToolPlan?: boolean
 }
