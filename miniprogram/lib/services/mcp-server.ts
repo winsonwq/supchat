@@ -8,6 +8,7 @@ export interface MCPTool {
   chineseName?: string
   inputSchema?: any
   isEnabled?: boolean
+  needConfirm?: boolean
 }
 
 export interface MCPInitializeResponse {

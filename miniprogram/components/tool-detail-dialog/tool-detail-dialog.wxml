@@ -30,9 +30,7 @@
       <view class="section-content">
         <view class="tool-status">
           <text class="status-label">启用状态:</text>
-          <text class="status-value {{ tool.isEnabled !== false ? 'status-enabled' : 'status-disabled' }}">
-            {{ tool.isEnabled !== false ? '已启用' : '已禁用' }}
-          </text>
+          <text class="status-value {{ tool.isEnabled !== false ? 'status-enabled' : 'status-disabled' }}">{{ tool.isEnabled !== false ? '已启用' : '已禁用' }}</text>
         </view>
         <!-- 调试信息 -->
         <view class="debug-info" wx:if="{{ tool._configName }}">

@@ -343,7 +343,7 @@
 }
 
 .tool-item {
-  padding: 16rpx;
+  padding: 32rpx;
   background-color: #ffffff;
   border-radius: 12rpx;
   border: 1rpx solid #e5e7eb;
@@ -372,60 +372,18 @@
   line-height: 1.4;
 }
 
-/* 工具开关样式 */
-.tool-switch-container {
-  cursor: pointer;
-  transition: all 0.3s ease;
+/* 工具开关样式已被checkbox组件替代 */
+
+/* 工具控制面板样式 - 一行布局 */
+.tool-controls-inline {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
   flex-shrink: 0;
 }
 
-.tool-switch-container.disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.tool-switch {
-  width: 72rpx;
-  height: 40rpx;
-  border-radius: 20rpx;
-  position: relative;
-  transition: all 0.3s ease;
-  border: 2rpx solid #e5e7eb;
-}
-
-.tool-switch.switch-off {
-  background-color: #f3f4f6;
-}
-
-.tool-switch.switch-on {
-  background-color: #10b981;
-  border-color: #10b981;
-}
-
-.tool-switch.switch-disabled {
-  background-color: #e2e8f0;
-  border-color: #cbd5e0;
-}
-
-.tool-switch .switch-handle {
-  width: 32rpx;
-  height: 32rpx;
-  border-radius: 50%;
-  background-color: white;
-  position: absolute;
-  top: 2rpx;
-  left: 2rpx;
-  transition: all 0.3s ease;
-  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
-}
-
-.tool-switch.switch-on .switch-handle {
-  transform: translateX(32rpx);
-}
-
-.tool-switch.switch-disabled .switch-handle {
-  background-color: #f8fafc;
-  box-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.08);
+.tool-controls-inline.disabled {
+  opacity: 0.6;
 }
 
 /* 展开区域 */

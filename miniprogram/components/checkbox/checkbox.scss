@@ -1,0 +1,126 @@
+/* checkbox组件样式 */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-container.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 基础checkbox样式 */
+.checkbox {
+  border: 2rpx solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+  flex-shrink: 0;
+}
+
+/* 形状样式 */
+.checkbox.shape-square {
+  border-radius: 4rpx;
+}
+
+.checkbox.shape-circle {
+  border-radius: 50%;
+}
+
+/* 大小样式 */
+.checkbox.size-small {
+  width: 28rpx;
+  height: 28rpx;
+}
+
+.checkbox.size-medium {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.checkbox.size-large {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+/* 容器gap根据大小调整 */
+.checkbox-container.size-small {
+  gap: 6rpx;
+}
+
+.checkbox-container.size-medium {
+  gap: 8rpx;
+}
+
+.checkbox-container.size-large {
+  gap: 10rpx;
+}
+
+.checkbox.checked {
+  background-color: #10b981;
+  border-color: #10b981;
+}
+
+.checkbox.disabled {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+}
+
+.checkbox.checked.disabled {
+  background-color: #d1fae5;
+  border-color: #a7f3d0;
+}
+
+.checkbox-mark {
+  color: white;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* 标记大小根据checkbox大小调整 */
+.checkbox.size-small .checkbox-mark {
+  font-size: 16rpx;
+}
+
+.checkbox.size-medium .checkbox-mark {
+  font-size: 20rpx;
+}
+
+.checkbox.size-large .checkbox-mark {
+  font-size: 24rpx;
+}
+
+.checkbox.disabled .checkbox-mark {
+  color: #9ca3af;
+}
+
+.checkbox-label {
+  color: #374151;
+  line-height: 1.2;
+}
+
+/* 标签字体大小根据size调整 */
+.checkbox-container.size-small .checkbox-label {
+  font-size: 22rpx;
+}
+
+.checkbox-container.size-medium .checkbox-label {
+  font-size: 24rpx;
+}
+
+.checkbox-container.size-large .checkbox-label {
+  font-size: 28rpx;
+}
+
+.checkbox-container.disabled .checkbox-label {
+  color: #9ca3af;
+}
+
+/* 点击反馈 */
+.checkbox-container:active:not(.disabled) .checkbox {
+  transform: scale(0.95);
+}

@@ -200,7 +200,9 @@ Page({
       const mergedTool = {
         ...newTool,
         // 如果现有工具存在，保持其启用状态；否则默认为启用
-        isEnabled: existingTool ? existingTool.isEnabled : true
+        isEnabled: existingTool ? existingTool.isEnabled : true,
+        // 如果现有工具存在，保持其确认状态；否则默认需要确认
+        needConfirm: existingTool ? (existingTool as any).needConfirm : true
       }
       
       console.log(`工具 ${newTool.name} 状态合并:`, {
@@ -436,6 +438,86 @@ Page({
         icon: 'error'
       })
     }
+  },
+
+  /**
+   * 切换工具确认状态
+   */
+  onToggleToolConfirm(e: WxEvent) {
+    const { configId, toolName } = e.currentTarget.dataset
+    const { configs } = this.data
+    
+    if (!configId || !toolName) {
+      wx.showToast({
+        title: '参数不完整',
+        icon: 'error'
+      })
+      return
+    }
+    
+    // 检查 MCP 服务器和工具是否启用
+    const targetConfig = configs.find(config => config.id === configId)
+    if (!targetConfig?.isEnabled) {
+      wx.showToast({
+        title: 'MCP 服务器未启用',
+        icon: 'none',
+        duration: 2000
+      })
+      return
+    }
+    
+    const targetTool = targetConfig.tools?.find(tool => tool.name === toolName)
+    if (!targetTool || targetTool.isEnabled === false) {
+      wx.showToast({
+        title: '工具未启用',
+        icon: 'none',
+        duration: 2000
+      })
+      return
+    }
+    
+    try {
+      this.toggleToolConfirmById(configId, toolName)
+    } catch (error) {
+      console.error('切换工具确认状态失败:', error)
+      wx.showToast({
+        title: '更新失败',
+        icon: 'error'
+      })
+    }
+  },
+
+  /**
+   * 按配置与工具名切换工具确认状态
+   */
+  toggleToolConfirmById(configId: string, toolName: string) {
+    const { configs } = this.data
+    const updatedConfigs = configs.map(config => {
+      if (config.id === configId) {
+        const updatedTools = config.tools?.map(tool => {
+          if (tool.name === toolName) {
+            const currentNeedConfirm = tool.needConfirm !== false
+            const newNeedConfirm = !currentNeedConfirm
+            console.log(`切换工具 ${toolName} 确认状态: ${currentNeedConfirm} -> ${newNeedConfirm}`)
+            return { ...tool, needConfirm: newNeedConfirm }
+          }
+          return tool
+        })
+        return { ...config, tools: updatedTools }
+      }
+      return config
+    })
+    
+    this.setData({ configs: updatedConfigs })
+    const targetConfig = updatedConfigs.find(c => c.id === configId)
+    if (targetConfig) {
+      MCPConfigStorage.updateConfigTools(configId, targetConfig.tools || [])
+    }
+    wx.showToast({
+      title: '自动允许状态已更新',
+      icon: 'success',
+      duration: 1500
+    })
   },
 
   /**

@@ -89,16 +89,31 @@
                 <text class="tool-name">{{ tool.name }}</text>
               </view>
               
-              <!-- 工具开关 -->
-              <view 
-                class="tool-switch-container {{ !item.isEnabled ? 'disabled' : '' }}" 
-                catchtap="{{ item.isEnabled ? 'onToggleTool' : '' }}" 
-                data-config-id="{{ item.id }}"
-                data-tool-name="{{ tool.name }}"
-              >
-                <view class="tool-switch {{ !item.isEnabled ? 'switch-disabled' : (tool.isEnabled !== false ? 'switch-on' : 'switch-off') }}">
-                  <view class="switch-handle"></view>
-                </view>
+              <!-- 工具控制面板 -->
+              <view class="tool-controls-inline {{ !item.isEnabled ? 'disabled' : '' }}">
+                <!-- 启用checkbox -->
+                <checkbox
+                  checked="{{ tool.isEnabled !== false }}"
+                  disabled="{{ !item.isEnabled }}"
+                  label="启用"
+                  shape="circle"
+                  size="medium"
+                  bind:change="onToggleTool"
+                  data-config-id="{{ item.id }}"
+                  data-tool-name="{{ tool.name }}"
+                />
+                
+                <!-- 自动允许checkbox -->
+                <checkbox
+                  checked="{{ tool.needConfirm === false }}"
+                  disabled="{{ !item.isEnabled || tool.isEnabled === false }}"
+                  label="自动允许"
+                  shape="circle"
+                  size="medium"
+                  bind:change="onToggleToolConfirm"
+                  data-config-id="{{ item.id }}"
+                  data-tool-name="{{ tool.name }}"
+                />
               </view>
             </view>
           </view>

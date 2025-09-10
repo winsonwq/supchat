@@ -3,6 +3,7 @@
     "navigation-bar": "../../components/navigation-bar/navigation-bar",
     "svg-icon": "../../components/svg-icon/svg-icon",
     "tool-detail-dialog": "../../components/tool-detail-dialog/tool-detail-dialog",
-    "spin": "../../components/spin/spin"
+    "spin": "../../components/spin/spin",
+    "checkbox": "../../components/checkbox/checkbox"
   }
 }

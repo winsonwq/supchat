@@ -20,6 +20,7 @@ export interface MCPTool {
   description: string
   inputSchema?: Record<string, unknown>
   isEnabled?: boolean // 工具是否启用，默认为 true
+  needConfirm?: boolean // 是否需要确认执行，默认为 true
 }
 
 // MCP Server 配置

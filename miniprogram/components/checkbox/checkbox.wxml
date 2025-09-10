@@ -1,0 +1,10 @@
+<!-- checkbox.wxml -->
+<view 
+  class="checkbox-container {{ disabled ? 'disabled' : '' }} size-{{ size }}" 
+  bindtap="onToggle"
+>
+  <view class="checkbox {{ checked ? 'checked' : '' }} {{ disabled ? 'disabled' : '' }} shape-{{ shape }} size-{{ size }}">
+    <view class="checkbox-mark" wx:if="{{ checked }}">✓</view>
+  </view>
+  <text class="checkbox-label" wx:if="{{ label }}">{{ label }}</text>
+</view>
