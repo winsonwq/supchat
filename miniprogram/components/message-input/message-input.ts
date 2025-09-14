@@ -1,5 +1,5 @@
 // message-input.ts
-import { WxEvent } from '../../lib/mcp/types.js'
+import { WxEvent } from '../../lib/mcp/types'
 import { MCPConfigStorage } from '../../lib/storage/mcp-config-storage'
 import { AIConfigStorage } from '../../lib/storage/ai-config-storage'
 import getSafeArea from '../../lib/utils/safe-area'
@@ -157,18 +157,62 @@ Component({
 
     // 打开/关闭 MCP 抽屉
     onOpenMcpSheet() {
+      // 每次打开时重新加载配置，确保显示最新的启用状态
+      this.loadMcpConfigs()
       this.setData({ mcpSheetVisible: true })
     },
     onCloseMcpSheet() {
       this.setData({ mcpSheetVisible: false })
     },
     loadMcpConfigs() {
-      const configs = MCPConfigStorage.getAllConfigs()
+      // 只获取全局已启用的 MCP 配置，并添加消息发送状态
+      const enabledConfigs = MCPConfigStorage.getEnabledConfigs()
+      const configs = enabledConfigs.map(config => ({
+        ...config,
+        isMessageEnabled: MCPConfigStorage.isMessageEnabled(config.id)
+      }))
+      
+      console.log('🔧 MCP 配置加载:', {
+        totalConfigs: MCPConfigStorage.getAllConfigs().length,
+        globalEnabledConfigs: enabledConfigs.length,
+        configs: configs.map(c => ({ 
+          id: c.id, 
+          name: c.name, 
+          isEnabled: c.isEnabled,
+          isMessageEnabled: c.isMessageEnabled 
+        }))
+      })
       this.setData({ mcpConfigs: configs })
     },
     onToggleMcp(e: WxEvent) {
       const id = (e.currentTarget as any).dataset.id as string
-      MCPConfigStorage.toggleConfigEnabled(id)
+      
+      // 处理内置配置的消息发送状态
+      if (id === 'builtin-mcp-tools') {
+        const currentMessageEnabled = MCPConfigStorage.isMessageEnabled(id)
+        const newMessageEnabled = !currentMessageEnabled
+        const success = MCPConfigStorage.setMessageEnabled(id, newMessageEnabled)
+        
+        if (success) {
+          this.loadMcpConfigs()
+          this.triggerEvent('mcpchange', { id })
+          
+          wx.showToast({
+            title: newMessageEnabled ? '小程序生态工具包已启用消息发送' : '小程序生态工具包已关闭消息发送',
+            icon: 'success',
+            duration: 2000
+          })
+        } else {
+          wx.showToast({
+            title: '操作失败',
+            icon: 'error'
+          })
+        }
+        return
+      }
+      
+      // 切换消息发送状态
+      MCPConfigStorage.toggleMessageEnabled(id)
       this.loadMcpConfigs()
       this.triggerEvent('mcpchange', { id })
     },

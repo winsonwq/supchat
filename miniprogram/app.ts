@@ -1,8 +1,8 @@
 import getSafeArea from './lib/utils/safe-area'
 // 确保组件注册模块被加载
-import './lib/mcp/components/component-registry.js'
+import './lib/mcp/components/component-registry'
 // 确保 ComponentManager 在应用启动时初始化
-import { ComponentManager } from './lib/mcp/components/component-manager.js'
+import { ComponentManager } from './lib/mcp/components/component-manager'
 
 const safeAreaData = getSafeArea()
 

@@ -21,6 +21,8 @@ export interface MCPTool {
   inputSchema?: Record<string, unknown>
   isEnabled?: boolean // 工具是否启用，默认为 true
   needConfirm?: boolean // 是否需要确认执行，默认为 true
+  chineseName?: string // 中文名称
+  annotations?: Record<string, unknown> // 额外注解信息
 }
 
 // MCP Server 配置
@@ -41,6 +43,7 @@ export interface MCPConfig {
   toolCount?: number // 工具数量
   createdAt: number // 创建时间戳
   updatedAt: number // 更新时间戳
+  isBuiltin?: boolean // 是否为内置配置
 }
 
 // 认证方式选项列表

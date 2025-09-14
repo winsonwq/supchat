@@ -3,6 +3,7 @@ import { MCPConfig, AuthType } from '../../lib/types/mcp-config'
 import { MCPConfigStorage } from '../../lib/storage/mcp-config-storage'
 import { getNavigationHeight } from '../../lib/utils/navigation-height'
 import { MCPServerService, MCPTool } from '../../lib/services/mcp-server'
+import { isBuiltinMCP, updateBuiltinToolState } from '../../lib/mcp/builtin-tools'
 
 interface ConfigWithShowTools extends MCPConfig {
   showTools?: boolean
@@ -48,9 +49,10 @@ Page({
   loadConfigs() {
     let configs = MCPConfigStorage.getAllConfigs()
     
-    // 如果没有配置，添加一些示例数据用于测试
-    if (configs.length === 0) {
-      console.log('没有找到MCP配置，添加示例数据')
+    // 如果没有用户配置（只有内置配置），添加一些示例数据用于测试
+    const userConfigs = configs.filter(config => !isBuiltinMCP(config.id))
+    if (userConfigs.length === 0) {
+      console.log('没有找到用户MCP配置，添加示例数据')
       this.addSampleData()
       configs = MCPConfigStorage.getAllConfigs()
     }
@@ -109,6 +111,12 @@ Page({
     // 检查每个配置的状态
     for (let i = 0; i < configs.length; i++) {
       const config = configs[i]
+      
+      // 跳过内置配置，内置配置始终在线且工具固定
+      if (isBuiltinMCP(config.id)) {
+        console.log(`跳过内置配置 ${config.name}`)
+        continue
+      }
       
       try {
         console.log(`检查配置 ${config.name} (${config.url})`)
@@ -221,6 +229,16 @@ Page({
     const { id } = e.currentTarget.dataset
     if (!id) return
 
+    // 不允许刷新内置配置
+    if (isBuiltinMCP(id)) {
+      wx.showToast({
+        title: '内置工具集不支持刷新',
+        icon: 'none',
+        duration: 2000
+      })
+      return
+    }
+
     // 设置刷新状态
     this.setData({
       [`refreshing.${id}`]: true
@@ -312,6 +330,30 @@ Page({
         title: '配置ID不存在',
         icon: 'error'
       })
+      return
+    }
+    
+    // 处理内置配置的启用状态
+    if (isBuiltinMCP(id)) {
+      const currentEnabled = MCPConfigStorage.getBuiltinGlobalEnabled()
+      const newEnabled = !currentEnabled
+      const success = MCPConfigStorage.setBuiltinGlobalEnabled(newEnabled)
+      
+      if (success) {
+        // 重新加载数据
+        this.loadConfigs()
+        
+        wx.showToast({
+          title: newEnabled ? '小程序生态工具包已启用' : '小程序生态工具包已关闭',
+          icon: 'success',
+          duration: 2000
+        })
+      } else {
+        wx.showToast({
+          title: '操作失败',
+          icon: 'error'
+        })
+      }
       return
     }
     
@@ -430,7 +472,12 @@ Page({
     }
     
     try {
-      this.toggleToolById(configId, toolName)
+      // 如果是内置工具，使用特殊处理
+      if (isBuiltinMCP(configId)) {
+        this.toggleBuiltinToolById(toolName)
+      } else {
+        this.toggleToolById(configId, toolName)
+      }
     } catch (error) {
       console.error('切换工具状态失败:', error)
       wx.showToast({
@@ -477,7 +524,12 @@ Page({
     }
     
     try {
-      this.toggleToolConfirmById(configId, toolName)
+      // 如果是内置工具，使用特殊处理
+      if (isBuiltinMCP(configId)) {
+        this.toggleBuiltinToolConfirmById(toolName)
+      } else {
+        this.toggleToolConfirmById(configId, toolName)
+      }
     } catch (error) {
       console.error('切换工具确认状态失败:', error)
       wx.showToast({
@@ -548,6 +600,86 @@ Page({
     }
     wx.showToast({
       title: '工具状态已更新',
+      icon: 'success',
+      duration: 1500
+    })
+  },
+
+  /**
+   * 切换内置工具启用状态
+   */
+  toggleBuiltinToolById(toolName: string) {
+    const { configs } = this.data
+    const builtinConfig = configs.find(config => isBuiltinMCP(config.id))
+    if (!builtinConfig) return
+
+    const targetTool = builtinConfig.tools?.find(tool => tool.name === toolName)
+    if (!targetTool) return
+
+    const currentEnabled = targetTool.isEnabled !== false
+    const newIsEnabled = !currentEnabled
+    const currentNeedConfirm = targetTool.needConfirm !== false
+
+    // 更新存储
+    updateBuiltinToolState(toolName, newIsEnabled, currentNeedConfirm)
+
+    // 更新页面状态
+    const updatedConfigs = configs.map(config => {
+      if (isBuiltinMCP(config.id)) {
+        const updatedTools = config.tools?.map(tool => {
+          if (tool.name === toolName) {
+            return { ...tool, isEnabled: newIsEnabled }
+          }
+          return tool
+        })
+        return { ...config, tools: updatedTools }
+      }
+      return config
+    })
+
+    this.setData({ configs: updatedConfigs })
+    wx.showToast({
+      title: '工具状态已更新',
+      icon: 'success',
+      duration: 1500
+    })
+  },
+
+  /**
+   * 切换内置工具确认状态
+   */
+  toggleBuiltinToolConfirmById(toolName: string) {
+    const { configs } = this.data
+    const builtinConfig = configs.find(config => isBuiltinMCP(config.id))
+    if (!builtinConfig) return
+
+    const targetTool = builtinConfig.tools?.find(tool => tool.name === toolName)
+    if (!targetTool) return
+
+    const currentEnabled = targetTool.isEnabled !== false
+    const currentNeedConfirm = targetTool.needConfirm !== false
+    const newNeedConfirm = !currentNeedConfirm
+
+    // 更新存储
+    updateBuiltinToolState(toolName, currentEnabled, newNeedConfirm)
+
+    // 更新页面状态
+    const updatedConfigs = configs.map(config => {
+      if (isBuiltinMCP(config.id)) {
+        const updatedTools = config.tools?.map(tool => {
+          if (tool.name === toolName) {
+            return { ...tool, needConfirm: newNeedConfirm }
+          }
+          return tool
+        })
+        return { ...config, tools: updatedTools }
+      }
+      return config
+    })
+
+    this.setData({ configs: updatedConfigs })
+    wx.showToast({
+      title: '自动允许状态已更新',
       icon: 'success',
       duration: 1500
     })

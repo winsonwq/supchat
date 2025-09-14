@@ -137,12 +137,13 @@
                 <text class="status-text">{{ item.isOnline ? '在线' : '离线' }}</text>
               </view>
             </view>
-            <switch class="mcp-switch" checked="{{ item.isEnabled }}" bindchange="onToggleMcp" data-id="{{ item.id }}"></switch>
+            <switch class="mcp-switch" checked="{{ item.isMessageEnabled }}" bindchange="onToggleMcp" data-id="{{ item.id }}"></switch>
           </view>
         </block>
       </block>
-      <view class="mcp-empty" wx:else>
-        <text>暂无 MCP 配置，可前往设置添加</text>
+      <view class="mcp-empty flex flex-col justify-center min-h-32" wx:else>
+        <text class="block">暂无全局启用的 MCP 服务</text>
+        <text class="block text-xs text-gray-400 mt-2">可前往设置页面启用 MCP 服务</text>
       </view>
     </view>
   </bottom-sheet>

@@ -28,13 +28,13 @@
         <!-- 配置基本信息 -->
         <view class="config-content">
           <view 
-            class="config-main clickable"
-            bindtap="onEditConfig"
+            class="config-main {{ item.isBuiltin ? '' : 'clickable' }}"
+            bindtap="{{ item.isBuiltin ? '' : 'onEditConfig' }}"
             data-id="{{ item.id }}"
           >
             <view class="config-header">
               <view class="status-indicator {{ item.isOnline ? 'status-online' : 'status-offline' }}"></view>
-              <text class="config-name">{{ item.name }}</text>
+              <text class="config-name">{{ item.name }}<text wx:if="{{ item.isBuiltin }}" class="builtin-tag"> 内置</text></text>
             </view>
             <text class="config-url">{{ item.url }}</text>
             <view class="config-badges">

@@ -67,6 +67,12 @@
   overflow: hidden;
 }
 
+/* 内置配置特殊样式 */
+.config-item:has(.badge-builtin) {
+  border: 2rpx solid #e6f3ff;
+  background: linear-gradient(135deg, #f8fbff 0%, #ffffff 100%);
+}
+
 /* 配置内容区域 */
 .config-content {
   padding: 32rpx;
@@ -166,6 +172,18 @@
   flex: 1;
   min-width: 0;
   word-break: break-all;
+  display: flex;
+  align-items: center;
+}
+
+.builtin-tag {
+  background-color: #333333;
+  color: white;
+  font-size: 20rpx;
+  font-weight: 500;
+  padding: 4rpx 8rpx;
+  border-radius: 8rpx;
+  margin-left: 8rpx;
 }
 
 .config-badges {
@@ -242,6 +260,8 @@
   cursor: pointer;
   transition: all 0.3s ease;
 }
+
+/* 内置配置开关样式 - 与普通开关保持一致 */
 
 .switch {
   width: 88rpx;

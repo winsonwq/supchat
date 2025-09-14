@@ -5,6 +5,8 @@ import { OpenRouterTool } from '../mcp/types.js'
 import { ToolCallResult } from '../mcp/types.js'
 import { executeToolCall } from '../mcp/utils.js'
 import { ToolConfirmManager } from './tool-confirm-manager.js'
+import { getBuiltinMCPConfig, isBuiltinMCP } from '../mcp/builtin-tools.js'
+import { MCPConfigStorage } from '../storage/mcp-config-storage.js'
 
 /**
  * 工具管理器
@@ -21,15 +23,27 @@ export class ToolManager {
   }
 
   /**
-   * 获取所有可用的工具（本地工具 + MCP 工具）
+   * 获取所有可用的工具（内置工具 + MCP 工具）
    */
   getAllTools(): OpenRouterTool[] {
-    const localTools = allTools.map(transformToOpenRouterTool)
+    // 获取内置工具（从内置 MCP 配置中获取启用的工具）
+    const builtinConfig = getBuiltinMCPConfig()
+    const enabledBuiltinTools = builtinConfig.tools?.filter(tool => tool.isEnabled !== false) || []
+    const builtinOpenRouterTools = enabledBuiltinTools.map(tool => ({
+      type: 'function' as const,
+      function: {
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.inputSchema || {}
+      }
+    }))
+    
+    // 获取 MCP 工具
     const mcpTools = MCPToolsService.getAllOpenRouterMCPTools()
     
-    console.log(`工具管理器: 本地工具 ${localTools.length} 个, MCP 工具 ${mcpTools.length} 个`)
+    console.log(`工具管理器: 内置工具 ${builtinOpenRouterTools.length} 个, MCP 工具 ${mcpTools.length} 个`)
     
-    return [...localTools, ...mcpTools]
+    return [...builtinOpenRouterTools, ...mcpTools]
   }
 
   /**
@@ -41,6 +55,33 @@ export class ToolManager {
     onStreamCallback?: (content: any) => void
   ): Promise<ToolCallResult> {
     console.log(`工具管理器: 执行工具 ${toolName}`)
+    
+    // 检查是否为内置工具
+    const builtinConfig = getBuiltinMCPConfig()
+    const builtinTool = builtinConfig.tools?.find(tool => tool.name === toolName)
+    
+    if (builtinTool) {
+      console.log(`工具管理器: 执行内置工具 ${toolName}`)
+      
+      // 检查内置工具是否需要用户确认
+      if (builtinTool.needConfirm !== false) {
+        console.log(`内置工具 ${toolName} 需要用户确认`)
+        const confirmManager = ToolConfirmManager.getInstance()
+        const confirmed = await confirmManager.createConfirmRequest(
+          toolName,
+          { function: { name: toolName, arguments: JSON.stringify(arguments_) } },
+          arguments_,
+          onStreamCallback
+        )
+        if (!confirmed) {
+          console.log(`用户取消了内置工具 ${toolName} 的执行`)
+          throw new Error('用户取消了操作')
+        }
+      }
+      
+      // 执行内置工具
+      return await executeToolCall(toolName, arguments_, allTools)
+    }
     
     // 检查是否为 MCP 工具
     if (MCPToolsService.isMCPTool(toolName)) {
@@ -64,10 +105,10 @@ export class ToolManager {
       }
       
       return await MCPToolsService.executeMCPTool(toolName, arguments_)
-    } else {
-      console.log(`工具管理器: 执行本地工具 ${toolName}`)
-      return await executeToolCall(toolName, arguments_, allTools)
     }
+    
+    // 如果都不是，抛出错误
+    throw new Error(`工具 ${toolName} 不存在`)
   }
 
 
@@ -75,9 +116,10 @@ export class ToolManager {
    * 检查工具是否存在
    */
   hasTool(toolName: string): boolean {
-    // 检查本地工具
-    const localToolExists = allTools.some(tool => tool.name === toolName)
-    if (localToolExists) {
+    // 检查内置工具
+    const builtinConfig = getBuiltinMCPConfig()
+    const builtinToolExists = builtinConfig.tools?.some(tool => tool.name === toolName && tool.isEnabled !== false)
+    if (builtinToolExists) {
       return true
     }
     
@@ -88,13 +130,14 @@ export class ToolManager {
   /**
    * 获取工具信息
    */
-  getToolInfo(toolName: string): { type: 'local' | 'mcp'; name: string } | null {
-    // 检查本地工具
-    const localTool = allTools.find(tool => tool.name === toolName)
-    if (localTool) {
+  getToolInfo(toolName: string): { type: 'builtin' | 'mcp'; name: string } | null {
+    // 检查内置工具
+    const builtinConfig = getBuiltinMCPConfig()
+    const builtinTool = builtinConfig.tools?.find(tool => tool.name === toolName && tool.isEnabled !== false)
+    if (builtinTool) {
       return {
-        type: 'local',
-        name: localTool.name
+        type: 'builtin',
+        name: builtinTool.name
       }
     }
     
