@@ -14,7 +14,7 @@
     <!-- 工具调用信息 - 循环渲染当前调用的工具 -->
     <view wx:if="{{ message.tool_calls && message.tool_calls.length > 0 }}">
       <view class="mb-3 flex items-center space-x-2">
-        <text class="text-sm font-medium text-blue-600">正在调用工具</text>
+        <text class="text-sm font-medium text-blue-600 {{ isStreaming && isLast ? 'tool-calling-animated' : '' }}">正在调用工具</text>
       </view>
       <view wx:for="{{ message.tool_calls }}" wx:key="id" wx:for-item="toolCall" class="tool-call-item my-2">
         <view class="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all duration-300">
@@ -68,7 +68,7 @@
   <!-- 工具确认UI - 当消息携带工具确认数据时显示 -->
   <view wx:if="{{ message.toolConfirmData }}" >
     <view class="mb-3 flex items-center space-x-2">
-      <text class="text-sm font-medium text-blue-600">正在调用工具</text>
+      <text class="text-sm font-medium text-blue-600 {{ isStreaming && isLast ? 'tool-calling-animated' : '' }}">正在调用工具</text>
     </view>
     <view class="tool-confirm-container">
       <!-- 工具信息 -->
@@ -111,7 +111,7 @@
   <!-- 工具调用信息 - 只在没有工具确认时显示，避免界面混乱 -->
   <view wx:elif="{{ message.tool_calls && message.tool_calls.length > 0 }}">
     <view class="mb-3 flex items-center space-x-2">
-      <text class="text-sm font-medium text-blue-600">调用工具</text>
+      <text class="text-sm font-medium {{ isStreaming && isLast ? 'tool-calling-animated' : '' }}">{{ isStreaming && isLast ? '正在调用工具' : '调用工具' }}</text>
     </view>
     <view wx:for="{{ message.tool_calls }}" wx:key="id" wx:for-item="toolCall" class="tool-call-item my-2">
       <view class="cursor-pointer flex items-center justify-between bg-gray-100 rounded-lg p-4" bindtap="showToolParamsModal" data-tool-index="{{ index }}">
