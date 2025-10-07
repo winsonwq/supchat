@@ -54,15 +54,12 @@ export class WeatherCard extends BaseComponent {
 
   // 实现具体的操作方法（基类会自动调用）
   refresh() {
-    console.log('刷新天气数据')
   }
 
   share() {
-    console.log('分享天气数据')
   }
 
   detail() {
-    console.log('查看天气详情')
   }
 }
 

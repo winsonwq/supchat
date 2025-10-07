@@ -6,7 +6,7 @@ const AGENT_MODE_STORAGE_KEY = 'agent_mode_state'
 
 interface AgentModeState {
   isAgentMode: boolean
-  currentAgentId: string | null  // 只存储ID，不存储整个对象
+  currentAgentId: string | null
   lastUpdated: number
 }
 
@@ -53,7 +53,6 @@ export class AgentModeStorage {
       }
       
       wx.setStorageSync(AGENT_MODE_STORAGE_KEY, JSON.stringify(newState))
-      console.log('Agent模式状态已保存:', newState)
       return true
     } catch (error) {
       console.error('保存Agent模式状态失败:', error)
@@ -102,7 +101,6 @@ export class AgentModeStorage {
     const agent = AgentConfigStorage.getConfigById(agentId)
     
     if (!agent) {
-      console.warn('⚠️ Agent 已不存在，ID:', agentId)
       // Agent已被删除，清除存储的ID
       this.setCurrentAgentId(null)
       return null
@@ -129,7 +127,6 @@ export class AgentModeStorage {
   static clearAgentModeState(): boolean {
     try {
       wx.removeStorageSync(AGENT_MODE_STORAGE_KEY)
-      console.log('Agent模式状态已清除')
       return true
     } catch (error) {
       console.error('清除Agent模式状态失败:', error)

@@ -22,7 +22,6 @@ export class ComponentManager {
   registerComponent(component: BaseComponent): void {
     const componentId = component.getComponentId()
     this.components.set(componentId, component)
-    console.log(`注册组件实例: ${component.getComponentType()} (${componentId})`)
   }
 
   /**
@@ -39,7 +38,6 @@ export class ComponentManager {
     const component = this.components.get(componentId)
     if (component) {
       this.components.delete(componentId)
-      console.log(`移除组件实例: ${component.getComponentType()} (${componentId})`)
     }
   }
 
@@ -70,7 +68,6 @@ export class ComponentManager {
    * 清空所有组件
    */
   clear(): void {
-    console.log(`清空所有组件实例，共 ${this.components.size} 个`)
     this.components.clear()
   }
 
@@ -88,12 +85,10 @@ export class ComponentManager {
   handleComponentEvent(componentId: string, eventName: string, event?: any): boolean {
     const component = this.getComponent(componentId)
     if (!component) {
-      console.warn(`未找到组件实例: ${componentId}`)
       return false
     }
 
     try {
-      console.log(`处理组件事件: ${component.getComponentType()} (${componentId}).${eventName}`)
       component.executeAction(eventName, event)
       return true
     } catch (error) {
@@ -114,7 +109,6 @@ export class ComponentManager {
       // 手动注册到当前管理器
       this.registerComponent(component)
       
-      console.log(`🔄 组件 ${component.getComponentType()} (${component.getComponentId()}) 已从存储恢复并注册`)
       return component
     } catch (error) {
       console.error('反序列化并注册组件失败:', error)
@@ -139,7 +133,6 @@ export class ComponentManager {
       }
     }
     
-    console.log(`📦 批量恢复了 ${components.length}/${serializedDataArray.length} 个组件`)
     return components
   }
 

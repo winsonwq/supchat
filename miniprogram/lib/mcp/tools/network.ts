@@ -23,8 +23,6 @@ async function getNetworkStatusHandler(
     // 获取网络类型
     wx.getNetworkType({
       success: (res) => {
-        console.log('获取网络状态成功:', res)
-        
         let networkReport = `# 🌐 网络状态信息
 
 ## 🕐 获取时间

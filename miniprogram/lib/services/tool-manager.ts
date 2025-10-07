@@ -1,12 +1,11 @@
 // 工具管理器
-import { allTools, transformToOpenRouterTool } from '../mcp/index.js'
+import { allTools } from '../mcp/index.js'
 import { MCPToolsService } from './mcp-tools.js'
 import { OpenRouterTool } from '../mcp/types.js'
 import { ToolCallResult } from '../mcp/types.js'
 import { executeToolCall } from '../mcp/utils.js'
 import { ToolConfirmManager } from './tool-confirm-manager.js'
-import { getBuiltinMCPConfig, isBuiltinMCP } from '../mcp/builtin-tools.js'
-import { MCPConfigStorage } from '../storage/mcp-config-storage.js'
+import { getBuiltinMCPConfig } from '../mcp/builtin-tools.js'
 
 /**
  * 工具管理器
@@ -40,8 +39,6 @@ export class ToolManager {
     
     // 获取 MCP 工具
     const mcpTools = MCPToolsService.getAllOpenRouterMCPTools()
-    
-    console.log(`工具管理器: 内置工具 ${builtinOpenRouterTools.length} 个, MCP 工具 ${mcpTools.length} 个`)
     
     return [...builtinOpenRouterTools, ...mcpTools]
   }
@@ -83,8 +80,6 @@ export class ToolManager {
       })
     }
     
-    console.log(`工具管理器 (Agent模式): 内置工具 ${builtinOpenRouterTools.length} 个, Agent MCP 工具 ${agentMcpTools.length} 个`)
-    
     return [...builtinOpenRouterTools, ...agentMcpTools]
   }
 
@@ -97,18 +92,13 @@ export class ToolManager {
     onStreamCallback?: (content: any) => void,
     agent?: any
   ): Promise<ToolCallResult> {
-    console.log(`工具管理器: 执行工具 ${toolName}`)
-    
     // 检查是否为内置工具
     const builtinConfig = getBuiltinMCPConfig()
     const builtinTool = builtinConfig.tools?.find(tool => tool.name === toolName)
     
     if (builtinTool) {
-      console.log(`工具管理器: 执行内置工具 ${toolName}`)
-      
       // 检查内置工具是否需要用户确认
       if (builtinTool.needConfirm !== false) {
-        console.log(`内置工具 ${toolName} 需要用户确认`)
         const confirmManager = ToolConfirmManager.getInstance()
         const confirmed = await confirmManager.createConfirmRequest(
           toolName,
@@ -117,7 +107,6 @@ export class ToolManager {
           onStreamCallback
         )
         if (!confirmed) {
-          console.log(`用户取消了内置工具 ${toolName} 的执行`)
           throw new Error('用户取消了操作')
         }
       }
@@ -132,11 +121,8 @@ export class ToolManager {
         if (mcpServer.tools && Array.isArray(mcpServer.tools)) {
           const agentTool = mcpServer.tools.find((tool: any) => tool.name === toolName && tool.isEnabled !== false)
           if (agentTool) {
-            console.log(`工具管理器: 执行 Agent MCP 工具 ${toolName}`)
-            
             // 检查工具是否需要用户确认
             if (agentTool.needConfirm !== false) {
-              console.log(`Agent MCP 工具 ${toolName} 需要用户确认`)
               const confirmManager = ToolConfirmManager.getInstance()
               const confirmed = await confirmManager.createConfirmRequest(
                 toolName,
@@ -145,7 +131,6 @@ export class ToolManager {
                 onStreamCallback
               )
               if (!confirmed) {
-                console.log(`用户取消了 Agent MCP 工具 ${toolName} 的执行`)
                 throw new Error('用户取消了操作')
               }
             }
@@ -153,9 +138,7 @@ export class ToolManager {
             // 执行 Agent MCP 工具 - 这里需要根据实际的 MCP 工具执行逻辑来实现
             // 目前先返回一个模拟结果，实际项目中需要调用对应的 MCP 服务
             return {
-              success: true,
-              content: `Agent MCP 工具 ${toolName} 执行成功`,
-              metadata: { source: 'agent_mcp', toolName, arguments: arguments_ }
+              data: `Agent MCP 工具 ${toolName} 执行成功`
             }
           }
         }
@@ -164,12 +147,9 @@ export class ToolManager {
     
     // 检查是否为全局 MCP 工具
     if (MCPToolsService.isMCPTool(toolName)) {
-      console.log(`工具管理器: 执行全局 MCP 工具 ${toolName}`)
-      
       // 检查 MCP 工具是否需要用户确认
       const mcpTool = MCPToolsService.findMCPToolByName(toolName)
       if (mcpTool && mcpTool.needConfirm !== false) {
-        console.log(`MCP 工具 ${toolName} 需要用户确认`)
         const confirmManager = ToolConfirmManager.getInstance()
         const confirmed = await confirmManager.createConfirmRequest(
           toolName,
@@ -178,7 +158,6 @@ export class ToolManager {
           onStreamCallback
         )
         if (!confirmed) {
-          console.log(`用户取消了 MCP 工具 ${toolName} 的执行`)
           throw new Error('用户取消了操作')
         }
       }

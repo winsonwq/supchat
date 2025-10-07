@@ -85,9 +85,7 @@ Page({
   // 测试 fetchChats
   async onTestFetchChats() {
     try {
-      console.log('开始测试 fetchChats...')
       const result = await rootStore.dispatch(fetchChats())
-      console.log('fetchChats 成功:', result)
       wx.showToast({
         title: `获取到 ${result.length} 个聊天`,
         icon: 'success'

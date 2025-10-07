@@ -34,8 +34,6 @@ async function getDeviceInfoHandler(
   return new Promise((resolve, reject) => {
     wx.getSystemInfo({
       success: (res) => {
-        console.log('获取设备信息成功:', res)
-        
         // 生成设备信息报告
         let deviceReport = `# 📱 设备信息报告
 

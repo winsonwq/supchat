@@ -68,13 +68,10 @@ export class WechatSIService {
 
       // 初始化语音识别管理器
       this.recordRecoManager = this.plugin.getRecordRecognitionManager()
-      console.log('🔧 recordRecoManager 创建成功')
-
       // 调试信息：显示插件可用的方法
       console.log('🔧 插件可用方法:', Object.keys(this.plugin))
 
       this.isInitialized = true
-      console.log('微信同声传译插件初始化成功')
       return true
 
     } catch (error) {
@@ -124,8 +121,6 @@ export class WechatSIService {
 
       // 由于微信同声传译插件不直接支持录音文件转文字，
       // 我们需要使用其他方式或者回退到模拟识别
-      console.log('⚠️ 微信同声传译插件不直接支持录音文件转文字，将使用模拟识别')
-      
       return {
         success: false,
         error: '微信同声传译插件不直接支持录音文件转文字，请使用实时语音识别'
@@ -161,12 +156,9 @@ export class WechatSIService {
 
         // 严格按照官方文档的方式设置事件监听器
         this.recordRecoManager.onStart = function(res: any) {
-          console.log('🎤 开始录音识别')
         }
 
         this.recordRecoManager.onStop = function(res: any) {
-          console.log('✅ 识别完成:', res.result ? '成功' : '失败')
-          
           if (!hasResolved) {
             hasResolved = true
             
@@ -259,7 +251,6 @@ export class WechatSIService {
           content: content,
           tts: tts,
           success: (res: any) => {
-            console.log('✅ 文本翻译成功:', res)
             if (res.retcode === 0) {
               resolve({
                 success: true,
@@ -274,8 +265,8 @@ export class WechatSIService {
               })
             }
           },
-          fail: (err: any) => {
-            console.error('❌ 文本翻译失败:', err)
+          fail:             (err: any) => {
+              console.error('文本翻译失败:', err)
             resolve({
               success: false,
               error: `翻译失败: ${err.msg} (错误码: ${err.retcode})`
@@ -315,7 +306,6 @@ export class WechatSIService {
           lang: lang,
           content: content,
           success: (res: any) => {
-            console.log('✅ 语音合成成功:', res)
             if (res.retcode === 0) {
               resolve({
                 success: true,
@@ -330,8 +320,8 @@ export class WechatSIService {
               })
             }
           },
-          fail: (err: any) => {
-            console.error('❌ 语音合成失败:', err)
+          fail:             (err: any) => {
+              console.error('语音合成失败:', err)
             resolve({
               success: false,
               error: `语音合成失败: ${err.msg} (错误码: ${err.retcode})`
@@ -355,7 +345,6 @@ export class WechatSIService {
     try {
       if (this.recordRecoManager) {
         this.recordRecoManager.stop()
-        console.log('🛑 语音识别已停止')
       }
     } catch (error) {
       console.error('停止语音识别失败:', error)

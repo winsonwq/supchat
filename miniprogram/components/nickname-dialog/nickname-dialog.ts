@@ -28,7 +28,6 @@ Component({
         this.setData({
           nickname: currentNickname || '',
         })
-        console.log('Dialog opened, nickname set to:', this.data.nickname)
       }
     }
   },
@@ -67,12 +66,9 @@ Component({
     onNicknameInput(e: any) {
       // form-input 组件传递的数据结构是 { value }
       const value = e.detail.value
-      console.log('Input event triggered:', e.detail, 'Value:', value)
-      
       this.setData({
         nickname: value,
       })
-      console.log('Nickname updated:', this.data.nickname)
     },
   },
 })

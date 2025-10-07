@@ -49,7 +49,6 @@ Component({
 
   lifetimes: {
     attached() {
-      console.log('🔧 sidebar组件: attached 生命周期')
       const safeAreaData = getSafeArea()
       this.setData({
         s: {
@@ -71,7 +70,6 @@ Component({
 
   observers: {
     'isOpen': function(isOpen: boolean) {
-      console.log('🔧 sidebar组件: isOpen 属性变化为:', isOpen)
     },
     'chatSessions': function(chatSessions: ChatSession[]) {
       // 按最新更新时间倒序排序
@@ -110,8 +108,6 @@ Component({
 
         // 更新头像到云端和本地
         const updated = await appDispatch(updateUserProfile({ avatar: avatarUrl }))
-        console.log('头像已更新:', updated)
-        
         const current = this.data.localUserInfo
         this.setData({
           localUserInfo: {
@@ -151,8 +147,6 @@ Component({
           nickname: nickname.trim(),
           avatar: (this.data.localUserInfo?.avatar || '').trim() || undefined
         }))
-        console.log('用户资料已更新:', updated)
-        
         const current = this.data.localUserInfo
         this.setData({
           localUserInfo: {
@@ -196,12 +190,10 @@ Component({
 
     // 切换编辑模式
     toggleEditMode() {
-      console.log('切换编辑模式，当前状态:', this.data.isEditMode)
       const newEditMode = !this.data.isEditMode
       this.setData({
         isEditMode: newEditMode
       })
-      console.log('编辑模式已切换到:', newEditMode)
     },
 
     // 选择聊天会话
@@ -220,14 +212,7 @@ Component({
 
     // 删除聊天会话
     deleteChatSession(e: any) {
-      console.log('删除聊天会话被调用', e)
-      console.log('事件类型:', e.type)
-      console.log('事件目标:', e.currentTarget)
-      console.log('事件详情:', e.detail)
-      
       const sessionId = e.currentTarget.dataset.sessionId
-      console.log('要删除的会话ID:', sessionId)
-      
       if (!sessionId) {
         console.error('会话ID为空，无法删除')
         wx.showToast({
@@ -239,8 +224,6 @@ Component({
       
       // 直接触发删除事件，让父组件处理确认和删除逻辑
       this.triggerEvent('deleteChatSession', { sessionId }, {})
-      console.log('删除事件已触发')
-      
       // 注意：不在这里退出编辑模式，让父组件在删除成功后通知
       // 这样可以保持编辑模式直到用户确认删除
     },

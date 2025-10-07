@@ -22,8 +22,6 @@ export class ComponentEventManager {
     Object.entries(handlers).forEach(([action, handler]) => {
       componentHandlers.set(action, handler)
     })
-
-    console.log(`注册组件事件: ${componentType} (${componentId})`, Object.keys(handlers))
   }
 
   /**

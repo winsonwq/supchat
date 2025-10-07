@@ -298,12 +298,7 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
     try {
       // 清理 ComponentManager 中的旧组件实例
       const componentManager = ComponentManager.getInstance()
-      const oldCount = componentManager.getComponentCount()
       componentManager.clear()
-      
-      if (oldCount > 0) {
-        console.log(`🧹 会话切换：清理了 ${oldCount} 个旧组件实例`)
-      }
       
       wx.setStorageSync(ACTIVE_SESSION_KEY, sessionId)
     } catch (error) {
@@ -406,16 +401,11 @@ export class LocalChatHistoryStorage implements ChatHistoryStorage {
 
       // 使用 ComponentManager 反序列化并注册组件
       try {
-        console.log('=== 开始反序列化组件 ===')
-        console.log('组件数据:', content)
-        console.log('组件类型:', componentType)
-
         const componentManager = ComponentManager.getInstance()
         const result = componentManager.deserializeAndRegister(content)
-        console.log('✅ 反序列化并注册成功:', result)
         return result
       } catch (error) {
-        console.error('❌ 反序列化失败:', error)
+        console.error('反序列化失败:', error)
 
         // 如果反序列化失败，返回HTML字符串作为降级方案
         return content.html || JSON.stringify(content)

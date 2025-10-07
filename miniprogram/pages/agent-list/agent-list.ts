@@ -20,8 +20,6 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad() {
-    console.log('Agent列表页面加载')
-    
     // 计算内容顶部间距
     const paddingTop = getNavigationHeight()
     
@@ -29,7 +27,6 @@ Page({
       contentPaddingTop: paddingTop
     })
     
-    console.log('设置contentPaddingTop:', paddingTop)
     this.loadAgents()
   },
 

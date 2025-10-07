@@ -42,7 +42,6 @@ async function openPhotoHandler(
       sourceType: [sourceType],
       sizeType: [sizeType],
       success: (res) => {
-        console.log('选择照片成功:', res)
         resolve({
           success: true,
           data: {

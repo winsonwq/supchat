@@ -26,13 +26,10 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad() {
-    console.log('MCP列表页面加载')
-    
     // 计算内容顶部间距
     const paddingTop = getNavigationHeight()
     this.setData({ contentPaddingTop: paddingTop })
     
-    console.log('设置contentPaddingTop:', paddingTop)
     this.loadConfigs()
   },
 
@@ -72,15 +69,12 @@ Page({
   async checkConfigsStatus() {
     const { configs } = this.data
     
-    console.log('开始检查 MCP 配置状态...')
-    
     // 检查每个配置的状态
     for (let i = 0; i < configs.length; i++) {
       const config = configs[i]
       
       // 跳过内置配置，内置配置始终在线且工具固定
       if (isBuiltinMCP(config.id)) {
-        console.log(`跳过内置配置 ${config.name}`)
         continue
       }
       
@@ -95,7 +89,6 @@ Page({
         if (isOnline) {
           tools = await MCPServerService.getServerTools(config)
         } else {
-          console.log(`MCP 服务器 ${config.name} 离线，跳过工具获取`)
         }
         
         // 保持现有的工具状态
@@ -115,8 +108,6 @@ Page({
         // 同时更新存储
         MCPConfigStorage.updateConfigOnlineStatus(config.id, isOnline)
         MCPConfigStorage.updateConfigTools(config.id, toolsWithState)
-        
-        console.log(`配置 ${config.name} 状态更新完成: 在线=${isOnline}, 工具数量=${toolsWithState.length}`)
         
       } catch (error) {
         console.error(`检查配置 ${config.name} 状态失败:`, error)
@@ -153,7 +144,6 @@ Page({
       }
     }
     
-    console.log('MCP 配置状态检查完成')
   },
 
   /**
@@ -178,11 +168,6 @@ Page({
         // 如果现有工具存在，保持其确认状态；否则默认需要确认
         needConfirm: existingTool ? (existingTool as any).needConfirm : true
       }
-      
-      console.log(`工具 ${newTool.name} 状态合并:`, {
-        existing: existingTool?.isEnabled,
-        new: mergedTool.isEnabled
-      })
       
       return mergedTool
     })
@@ -389,12 +374,6 @@ Page({
       _configId: configId
     }
     
-    console.log('显示工具详情:', {
-      toolName,
-      configName: targetConfig.name,
-      tool: toolWithState
-    })
-    
     this.setData({
       toolDialogVisible: true,
       selectedTool: toolWithState
@@ -516,7 +495,6 @@ Page({
           if (tool.name === toolName) {
             const currentNeedConfirm = tool.needConfirm !== false
             const newNeedConfirm = !currentNeedConfirm
-            console.log(`切换工具 ${toolName} 确认状态: ${currentNeedConfirm} -> ${newNeedConfirm}`)
             return { ...tool, needConfirm: newNeedConfirm }
           }
           return tool
@@ -549,7 +527,6 @@ Page({
           if (tool.name === toolName) {
             const currentEnabled = tool.isEnabled !== false
             const newIsEnabled = !currentEnabled
-            console.log(`切换工具 ${toolName} 状态: ${currentEnabled} -> ${newIsEnabled}`)
             return { ...tool, isEnabled: newIsEnabled }
           }
           return tool
@@ -656,8 +633,6 @@ Page({
    */
   async validateMCPConfig(url: string, authType: AuthType, authConfig: any): Promise<{ isValid: boolean; message: string }> {
     try {
-      console.log(`验证 MCP 服务器配置: ${url}`)
-      
       // 创建临时配置进行测试
       const tempConfig: MCPConfig = {
         id: 'temp',
@@ -721,25 +696,13 @@ Page({
    */
   checkDataConsistency() {
     const { configs } = this.data
-    console.log('=== 数据一致性检查 ===')
-    
     configs.forEach((config, index) => {
-      console.log(`配置 ${index + 1}: ${config.name}`)
-      console.log(`  - 在线状态: ${config.isOnline}`)
-      console.log(`  - 启用状态: ${config.isEnabled}`)
-      console.log(`  - 工具数量: ${config.toolCount}`)
-      console.log(`  - 实际工具: ${config.tools?.length || 0}`)
-      
       if (config.tools) {
         config.tools.forEach((tool, toolIndex) => {
-          console.log(`    工具 ${toolIndex + 1}: ${tool.name}`)
-          console.log(`      - 启用状态: ${tool.isEnabled}`)
-          console.log(`      - 描述: ${tool.description}`)
         })
       }
     })
     
-    console.log('=== 数据一致性检查完成 ===')
   }
 })
 

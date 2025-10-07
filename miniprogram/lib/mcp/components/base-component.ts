@@ -92,28 +92,21 @@ export abstract class BaseComponent implements RenderableComponent {
   static deserialize(serializedData: any): BaseComponent {
     const { componentType, data, componentId } = serializedData
     
-    console.log(`🔄 尝试反序列化组件类型: ${componentType}`)
-    console.log(`组件数据:`, data)
-    console.log(`组件ID:`, componentId)
-    
     // 尝试从全局注册表中获取组件类
     const ComponentClass = (globalThis as any).__componentRegistry__?.[componentType]
     
     if (ComponentClass && typeof ComponentClass === 'function') {
-      console.log(`✅ 找到组件类 ${componentType}`)
       try {
         const component = new ComponentClass(data)
         component.setComponentId(componentId)
-        console.log(`✅ 组件 ${componentType} 反序列化成功`)
         return component
       } catch (error) {
-        console.error(`❌ 创建组件实例失败:`, error)
+        console.error(`创建组件实例失败:`, error)
         throw new Error(`创建组件实例失败: ${error}`)
       }
     }
     
-    console.error(`❌ 未找到组件类型 ${componentType} 的注册`)
-    console.error(`可用组件类型:`, Object.keys((globalThis as any).__componentRegistry__ || {}))
+    console.error(`未找到组件类型 ${componentType} 的注册`)
     
     // 如果无法自动恢复，抛出错误提示子组件实现
     throw new Error(`无法自动恢复组件类型 '${componentType}'，请确保组件已注册或实现 deserialize 方法`)

@@ -117,7 +117,6 @@ Component({
       this.triggerEvent('home', {}, {})
     },
     toggleSidebar() {
-      console.log('🔧 navigation-bar: toggleSidebar 被点击')
       this.triggerEvent('toggleSidebar', {}, {})
     }
   },

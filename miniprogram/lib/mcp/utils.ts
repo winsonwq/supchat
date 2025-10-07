@@ -21,31 +21,22 @@ export async function executeToolCall(
   arguments_: Record<string, unknown>,
   tools: ToolBaseConfig[]
 ): Promise<ToolCallResult> {
-  console.log(`开始执行工具: ${toolName}`, arguments_)
-  
   const tool = tools.find(t => t.name === toolName)
   if (!tool) {
-    console.error(`工具 ${toolName} 未找到，可用工具:`, tools.map(t => t.name))
+    console.error(`工具 ${toolName} 未找到`)
     throw new Error(`工具 ${toolName} 未找到。可用工具: ${tools.map(t => t.name).join(', ')}`)
   }
 
-  console.log(`找到工具: ${tool.name} (${tool.chineseName})`)
-
   // 如果需要用户确认
   if (tool.needUserConfirm) {
-    console.log(`工具 ${toolName} 需要用户确认`)
     const confirmed = await showToolConfirmDialog(tool.chineseName || tool.name, arguments_)
     if (!confirmed) {
-      console.log(`用户取消了工具 ${toolName} 的执行`)
       throw new Error('用户取消了操作')
     }
   }
 
   // 执行工具处理函数
-  console.log(`执行工具 ${toolName} 的处理函数`)
   const result = await tool.handler(arguments_)
-  console.log(`工具 ${toolName} 执行成功:`, result)
-  
   return result
 }
 
@@ -72,8 +63,6 @@ export function processToolCalls(
 ): { hasToolCalls: boolean; toolCalls: ToolCall[] | null } {
   const toolCalls = response.choices?.[0]?.message?.tool_calls || []
   
-  console.log('检查工具调用:', toolCalls)
-  
   if (toolCalls.length === 0) {
     return { hasToolCalls: false, toolCalls: null }
   }
@@ -91,8 +80,6 @@ export function buildToolCallResponse(
   content: string
   originalData?: any // 添加原始数据字段，用于保存到聊天历史
 }> {
-  console.log('构建工具调用响应:', { toolCalls, results })
-  
   const toolResults = toolCalls.map((call, index) => {
     const result = results[index]
     let content: string
@@ -116,8 +103,6 @@ export function buildToolCallResponse(
     } else {
       content = '工具执行完成，无返回数据'
     }
-    
-    console.log(`工具调用 ${call.function.name} 响应:`, { content, originalData })
     
     return {
       tool_call_id: call.id,

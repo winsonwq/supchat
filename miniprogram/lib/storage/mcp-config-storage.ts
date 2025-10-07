@@ -283,7 +283,6 @@ export class MCPConfigStorage {
       const storageKey = 'builtin_global_enabled'
       const data = wx.getStorageSync(storageKey)
       const enabled = data ? JSON.parse(data) : true // 默认为启用
-      console.log('🔧 获取内置工具全局启用状态:', { storageKey, data, enabled })
       return enabled
     } catch (error) {
       console.error('获取内置工具全局启用状态失败:', error)

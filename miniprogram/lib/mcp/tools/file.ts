@@ -43,8 +43,6 @@ async function chooseFileHandler(
       type: type,
       extension: extension,
       success: (res) => {
-        console.log('选择文件成功:', res)
-        
         // 生成文件信息报告
         const fileReport = `# 📁 文件选择结果
 

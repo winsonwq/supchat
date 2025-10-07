@@ -88,11 +88,6 @@ Component({
       this.loadAgentModeState()
 
       // 调试信息
-      console.log('🔧 组件初始化完成:', {
-        isVoiceMode: this.data.isVoiceMode,
-        bottomSafeHeight: this.data.bottomSafeHeight,
-        textareaInitialHeight: this.data.textareaInitialHeight,
-      })
     },
     detached() {
       // 清理录音计时器
@@ -142,14 +137,8 @@ Component({
     onSend() {
       const message = this.properties.inputMessage.trim()
       if (!message || this.properties.isLoading) {
-        console.log('⚠️ 发送消息失败:', {
-          message,
-          isLoading: this.properties.isLoading,
-        })
         return
       }
-
-      console.log('📤 发送消息:', message)
 
       // 触发发送事件
       this.triggerEvent('send', {
@@ -185,16 +174,6 @@ Component({
         isMessageEnabled: MCPConfigStorage.isMessageEnabled(config.id)
       }))
       
-      console.log('🔧 MCP 配置加载:', {
-        totalConfigs: MCPConfigStorage.getAllConfigs().length,
-        globalEnabledConfigs: enabledConfigs.length,
-        configs: configs.map(c => ({ 
-          id: c.id, 
-          name: c.name, 
-          isEnabled: c.isEnabled,
-          isMessageEnabled: c.isMessageEnabled 
-        }))
-      })
       this.setData({ mcpConfigs: configs })
     },
     onToggleMcp(e: WxEvent) {
@@ -256,8 +235,6 @@ Component({
     loadAgentModeState() {
       // 从localStorage加载Agent模式状态
       const agentModeState = AgentModeStorage.getAgentModeState()
-      console.log('🔧 从localStorage加载Agent模式状态:', agentModeState)
-      
       // getCurrentAgent() 会自动从 AgentConfigStorage 获取最新配置
       // 如果 agent 已被删除或配置已更新，会自动获取最新状态
       const currentAgent = agentModeState.currentAgent
@@ -324,7 +301,6 @@ Component({
       wx.showToast({ title: `已选择 ${agent.name}`, icon: 'success', duration: 1200 })
     },
     onSelectAiConfig(e: WxEvent) {
-      console.log('🎯 onSelectAiConfig 被调用', e)
       console.log('事件详情:', {
         type: e.type,
         currentTarget: e.currentTarget,
@@ -333,8 +309,6 @@ Component({
       })
       
       const id = (e.currentTarget as any).dataset.id as string
-      console.log('选择AI配置ID:', id)
-      
       if (!id) {
         console.error('❌ 未获取到配置ID')
         wx.showToast({
@@ -359,7 +333,6 @@ Component({
         // 触发配置变化事件
         this.triggerEvent('aiconfigchange', { id })
         
-        console.log('✅ AI配置切换成功:', id)
         setTimeout(() => {
           wx.showToast({
             title: 'AI配置已切换',
@@ -383,12 +356,10 @@ Component({
      */
     async initWechatSI() {
       try {
-        console.log('🔧 正在初始化微信同声传译插件...')
         const success = await wechatSI.getService().initialize()
         
         if (success) {
           this.setData({ wechatSIReady: true })
-          console.log('✅ 微信同声传译插件初始化成功')
         } else {
           console.warn('⚠️ 微信同声传译插件初始化失败，将使用模拟语音识别')
         }
@@ -405,14 +376,12 @@ Component({
 
       // 录音开始事件
       recorderManager.onStart(() => {
-        console.log('🎙️ 录音开始')
         this.setData({ isRecording: true })
         this.startRecordingTimer()
       })
 
       // 录音结束事件
       recorderManager.onStop((res) => {
-        console.log('🛑 录音结束', res)
         this.setData({ isRecording: false })
         this.stopRecordingTimer()
         this.handleVoiceResult(res)
@@ -498,8 +467,6 @@ Component({
      */
     async startWechatSIRecognition() {
       try {
-        console.log('🎤 开始微信同声传译实时语音识别...')
-        
         this.setData({ 
           isRecording: true,
           isRealtimeRecognition: true 
@@ -512,20 +479,13 @@ Component({
           duration: 30000,
         }
 
-        console.log('🎤 调用语音识别，参数:', options)
-        
         const result = await wechatSI.startRealtimeRecognition(options)
-        console.log('🎤 识别结果:', result)
-        
         if (result.success && result.text) {
-          console.log('✅ 语音识别成功:', result.text)
-          
           // 设置识别后的文字到输入框
           this.setData({ inputMessage: result.text })
           
           // 自动发送识别后的消息
           setTimeout(() => {
-            console.log('📤 自动发送语音识别消息:', result.text)
             this.onSend()
           }, 800)
         } else {
@@ -535,8 +495,8 @@ Component({
             icon: 'error',
           })
         }
-      } catch (error) {
-        console.error('❌ 语音识别异常:', error)
+        } catch (error) {
+          console.error('语音识别异常:', error)
         wx.showToast({
           title: '语音识别失败，请重试',
           icon: 'error',
@@ -616,8 +576,6 @@ Component({
 
         if (this.data.wechatSIReady) {
           // 使用微信同声传译插件进行语音识别
-          console.log('🎤 使用微信同声传译插件识别语音...')
-          
           const options: WechatSIOptions = {
             lang: 'zh_CN',
             duration: 30000,
@@ -627,7 +585,6 @@ Component({
           
           if (result.success && result.text) {
             recognizedText = result.text
-            console.log('✅ 微信同声传译识别成功:', recognizedText)
           } else {
             console.warn('⚠️ 微信同声传译识别失败:', result.error)
             wx.showToast({
@@ -638,7 +595,6 @@ Component({
           }
         } else {
           // 微信同声传译插件未就绪
-          console.log('🎤 微信同声传译插件未就绪')
           wx.showToast({
             title: '语音识别插件未就绪',
             icon: 'error',
@@ -661,7 +617,6 @@ Component({
 
           // 延迟一下再自动发送，让用户看到识别结果
           setTimeout(() => {
-            console.log('📤 自动发送语音识别消息:', recognizedText)
             // 自动发送识别后的消息
             this.onSend()
           }, 800)

@@ -7,8 +7,6 @@ export default [
   GET('/storage/:key', async ({ params, method, query }) => {
     try {
       const { key, collection = 'default' } = params || {}
-      console.log('GET /storage/:key', { key, collection, query })
-      
       const collectionRef = db.collection(collection)
       const result = await collectionRef.doc(key).get()
       
@@ -30,8 +28,6 @@ export default [
   GET('/storage', async ({ method, query }) => {
     try {
       const { collection = 'default', limit = 20, skip = 0 } = query || {}
-      console.log('GET /storage', { collection, limit, skip, method })
-      
       const collectionRef = db.collection(collection)
       let queryBuilder = collectionRef.limit(parseInt(limit)).skip(parseInt(skip))
       
@@ -52,8 +48,6 @@ export default [
   POST('/storage', async ({ body, method }) => {
     try {
       const { data: itemData, collection = 'default' } = body || {}
-      console.log('POST /storage', { itemData, collection, method })
-      
       if (!itemData) {
         return { error: '缺少数据' }
       }
@@ -88,8 +82,6 @@ export default [
     try {
       const { key, collection = 'default' } = params || {}
       const { data: updateData } = body || {}
-      console.log('PUT /storage/:key', { key, collection, updateData, method })
-      
       if (!updateData) {
         return { error: '缺少更新数据' }
       }
@@ -128,8 +120,6 @@ export default [
   DELETE('/storage/:key', async ({ params, method }) => {
     try {
       const { key, collection = 'default' } = params || {}
-      console.log('DELETE /storage/:key', { key, collection, method })
-      
       const collectionRef = db.collection(collection)
       const result = await collectionRef.doc(key).remove()
       

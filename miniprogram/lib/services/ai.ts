@@ -130,8 +130,6 @@ export class AIService {
         : '你是一个有用的AI助手，请用简洁友好的方式回答用户的问题。你可以使用可用的工具来帮助用户。当需要使用工具时，请直接调用相应的工具。',
     }
     
-    console.log('📝 systemMessage:', currentAgent ? `使用 Agent "${currentAgent.name}"` : '使用默认提示词')
-    console.log('📝 systemMessage:', systemMessage)
 
     const aiMessages = MessageConverter.renderToAIHistory(this.renderMessages)
     return [systemMessage, ...aiMessages]
@@ -152,7 +150,6 @@ export class AIService {
   // 设置当前聊天会话ID
   setCurrentChatId(chatId: string) {
     this.currentChatId = chatId
-    console.log('AI服务设置当前聊天会话ID:', chatId)
   }
 
   // 获取当前聊天会话ID
@@ -173,7 +170,6 @@ export class AIService {
         tool_call_id: message.tool_call_id,
         aiconfig: message.aiconfig,
       })
-      console.log('工具消息已存储到云函数:', message)
     } catch (error) {
       console.error('存储工具消息到云函数失败:', error)
       throw error
@@ -358,13 +354,10 @@ export class AIService {
 
       // 如果已知流式请求不被支持，直接使用非流式模式
       if (this.streamingSupported === false) {
-        console.log('⚠️ 流式请求不被支持，直接使用非流式模式')
         return new Promise((resolve, reject) => {
           this.fallbackToNonStream(userMessage, onStream, resolve, reject)
         })
       }
-
-      console.log('发送流式请求到:', `${aiConfig.apiHost}/chat/completions`)
 
       return new Promise((resolve, reject) => {
         const config = this.buildRequestConfig({}, true)
@@ -373,7 +366,6 @@ export class AIService {
         this.currentRequestTask = wx.request({
           ...config,
           success: (response: HttpResponse) => {
-            console.log('流式请求成功:', response)
             if (this.isCancelled) {
               // 已被取消：不再处理
               resolve()
@@ -382,10 +374,9 @@ export class AIService {
             this.handleStreamResponse(response, onStream, resolve, reject)
           },
           fail: (error: unknown) => {
-            console.error('❌ 流式请求失败:', error)
+            console.error('流式请求失败:', error)
             // 标记流式请求不被支持
             this.streamingSupported = false
-            console.log('⚠️ 标记流式请求不被支持，后续将直接使用非流式模式')
             // 如果流式请求失败，回退到非流式模式
             if (this.isCancelled) {
               resolve()
@@ -433,7 +424,6 @@ export class AIService {
           await this.processStreamData(data, onStream, resolve)
         } else {
           // 如果不是字符串格式，说明服务不支持流式响应
-          console.warn('⚠️ 响应格式不是字符串，流式请求不被支持')
           this.streamingSupported = false
           // 回退到非流式模式
           if (this.isCancelled) {
@@ -443,7 +433,7 @@ export class AIService {
           this.fallbackToNonStream('', onStream, resolve, reject)
         }
       } catch (error) {
-        console.error('❌ 处理流式响应失败:', error)
+        console.error('处理流式响应失败:', error)
         this.streamingSupported = false
         if (this.isCancelled) {
           resolve()
@@ -452,7 +442,7 @@ export class AIService {
         this.fallbackToNonStream('', onStream, resolve, reject)
       }
     } else {
-      console.error('❌ API响应错误:', response)
+      console.error('API响应错误:', response)
       this.streamingSupported = false
       if (this.isCancelled) {
         resolve()
@@ -600,8 +590,6 @@ export class AIService {
     onStream: StreamCallback,
   ) {
     try {
-      console.log('处理工具调用:', toolCalls)
-
       // 执行所有工具调用
       const toolResults = await this.executeAllToolCalls(toolCalls, onStream)
 
@@ -663,7 +651,6 @@ export class AIService {
           string,
           unknown
         >
-        console.log(`执行工具 ${call.function.name}:`, args)
 
         // 通知页面显示正在调用的工具，传递当前工具信息
         onStream(
@@ -713,8 +700,6 @@ export class AIService {
     onStream: StreamCallback,
   ) {
     try {
-      console.log('发送工具结果给AI:', toolResponses)
-
       const config = this.buildRequestConfig({})
       const response = await this.sendHttpRequest(config)
 
@@ -809,8 +794,6 @@ export class AIService {
       return
     }
     try {
-      console.log('回退到非流式模式')
-
       const config = this.buildRequestConfig({})
       const response = await this.sendHttpRequest(config)
 
@@ -891,14 +874,10 @@ export class AIService {
 
     try {
       const aiConfig = this.getActiveAIConfig()
-      console.log('发送请求到:', `${aiConfig.apiHost}/chat/completions`)
 
       const config = this.buildRequestConfig({})
-      console.log('请求数据:', config.data)
 
       const response = await this.sendHttpRequest(config)
-
-      console.log('API响应:', response)
 
       if (response.statusCode === 200 && response.data) {
         const aiResponse = response.data as AIResponse
@@ -950,8 +929,6 @@ export class AIService {
   // 处理工具调用（非流式模式）
   private async handleToolCallsNonStream(toolCalls: ToolCall[]) {
     try {
-      console.log('处理工具调用（非流式）:', toolCalls)
-
       const toolManager = ToolManager.getInstance()
 
       // 执行所有工具调用
@@ -961,7 +938,6 @@ export class AIService {
             string,
             unknown
           >
-          console.log(`执行工具 ${call.function.name}:`, args)
 
           // 使用工具管理器执行工具
           const currentAgent = this.getCurrentAgent()

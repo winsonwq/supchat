@@ -38,8 +38,6 @@ async function getLocationHandler(
       isHighAccuracy: isHighAccuracy,
       highAccuracyExpireTime: highAccuracyExpireTime,
       success: (res) => {
-        console.log('获取位置成功:', res)
-        
         // 生成位置信息报告
         const locationReport = `# 📍 位置信息
 

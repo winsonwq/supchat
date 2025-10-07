@@ -13,18 +13,9 @@ export const entry = async (event, context) => {
   const { pathname, query } = parseUrl(route)
   const matched = match(pathname, method)
 
-  console.log('Request:', { route, method, pathname, query })
-  console.log('Matched:', matched ? { 
-    pathPattern: matched.pathPattern, 
-    method: matched.method,
-    params: matched.params 
-  } : null)
-
   if (!matched) {
     // 提供更详细的错误信息
     const availableRoutes = getRoutes()
-    console.log('Available routes:', availableRoutes)
-    
     return { 
       ok: false, 
       error: `Route not found: ${method} ${pathname}`,

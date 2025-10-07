@@ -130,7 +130,6 @@ Component({
         confirmId = this.data.message.toolConfirmData.confirmId
       }
       
-      console.log('工具确认:', confirmId)
       this.triggerEvent('toolConfirm', { confirmId })
     },
 
@@ -147,7 +146,6 @@ Component({
         confirmId = this.data.message.toolConfirmData.confirmId
       }
       
-      console.log('工具取消:', confirmId)
       this.triggerEvent('toolCancel', { confirmId })
     },
   },

@@ -51,10 +51,8 @@ export class MCPServerService {
    */
   static async checkServerOnline(config: MCPConfig): Promise<boolean> {
     try {
-      console.log(`检查 MCP 服务器在线状态: ${config.url}`)
       const response = await this.makeMCPRequest(config, 'initialize', {})
       const isOnline = !response.error
-      console.log(`MCP 服务器 ${config.url} 在线状态: ${isOnline}`)
       return isOnline
     } catch (error) {
       console.error(`检查 MCP 服务器 ${config.url} 在线状态失败:`, error)
@@ -67,7 +65,6 @@ export class MCPServerService {
    */
   static async getServerTools(config: MCPConfig): Promise<MCPTool[]> {
     try {
-      console.log(`获取 MCP 服务器工具列表: ${config.url}`)
       const response = await this.makeMCPRequest(config, 'tools/list', {})
       if (response.error) {
         console.error(`获取工具列表失败: ${config.url}`, response.error)
@@ -76,7 +73,6 @@ export class MCPServerService {
       // 类型断言确保 response 是 MCPToolsListResponse
       const toolsResponse = response as MCPToolsListResponse
       const tools = toolsResponse.result?.tools || []
-      console.log(`MCP 服务器 ${config.url} 发现 ${tools.length} 个工具`)
       return tools
     } catch (error) {
       console.error(`获取 MCP 服务器 ${config.url} 工具列表失败:`, error)
@@ -93,7 +89,6 @@ export class MCPServerService {
     arguments_: Record<string, any>
   ): Promise<any> {
     try {
-      console.log(`调用 MCP 工具: ${toolName} 在 ${config.url}`)
       const response = await this.makeMCPRequest(config, 'tools/call', {
         name: toolName,
         arguments: arguments_
@@ -101,7 +96,6 @@ export class MCPServerService {
       if (response.error) {
         throw new Error(response.error.message)
       }
-      console.log(`MCP 工具 ${toolName} 调用成功`)
       return response.result
     } catch (error) {
       console.error(`调用 MCP 工具 ${toolName} 失败:`, error)

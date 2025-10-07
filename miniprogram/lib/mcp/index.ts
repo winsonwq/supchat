@@ -21,8 +21,3 @@ const componentManager = ComponentManager.getInstance()
 
 // 注册内置组件
 registry.register('weather', WeatherCard)
-
-console.log('MCP 模块初始化完成:', {
-  registry: registry,
-  componentManager: componentManager
-})

@@ -41,8 +41,6 @@ async function scanCodeHandler(
       autoZoom: autoZoom,
       onlyFromCamera: onlyFromCamera,
       success: (res) => {
-        console.log('扫码成功:', res)
-        
         // 生成扫码结果报告
         const scanReport = `# 📱 扫码结果
 

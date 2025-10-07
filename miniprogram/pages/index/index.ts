@@ -200,7 +200,6 @@ Component({
       })
       
       if (agentModeState.isAgentMode && currentAgent) {
-        console.log('🤖 恢复 Agent 模式:', currentAgent.name)
         this.configureAgentMcpTools(currentAgent)
       }
     },
@@ -423,8 +422,6 @@ Component({
 
     // 处理 AI 配置变化事件
     onAiConfigChange(e: WxEvent) {
-      const configId = e.detail?.id
-      console.log('AI 配置已切换:', configId)
       // AI 服务会自动使用新的激活配置，无需额外处理
       wx.showToast({
         title: 'AI 配置已切换',
@@ -435,8 +432,6 @@ Component({
 
     // 处理 MCP 配置变化事件
     onMcpChange(e: WxEvent) {
-      const configId = e.detail?.id
-      console.log('MCP 配置已切换:', configId)
       // MCP 配置变化处理逻辑
     },
 
@@ -450,10 +445,8 @@ Component({
       })
       
       if (isAgentMode && agent) {
-        console.log('🤖 切换到 Agent:', agent.name)
         this.configureAgentMcpTools(agent)
       } else {
-        console.log('🤖 退出 Agent 模式')
         this.restoreDefaultMcpConfig()
       }
     },
@@ -461,9 +454,6 @@ Component({
     // 配置Agent的MCP工具
     configureAgentMcpTools(agent: AgentDefinition) {
       // 这里可以实现Agent模式下自动启用特定的MCP工具
-      if (agent.mcpServers.length > 0) {
-        console.log(`🔧 配置 ${agent.mcpServers.length} 个 MCP 工具`)
-      }
     },
 
     // 恢复默认MCP配置
@@ -1166,7 +1156,6 @@ Component({
      */
     onToolConfirm(event: any) {
       const { confirmId } = event.detail
-      console.log('用户确认工具执行:', confirmId)
       
       // 移除确认消息
       this.removeConfirmMessage(confirmId)
@@ -1181,7 +1170,6 @@ Component({
      */
     onToolCancel(event: any) {
       const { confirmId } = event.detail
-      console.log('用户取消工具执行:', confirmId)
       
       // 移除确认消息
       this.removeConfirmMessage(confirmId)
