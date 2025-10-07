@@ -26,6 +26,9 @@ export interface AddMessageParams {
     name: string
     model: string
   }
+  agent?: {
+    name: string
+  }
 }
 
 export interface LoadMoreMessagesParams {
@@ -82,14 +85,15 @@ export const deleteChat = createAsyncThunk(
 export const addMessage = createAsyncThunk(
   ChatActionType.ADD_MESSAGE,
   async (params: AddMessageParams) => {
-    const { chatId, role, content, tool_calls, tool_call_id, aiconfig } = params
+    const { chatId, role, content, tool_calls, tool_call_id, aiconfig, agent } = params
     const result = await chatService.addMessage({ 
       chatId, 
       role, 
       content, 
       tool_calls, 
       tool_call_id,
-      aiconfig
+      aiconfig,
+      agent
     })
 
     return {

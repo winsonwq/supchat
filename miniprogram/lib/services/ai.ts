@@ -85,6 +85,12 @@ export class AIService {
       model: activeConfig.model
     } : undefined
 
+    // 获取当前Agent信息（不包含敏感信息）
+    const currentAgent = this.getCurrentAgent()
+    const agent = currentAgent ? {
+      name: currentAgent.name
+    } : undefined
+
     const renderMessage: RenderMessage = {
       id: MessageConverter.generateMessageId(),
       role,
@@ -93,6 +99,7 @@ export class AIService {
       tool_call_id,
       tool_calls,
       aiconfig,
+      agent,
       createdAt: new Date().toISOString(),
     }
 

@@ -28,7 +28,7 @@ export default [
     try {
       const { id } = params || {}
       if (!id) return { error: '缺少会话 ID' }
-      const { userId = authUserId, role = 'user', content, toolCalls, toolCallId, aiconfig } = body || {}
+      const { userId = authUserId, role = 'user', content, toolCalls, toolCallId, aiconfig, agent } = body || {}
       if (!userId || userId !== authUserId) return { error: '未授权或 userId 不匹配' }
       // 允许在存在 toolCalls 时 content 为空
       if (!Message.isContentOrToolCallsProvided(content, toolCalls)) {
@@ -46,7 +46,8 @@ export default [
         content,
         toolCalls,
         toolCallId,
-        aiconfig
+        aiconfig,
+        agent
       })
 
       // 生成预览内容（处理复杂内容类型）

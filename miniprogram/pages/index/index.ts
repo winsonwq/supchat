@@ -140,6 +140,11 @@ Component({
         model: activeConfig.model
       } : undefined
 
+      // 获取当前Agent信息（不包含敏感信息）
+      const agent = this.data.isAgentMode && this.data.currentAgent ? {
+        name: this.data.currentAgent.name
+      } : undefined
+
       const partialContent =
         typeof content === 'string' ? content : JSON.stringify(content)
       appDispatch(
@@ -149,6 +154,7 @@ Component({
           content: partialContent,
           tool_calls: toolCalls,
           aiconfig,
+          agent,
         }),
       ).catch((error) => {
         console.error('保存含工具计划的助手消息失败:', error)
@@ -513,6 +519,11 @@ Component({
         model: activeConfig.model
       } : undefined
 
+      // 获取当前Agent信息（不包含敏感信息）
+      const agent = this.data.isAgentMode && this.data.currentAgent ? {
+        name: this.data.currentAgent.name
+      } : undefined
+
       return {
         id: `msg_${Date.now()}_user`,
         role: 'user',
@@ -520,6 +531,7 @@ Component({
         plainContent: content,
         towxmlNodes: this.processMessageContent(content),
         aiconfig,
+        agent,
         createdAt: new Date().toISOString(),
       }
     },
@@ -534,6 +546,11 @@ Component({
         model: activeConfig.model
       } : undefined
 
+      // 获取当前Agent信息（不包含敏感信息）
+      const agent = this.data.isAgentMode && this.data.currentAgent ? {
+        name: this.data.currentAgent.name
+      } : undefined
+
       return {
         id: `msg_${Date.now()}_assistant`,
         role: 'assistant',
@@ -541,6 +558,7 @@ Component({
         plainContent: '',
         towxmlNodes: undefined,
         aiconfig,
+        agent,
         createdAt: new Date().toISOString(),
       }
     },
@@ -565,12 +583,19 @@ Component({
           model: activeConfig.model
         } : undefined
 
+        // 获取当前Agent信息（不包含敏感信息）
+        const agent = this.data.isAgentMode && this.data.currentAgent ? {
+          id: this.data.currentAgent.id,
+          name: this.data.currentAgent.name
+        } : undefined
+
         await appDispatch(
           addMessage({
             chatId: this.data.currentSessionId,
             role: 'user',
             content,
             aiconfig,
+            agent,
           }),
         )
       } catch (error) {
@@ -604,6 +629,12 @@ Component({
           model: activeConfig.model
         } : undefined
 
+        // 获取当前Agent信息（不包含敏感信息）
+        const agent = this.data.isAgentMode && this.data.currentAgent ? {
+          id: this.data.currentAgent.id,
+          name: this.data.currentAgent.name
+        } : undefined
+
         const toolMessage: RenderMessage = {
           id: `msg_${Date.now()}_tool`,
           role: 'tool',
@@ -611,6 +642,7 @@ Component({
           plainContent: typeof content === 'string' ? content : '',
           towxmlNodes: this.processMessageContent(content),
           aiconfig,
+          agent,
           createdAt: new Date().toISOString(),
         }
         const updatedMessages = [...this.data.messages, toolMessage]
@@ -640,6 +672,12 @@ Component({
             model: activeConfig.model
           } : undefined
 
+          // 获取当前Agent信息（不包含敏感信息）
+          const agent = this.data.isAgentMode && this.data.currentAgent ? {
+            id: this.data.currentAgent.id,
+            name: this.data.currentAgent.name
+          } : undefined
+
           const finalContent =
             typeof content === 'string' ? content : JSON.stringify(content)
           appDispatch(
@@ -649,6 +687,7 @@ Component({
               content: finalContent,
               tool_calls: toolCalls,
               aiconfig,
+              agent,
             }),
           ).catch((error) => {
             console.error('保存助手消息失败:', error)

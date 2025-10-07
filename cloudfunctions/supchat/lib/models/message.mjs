@@ -15,6 +15,7 @@ export class Message {
     this.toolCallId = data.toolCallId
     this.toolResult = data.toolResult
     this.aiconfig = data.aiconfig
+    this.agent = data.agent
     this.isDeleted = data.isDeleted !== undefined ? data.isDeleted : false
     this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date()
   }

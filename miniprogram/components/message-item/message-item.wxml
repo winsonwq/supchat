@@ -48,9 +48,14 @@
    <view class="flex flex-col">
     <!-- 卡片头部 -->
     <view class="flex items-center justify-between">
-      <view wx:if="{{ message.aiconfig }}" class="flex items-center space-x-1 text-sm font-medium">
-        <text>{{ message.aiconfig.name }}</text>
-        <text>({{ message.aiconfig.model }})</text>
+      <view wx:if="{{ message.aiconfig }}" class="flex flex-col space-y-1">
+        <!-- Agent 名称 - 如果存在则显示 -->
+        <text wx:if="{{ message.agent && message.agent.name }}" class="text-xs font-medium text-blue-600">{{ message.agent.name }}</text>
+        <!-- AI 配置信息 -->
+        <view class="flex items-center space-x-1 text-sm font-medium">
+          <text>{{ message.aiconfig.name }}</text>
+          <text>({{ message.aiconfig.model }})</text>
+        </view>
       </view>
       <text wx:else class="card-title text-sm font-medium text-gray-600">{{ isLoading ? 'AI助手' : message.role === 'tool' ? '工具' : 'AI助手' }}</text>
     </view>

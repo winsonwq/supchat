@@ -7,6 +7,11 @@ export interface AIConfigInfo {
   model: string
 }
 
+// Agent 信息（用于消息存储）
+export interface AgentInfo {
+  name: string
+}
+
 // AI 通信标准消息格式
 export interface AIMessage {
   role: 'user' | 'assistant' | 'system' | 'tool'
@@ -15,6 +20,7 @@ export interface AIMessage {
   tool_calls?: ToolCall[]
   name?: string
   aiconfig?: AIConfigInfo // 消息对应的AI配置信息
+  agent?: AgentInfo // 消息对应的Agent信息
 }
 
 export type AIMessageHistory = AIMessage[]
@@ -30,6 +36,7 @@ export interface RenderMessage {
   tool_calls?: ToolCall[]
   toolConfirmData?: any // 工具确认数据
   aiconfig?: AIConfigInfo // 消息对应的AI配置信息
+  agent?: AgentInfo // 消息对应的Agent信息
   createdAt: string
 }
 
@@ -46,6 +53,7 @@ export class MessageConverter {
       tool_call_id: renderMessage.tool_call_id,
       tool_calls: renderMessage.tool_calls,
       aiconfig: renderMessage.aiconfig,
+      agent: renderMessage.agent,
     }
   }
 
@@ -64,6 +72,7 @@ export class MessageConverter {
       tool_call_id: aiMessage.tool_call_id,
       tool_calls: aiMessage.tool_calls,
       aiconfig: aiMessage.aiconfig,
+      agent: aiMessage.agent,
       createdAt: new Date().toISOString(),
     }
   }
@@ -118,18 +127,19 @@ export class MessageConverter {
 
 // 消息构建器
 export class MessageBuilder {
-  static createUserMessage(content: string, aiconfig?: AIConfigInfo): RenderMessage {
+  static createUserMessage(content: string, aiconfig?: AIConfigInfo, agent?: AgentInfo): RenderMessage {
     return {
       id: MessageConverter.generateMessageId(),
       role: 'user',
       content,
       plainContent: content,
       aiconfig,
+      agent,
       createdAt: new Date().toISOString(),
     }
   }
 
-  static createAssistantMessage(content: RenderNode, toolCalls?: ToolCall[], aiconfig?: AIConfigInfo): RenderMessage {
+  static createAssistantMessage(content: RenderNode, toolCalls?: ToolCall[], aiconfig?: AIConfigInfo, agent?: AgentInfo): RenderMessage {
     return {
       id: MessageConverter.generateMessageId(),
       role: 'assistant',
@@ -137,11 +147,12 @@ export class MessageBuilder {
       plainContent: MessageConverter.extractPlainText(content),
       tool_calls: toolCalls,
       aiconfig,
+      agent,
       createdAt: new Date().toISOString(),
     }
   }
 
-  static createToolMessage(content: RenderNode, toolCallId: string, aiconfig?: AIConfigInfo): RenderMessage {
+  static createToolMessage(content: RenderNode, toolCallId: string, aiconfig?: AIConfigInfo, agent?: AgentInfo): RenderMessage {
     return {
       id: MessageConverter.generateMessageId(),
       role: 'tool',
@@ -149,17 +160,19 @@ export class MessageBuilder {
       plainContent: MessageConverter.extractPlainText(content),
       tool_call_id: toolCallId,
       aiconfig,
+      agent,
       createdAt: new Date().toISOString(),
     }
   }
 
-  static createSystemMessage(content: string, aiconfig?: AIConfigInfo): RenderMessage {
+  static createSystemMessage(content: string, aiconfig?: AIConfigInfo, agent?: AgentInfo): RenderMessage {
     return {
       id: MessageConverter.generateMessageId(),
       role: 'system',
       content,
       plainContent: content,
       aiconfig,
+      agent,
       createdAt: new Date().toISOString(),
     }
   }

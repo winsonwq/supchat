@@ -8,6 +8,11 @@ const aiconfigSchema = z.object({
   model: z.string(),
 }).optional()
 
+// Agent 信息（用于消息存储）
+const agentSchema = z.object({
+  name: z.string(),
+}).optional()
+
 // Message 基础字段
 export const messageBaseSchema = z.object({
   chatId: z.string().min(1, 'chatId 必填'),
@@ -18,6 +23,7 @@ export const messageBaseSchema = z.object({
   toolCallId: z.string().optional(),
   toolResult: z.any().optional(),
   aiconfig: aiconfigSchema,
+  agent: agentSchema,
   isDeleted: z.boolean().default(false),
 })
 

@@ -24,6 +24,9 @@ export interface AddMessageOptions {
     name: string
     model: string
   }
+  agent?: {
+    name: string
+  }
 }
 
 export interface ChatWithMessages extends ChatSession {
@@ -257,7 +260,7 @@ export class ChatService {
   async addMessage(
     options: AddMessageOptions,
   ): Promise<{ message: RenderMessage; chat: ChatSession }> {
-    const { chatId, role, content, tool_calls, tool_call_id, aiconfig } = options
+    const { chatId, role, content, tool_calls, tool_call_id, aiconfig, agent } = options
 
     // 构建消息数据
     const messageData: {
@@ -270,12 +273,16 @@ export class ChatService {
         name: string
         model: string
       }
+      agent?: {
+        name: string
+      }
     } = {
       role,
       content,
       ...(tool_calls && { toolCalls: tool_calls }),
       ...(tool_call_id && { toolCallId: tool_call_id }),
       ...(aiconfig && { aiconfig }),
+      ...(agent && { agent }),
     }
 
     const result = await storage.create(`/chats/${chatId}/messages`, messageData)
