@@ -47,15 +47,7 @@ Page({
    * 加载配置列表
    */
   loadConfigs() {
-    let configs = MCPConfigStorage.getAllConfigs()
-    
-    // 如果没有用户配置（只有内置配置），添加一些示例数据用于测试
-    const userConfigs = configs.filter(config => !isBuiltinMCP(config.id))
-    if (userConfigs.length === 0) {
-      console.log('没有找到用户MCP配置，添加示例数据')
-      this.addSampleData()
-      configs = MCPConfigStorage.getAllConfigs()
-    }
+    const configs = MCPConfigStorage.getAllConfigs()
     
     // 为每个配置添加展开状态标记
     const configsWithShowTools = configs.map(config => ({
@@ -63,7 +55,6 @@ Page({
       showTools: false
     }))
     
-    console.log('加载的MCP配置:', configsWithShowTools)
     this.setData({ configs: configsWithShowTools })
     
     // 检查在线状态和工具信息
@@ -72,31 +63,6 @@ Page({
       setTimeout(() => {
         this.checkDataConsistency()
       }, 1000)
-    })
-  },
-
-  /**
-   * 添加示例数据（用于测试）
-   */
-  addSampleData() {
-    const sampleConfigs = [
-      {
-        id: MCPConfigStorage.generateConfigId(),
-        name: '文件系统 MCP',
-        url: 'http://0.0.0.0:3001/api/servers/filesystem/mcp',
-        authType: AuthType.NONE,
-        authConfig: {},
-        isEnabled: true,
-        isOnline: false,
-        tools: [],
-        toolCount: 0,
-        createdAt: Date.now() - 86400000, // 1天前
-        updatedAt: Date.now()
-      }
-    ]
-    
-    sampleConfigs.forEach(config => {
-      MCPConfigStorage.saveConfig(config)
     })
   },
 

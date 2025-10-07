@@ -3,6 +3,7 @@ import { WxEvent } from '../../lib/mcp/types'
 import { MCPConfigStorage } from '../../lib/storage/mcp-config-storage'
 import { AIConfigStorage } from '../../lib/storage/ai-config-storage'
 import { AgentConfigStorage } from '../../lib/storage/agent-config-storage'
+import { AgentModeStorage } from '../../lib/storage/agent-mode-storage'
 import { AgentDefinition } from '../../lib/types/agent'
 import getSafeArea from '../../lib/utils/safe-area'
 import wechatSI, { WechatSIOptions } from '../../lib/mcp/tools/wechat-si'
@@ -83,6 +84,8 @@ Component({
       this.initRecorderManager()
       // 初始化微信同声传译插件
       this.initWechatSI()
+      // 从localStorage加载Agent模式状态
+      this.loadAgentModeState()
 
       // 调试信息
       console.log('🔧 组件初始化完成:', {
@@ -250,6 +253,25 @@ Component({
       const agents = AgentConfigStorage.getAllConfigs()
       this.setData({ agents })
     },
+    loadAgentModeState() {
+      // 从localStorage加载Agent模式状态
+      const agentModeState = AgentModeStorage.getAgentModeState()
+      console.log('🔧 从localStorage加载Agent模式状态:', agentModeState)
+      
+      // getCurrentAgent() 会自动从 AgentConfigStorage 获取最新配置
+      // 如果 agent 已被删除或配置已更新，会自动获取最新状态
+      const currentAgent = agentModeState.currentAgent
+      
+      this.setData({
+        isAgentMode: agentModeState.isAgentMode,
+        currentAgent: currentAgent
+      })
+      
+      // 如果agent模式已启用且有有效的agent，通知父组件
+      if (agentModeState.isAgentMode && currentAgent) {
+        this.triggerEvent('agentchange', { agent: currentAgent, isAgentMode: true })
+      }
+    },
     onOpenAgentSheet() {
       this.setData({ agentSheetVisible: true })
     },
@@ -264,13 +286,23 @@ Component({
         if (!agent) {
           wx.showToast({ title: '暂无可用的 Agent', icon: 'error' })
           this.setData({ isAgentMode: false })
+          AgentModeStorage.setAgentModeEnabled(false)
           return
         }
         this.setData({ currentAgent: agent, isAgentMode: true })
+        
+        // 只保存 agent ID，不存储整个对象
+        AgentModeStorage.setAgentModeEnabled(true)
+        AgentModeStorage.setCurrentAgentId(agent.id)
+        
         this.triggerEvent('agentchange', { agent, isAgentMode: true })
         wx.showToast({ title: `已开启 ${agent.name} 模式`, icon: 'success', duration: 1200 })
       } else {
         this.setData({ isAgentMode: false })
+        
+        // 只保存模式开关状态，保留当前 agent ID
+        AgentModeStorage.setAgentModeEnabled(false)
+        
         this.triggerEvent('agentchange', { agent: this.data.currentAgent, isAgentMode: false })
         wx.showToast({ title: '已关闭 Agent 模式', icon: 'success', duration: 1200 })
       }
@@ -280,7 +312,12 @@ Component({
       if (!id) return
       const agent = this.data.agents.find(a => a.id === id)
       if (!agent) return
+      
       this.setData({ currentAgent: agent, agentSheetVisible: false })
+      
+      // 只保存 agent ID 到 localStorage，不存储整个对象
+      AgentModeStorage.setCurrentAgentId(agent.id)
+      
       if (this.data.isAgentMode) {
         this.triggerEvent('agentchange', { agent, isAgentMode: true })
       }

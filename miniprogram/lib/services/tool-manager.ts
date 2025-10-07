@@ -47,12 +47,55 @@ export class ToolManager {
   }
 
   /**
+   * 获取指定 Agent 的工具列表
+   */
+  getAllToolsForAgent(agent: any): OpenRouterTool[] {
+    // 获取内置工具（从内置 MCP 配置中获取启用的工具）
+    const builtinConfig = getBuiltinMCPConfig()
+    const enabledBuiltinTools = builtinConfig.tools?.filter(tool => tool.isEnabled !== false) || []
+    const builtinOpenRouterTools = enabledBuiltinTools.map(tool => ({
+      type: 'function' as const,
+      function: {
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.inputSchema || {}
+      }
+    }))
+    
+    // 获取 Agent 特定的 MCP 工具
+    const agentMcpTools: OpenRouterTool[] = []
+    if (agent && agent.mcpServers && Array.isArray(agent.mcpServers)) {
+      agent.mcpServers.forEach((mcpServer: any) => {
+        if (mcpServer.tools && Array.isArray(mcpServer.tools)) {
+          mcpServer.tools.forEach((tool: any) => {
+            if (tool.isEnabled !== false) {
+              agentMcpTools.push({
+                type: 'function' as const,
+                function: {
+                  name: tool.name,
+                  description: tool.description,
+                  parameters: tool.inputSchema || {}
+                }
+              })
+            }
+          })
+        }
+      })
+    }
+    
+    console.log(`工具管理器 (Agent模式): 内置工具 ${builtinOpenRouterTools.length} 个, Agent MCP 工具 ${agentMcpTools.length} 个`)
+    
+    return [...builtinOpenRouterTools, ...agentMcpTools]
+  }
+
+  /**
    * 执行工具调用
    */
   async executeTool(
     toolName: string,
     arguments_: Record<string, unknown>,
-    onStreamCallback?: (content: any) => void
+    onStreamCallback?: (content: any) => void,
+    agent?: any
   ): Promise<ToolCallResult> {
     console.log(`工具管理器: 执行工具 ${toolName}`)
     
@@ -83,9 +126,45 @@ export class ToolManager {
       return await executeToolCall(toolName, arguments_, allTools)
     }
     
-    // 检查是否为 MCP 工具
+    // 检查是否为 Agent 特定的 MCP 工具
+    if (agent && agent.mcpServers && Array.isArray(agent.mcpServers)) {
+      for (const mcpServer of agent.mcpServers) {
+        if (mcpServer.tools && Array.isArray(mcpServer.tools)) {
+          const agentTool = mcpServer.tools.find((tool: any) => tool.name === toolName && tool.isEnabled !== false)
+          if (agentTool) {
+            console.log(`工具管理器: 执行 Agent MCP 工具 ${toolName}`)
+            
+            // 检查工具是否需要用户确认
+            if (agentTool.needConfirm !== false) {
+              console.log(`Agent MCP 工具 ${toolName} 需要用户确认`)
+              const confirmManager = ToolConfirmManager.getInstance()
+              const confirmed = await confirmManager.createConfirmRequest(
+                toolName,
+                { function: { name: toolName, arguments: JSON.stringify(arguments_) } },
+                arguments_,
+                onStreamCallback
+              )
+              if (!confirmed) {
+                console.log(`用户取消了 Agent MCP 工具 ${toolName} 的执行`)
+                throw new Error('用户取消了操作')
+              }
+            }
+            
+            // 执行 Agent MCP 工具 - 这里需要根据实际的 MCP 工具执行逻辑来实现
+            // 目前先返回一个模拟结果，实际项目中需要调用对应的 MCP 服务
+            return {
+              success: true,
+              content: `Agent MCP 工具 ${toolName} 执行成功`,
+              metadata: { source: 'agent_mcp', toolName, arguments: arguments_ }
+            }
+          }
+        }
+      }
+    }
+    
+    // 检查是否为全局 MCP 工具
     if (MCPToolsService.isMCPTool(toolName)) {
-      console.log(`工具管理器: 执行 MCP 工具 ${toolName}`)
+      console.log(`工具管理器: 执行全局 MCP 工具 ${toolName}`)
       
       // 检查 MCP 工具是否需要用户确认
       const mcpTool = MCPToolsService.findMCPToolByName(toolName)

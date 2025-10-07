@@ -85,7 +85,7 @@
           catchtap="onOpenAgentSheet"
         >
           <svg-icon name="chat" size="40"></svg-icon>
-          选择 Agent
+          Agent
         </button>
         <!-- 仅在非 Agent 模式下显示 MCP 按钮 -->
         <button 

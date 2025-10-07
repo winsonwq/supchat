@@ -3,7 +3,7 @@
   <navigation-bar title="创建AI助手" show-back="{{true}}"></navigation-bar>
   
   <view class="content">
-    <form class="form">
+    <view class="form">
       <!-- 基本信息 -->
       <view class="form-section">
         <view class="section-title">基本信息</view>
@@ -81,7 +81,7 @@
           <view wx:if="{{errors.mcpServersJson}}" class="error-text">{{errors.mcpServersJson}}</view>
         </view>
       </view>
-    </form>
+    </view>
   </view>
 
   <!-- 底部操作栏 -->

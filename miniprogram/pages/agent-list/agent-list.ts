@@ -44,14 +44,7 @@ Page({
    * 加载Agent列表
    */
   loadAgents() {
-    let agents = AgentConfigStorage.getAllConfigs()
-    
-    // 如果没有配置，添加一些示例数据用于测试
-    if (agents.length === 0) {
-      console.log('没有找到Agent配置，添加示例数据')
-      this.addSampleData()
-      agents = AgentConfigStorage.getAllConfigs()
-    }
+    const agents = AgentConfigStorage.getAllConfigs()
     
     // 为每个配置添加格式化时间
     const agentsWithDetail = agents.map(agent => ({
@@ -59,42 +52,7 @@ Page({
       createdAtText: this.formatDate(agent.createdAt || Date.now())
     }))
     
-    console.log('加载的Agent配置:', agentsWithDetail)
     this.setData({ agents: agentsWithDetail })
-  },
-
-  /**
-   * 添加示例数据（用于测试）
-   */
-  addSampleData() {
-    const sampleAgents = [
-      {
-        id: AgentConfigStorage.generateConfigId(),
-        name: '通用助手',
-        description: '一个通用的AI助手，可以处理各种任务',
-        systemPrompt: '你是一个有用的AI助手，可以帮助用户解决各种问题。请保持友好和专业的态度。',
-        mcpServers: [],
-        isEnabled: true,
-        isDefault: true,
-        createdAt: Date.now() - 86400000, // 1天前
-        updatedAt: Date.now()
-      },
-      {
-        id: AgentConfigStorage.generateConfigId(),
-        name: '代码助手',
-        description: '专门用于编程和代码相关的AI助手',
-        systemPrompt: '你是一个专业的编程助手，擅长各种编程语言和技术栈。请提供准确、高效的代码解决方案。',
-        mcpServers: [],
-        isEnabled: true,
-        isDefault: false,
-        createdAt: Date.now() - 172800000, // 2天前
-        updatedAt: Date.now()
-      }
-    ]
-    
-    sampleAgents.forEach(agent => {
-      AgentConfigStorage.saveConfig(agent)
-    })
   },
 
   /**

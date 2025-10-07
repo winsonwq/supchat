@@ -1,5 +1,5 @@
 import { AIConfigStorage } from '../storage/ai-config-storage.js'
-import { AgentConfigStorage } from '../storage/agent-config-storage.js'
+import { AgentModeStorage } from '../storage/agent-mode-storage.js'
 import { ChatHistoryStorageFactory } from '../storage/chat-history-storage-interface.js'
 import { processToolCalls, buildToolCallResponse } from '../mcp/index.js'
 import { ToolManager } from './tool-manager.js'
@@ -50,6 +50,7 @@ export class AIService {
   private currentChatId: string | null = null // 当前聊天会话ID
   private isCancelled: boolean = false // 取消标记：用于软中断后续处理
   private streamingIntervalId: number | null = null // 非流式模拟的 interval ID
+  private streamingSupported: boolean | null = null // 流式请求支持状态：null=未知，true=支持，false=不支持
 
   private constructor() {
     // 初始化工具确认管理器回调
@@ -128,6 +129,9 @@ export class AIService {
         ? currentAgent.systemPrompt 
         : '你是一个有用的AI助手，请用简洁友好的方式回答用户的问题。你可以使用可用的工具来帮助用户。当需要使用工具时，请直接调用相应的工具。',
     }
+    
+    console.log('📝 systemMessage:', currentAgent ? `使用 Agent "${currentAgent.name}"` : '使用默认提示词')
+    console.log('📝 systemMessage:', systemMessage)
 
     const aiMessages = MessageConverter.renderToAIHistory(this.renderMessages)
     return [systemMessage, ...aiMessages]
@@ -135,27 +139,14 @@ export class AIService {
 
   // 获取当前Agent配置
   getCurrentAgent() {
-    // 优先使用临时Agent（单次请求）
-    return this.getTempAgent()
-  }
-
-  // 设置当前Agent（供外部调用）
-  setCurrentAgent(agent: any) {
-    // 这里可以存储当前Agent信息
-    // 暂时先不实现，后续可以通过参数传递
-  }
-
-  // 临时存储当前Agent（用于单次请求）
-  private currentAgent: any = null
-
-  // 设置临时Agent（用于单次请求）
-  setTempAgent(agent: any) {
-    this.currentAgent = agent
-  }
-
-  // 获取临时Agent
-  getTempAgent() {
-    return this.currentAgent
+    const agentModeState = AgentModeStorage.getAgentModeState()
+    
+    // 只有在Agent模式启用时才返回存储的Agent
+    if (agentModeState.isAgentMode && agentModeState.currentAgent) {
+      return agentModeState.currentAgent
+    }
+    
+    return null
   }
 
   // 设置当前聊天会话ID
@@ -295,9 +286,12 @@ export class AIService {
       headers.Accept = 'text/event-stream'
     }
 
-    // 使用工具管理器获取所有工具
+    // 使用工具管理器获取工具，支持agent模式
     const toolManager = ToolManager.getInstance()
-    const allAvailableTools = toolManager.getAllTools()
+    const currentAgent = this.getCurrentAgent()
+    const allAvailableTools = currentAgent 
+      ? toolManager.getAllToolsForAgent(currentAgent)
+      : toolManager.getAllTools()
 
     return {
       url: `${aiConfig.apiHost}/chat/completions`,
@@ -340,10 +334,10 @@ export class AIService {
   async sendMessageStream(
     userMessage: string,
     onStream: StreamCallback,
-    agent?: any,
   ): Promise<void> {
     // 重置取消标记
     this.isCancelled = false
+    
     // 检查AI配置是否有效
     if (!this.isActiveConfigValid()) {
       const errorMessage =
@@ -353,20 +347,24 @@ export class AIService {
       return
     }
 
-    // 设置临时Agent（如果提供）
-    if (agent) {
-      this.setTempAgent(agent)
-    }
-
-    // 添加用户消息到历史
+    // 添加用户消息到AI Service的内部历史（用于构建发送给AI的消息）
     this.addMessage('user', userMessage)
 
     try {
       const aiConfig = this.getActiveAIConfig()
-      console.log('发送流式请求到:', `${aiConfig.apiHost}/chat/completions`)
-
+      
       // 取消之前的请求
       this.cancelPreviousRequest()
+
+      // 如果已知流式请求不被支持，直接使用非流式模式
+      if (this.streamingSupported === false) {
+        console.log('⚠️ 流式请求不被支持，直接使用非流式模式')
+        return new Promise((resolve, reject) => {
+          this.fallbackToNonStream(userMessage, onStream, resolve, reject)
+        })
+      }
+
+      console.log('发送流式请求到:', `${aiConfig.apiHost}/chat/completions`)
 
       return new Promise((resolve, reject) => {
         const config = this.buildRequestConfig({}, true)
@@ -384,7 +382,10 @@ export class AIService {
             this.handleStreamResponse(response, onStream, resolve, reject)
           },
           fail: (error: unknown) => {
-            console.error('流式请求失败:', error)
+            console.error('❌ 流式请求失败:', error)
+            // 标记流式请求不被支持
+            this.streamingSupported = false
+            console.log('⚠️ 标记流式请求不被支持，后续将直接使用非流式模式')
             // 如果流式请求失败，回退到非流式模式
             if (this.isCancelled) {
               resolve()
@@ -427,9 +428,14 @@ export class AIService {
       try {
         const data = response.data
         if (typeof data === 'string') {
+          // 标记流式请求被支持
+          this.streamingSupported = true
           await this.processStreamData(data, onStream, resolve)
         } else {
-          // 如果不是字符串格式，回退到非流式模式
+          // 如果不是字符串格式，说明服务不支持流式响应
+          console.warn('⚠️ 响应格式不是字符串，流式请求不被支持')
+          this.streamingSupported = false
+          // 回退到非流式模式
           if (this.isCancelled) {
             resolve()
             return
@@ -437,7 +443,8 @@ export class AIService {
           this.fallbackToNonStream('', onStream, resolve, reject)
         }
       } catch (error) {
-        console.error('处理流式响应失败:', error)
+        console.error('❌ 处理流式响应失败:', error)
+        this.streamingSupported = false
         if (this.isCancelled) {
           resolve()
           return
@@ -445,7 +452,8 @@ export class AIService {
         this.fallbackToNonStream('', onStream, resolve, reject)
       }
     } else {
-      console.error('API响应错误:', response)
+      console.error('❌ API响应错误:', response)
+      this.streamingSupported = false
       if (this.isCancelled) {
         resolve()
         return
@@ -669,7 +677,8 @@ export class AIService {
         )
 
         // 使用工具管理器执行工具
-        const result = await toolManager.executeTool(call.function.name, args, onStream)
+        const currentAgent = this.getCurrentAgent()
+        const result = await toolManager.executeTool(call.function.name, args, onStream, currentAgent)
         toolResults.push(result)
 
         // 移除这里的addMessage调用，现在在saveToolCallResults中统一处理
@@ -955,7 +964,8 @@ export class AIService {
           console.log(`执行工具 ${call.function.name}:`, args)
 
           // 使用工具管理器执行工具
-          const result = await toolManager.executeTool(call.function.name, args)
+          const currentAgent = this.getCurrentAgent()
+          const result = await toolManager.executeTool(call.function.name, args, undefined, currentAgent)
 
           // 直接保存原始数据，不进行渲染
           this.addMessage('tool', result.data, call.id)

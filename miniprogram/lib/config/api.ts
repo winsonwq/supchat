@@ -33,8 +33,3 @@ export const API_CONFIG = {
 
 // 导出配置验证状态，供其他模块检查
 export const isConfigValid = validation.isValid
-
-export const SYSTEM_MESSAGE = {
-  role: 'system',
-  content: '你是一个有用的AI助手，请用简洁友好的方式回答用户的问题。'
-}

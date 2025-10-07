@@ -123,8 +123,8 @@ Page({
    */
   onTextareaChange(e: any) {
     const { field } = e.currentTarget.dataset
-    const { value } = e.detail.value
-    
+    const { value } = e.detail
+
     this.setData({
       [`form.${field}`]: value,
       [`errors.${field}`]: ''

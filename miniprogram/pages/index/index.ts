@@ -15,7 +15,7 @@ import { ChatSession } from '../../lib/types/chat-history'
 import { BaseComponent } from '../../lib/mcp/components/base-component.js'
 import { processMessageContent as processContentWithParser } from '../../lib/utils/content-parser.js'
 import { AIConfigStorage } from '../../lib/storage/ai-config-storage.js'
-import { AgentConfigStorage } from '../../lib/storage/agent-config-storage.js'
+import { AgentModeStorage } from '../../lib/storage/agent-mode-storage.js'
 import { AgentDefinition } from '../../lib/types/agent.js'
 
 import { ComponentManager } from '../../lib/mcp/components/component-manager.js'
@@ -95,6 +95,9 @@ Component({
 
       // 登录并引导完善资料
       this.ensureAuthAndProfile()
+
+      // 初始化Agent模式状态
+      this.initAgentModeState()
     },
 
     ready() {
@@ -181,6 +184,25 @@ Component({
         },
       )
       ;(this as any)._unsubUser = unsub
+    },
+
+    // 初始化Agent模式状态
+    initAgentModeState() {
+      const agentModeState = AgentModeStorage.getAgentModeState()
+      
+      // getCurrentAgent() 会自动从 AgentConfigStorage 获取最新配置
+      // 如果 agent 已被删除，会自动返回 null
+      const currentAgent = agentModeState.currentAgent
+      
+      this.setData({
+        isAgentMode: agentModeState.isAgentMode,
+        currentAgent: currentAgent
+      })
+      
+      if (agentModeState.isAgentMode && currentAgent) {
+        console.log('🤖 恢复 Agent 模式:', currentAgent.name)
+        this.configureAgentMcpTools(currentAgent)
+      }
     },
 
     // 订阅聊天数据
@@ -420,8 +442,7 @@ Component({
 
     // Agent 模式变化处理
     onAgentChange(e: WxEvent) {
-      const { agent, isAgentMode } = e.detail
-      console.log('Agent 模式变化:', { agent, isAgentMode })
+      const { agent, isAgentMode } = e.detail as { agent: AgentDefinition | null; isAgentMode: boolean }
       
       this.setData({
         currentAgent: agent,
@@ -429,30 +450,24 @@ Component({
       })
       
       if (isAgentMode && agent) {
-        console.log('进入Agent模式:', agent.name)
-        // 在Agent模式下，自动配置MCP工具
+        console.log('🤖 切换到 Agent:', agent.name)
         this.configureAgentMcpTools(agent)
       } else {
-        console.log('退出Agent模式')
-        // 退出Agent模式时，恢复默认MCP配置
+        console.log('🤖 退出 Agent 模式')
         this.restoreDefaultMcpConfig()
       }
     },
 
     // 配置Agent的MCP工具
     configureAgentMcpTools(agent: AgentDefinition) {
-      console.log('配置Agent MCP工具:', agent.mcpServers)
-      
       // 这里可以实现Agent模式下自动启用特定的MCP工具
-      // 目前先记录日志，后续可以扩展
-      agent.mcpServers.forEach(mcpServer => {
-        console.log('Agent MCP工具:', mcpServer.name)
-      })
+      if (agent.mcpServers.length > 0) {
+        console.log(`🔧 配置 ${agent.mcpServers.length} 个 MCP 工具`)
+      }
     },
 
     // 恢复默认MCP配置
     restoreDefaultMcpConfig() {
-      console.log('恢复默认MCP配置')
       // 这里可以实现退出Agent模式时恢复默认的MCP配置
     },
 
@@ -483,8 +498,8 @@ Component({
           this.handleStreamUpdate(streamContent)
 
         this.getAIService().setCurrentChatId(this.data.currentSessionId)
-
-        await this.getAIService().sendMessageStream(messageContent, onStream, this.data.currentAgent)
+        
+        await this.getAIService().sendMessageStream(messageContent, onStream)
       } catch (error) {
         console.error('发送消息失败:', error)
         wx.showToast({
@@ -645,10 +660,13 @@ Component({
               tool_calls: toolCalls,
               aiconfig,
             }),
-          )
+          ).catch((error) => {
+            console.error('保存助手消息失败:', error)
+          })
         }
 
-        this.loadMessageHistory(this.data.currentSessionId)
+        // 移除 loadMessageHistory 调用，因为消息已经在 UI 中正确显示
+        // 避免重复加载导致的性能问题和潜在的竞态条件
       }
     },
 

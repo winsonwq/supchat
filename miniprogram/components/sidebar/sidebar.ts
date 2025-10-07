@@ -49,6 +49,7 @@ Component({
 
   lifetimes: {
     attached() {
+      console.log('🔧 sidebar组件: attached 生命周期')
       const safeAreaData = getSafeArea()
       this.setData({
         s: {
@@ -69,6 +70,9 @@ Component({
   },
 
   observers: {
+    'isOpen': function(isOpen: boolean) {
+      console.log('🔧 sidebar组件: isOpen 属性变化为:', isOpen)
+    },
     'chatSessions': function(chatSessions: ChatSession[]) {
       // 按最新更新时间倒序排序
       const sorted = [...chatSessions].sort((a, b) => {
