@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "navigation-bar": "/components/navigation-bar/navigation-bar",
+    "form-input": "/components/form-input/form-input",
+    "svg-icon": "/components/svg-icon/svg-icon"
+  },
+  "navigationStyle": "custom"
+}

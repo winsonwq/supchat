@@ -29,6 +29,15 @@ Page({
   },
 
   /**
+   * AI 助手配置
+   */
+  onAgentSettings() {
+    wx.navigateTo({
+      url: '/pages/agent-list/agent-list'
+    })
+  },
+
+  /**
    * MCP Servers 设置
    */
   onMCPSettings() {

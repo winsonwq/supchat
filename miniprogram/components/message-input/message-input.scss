@@ -196,3 +196,71 @@
   text-align: center;
   color: #9ca3af;
 }
+
+/* Agent 列表 */
+.agent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.agent-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 16rpx;
+  border-bottom: 1rpx solid #f3f4f6;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.agent-item:hover {
+  background-color: #f9fafb;
+}
+
+.agent-item:active {
+  background-color: #f3f4f6;
+}
+
+.agent-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  flex: 1;
+}
+
+.agent-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #111827;
+}
+
+.agent-description {
+  font-size: 24rpx;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.agent-tools {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.agent-tools-text {
+  font-size: 22rpx;
+  color: #9ca3af;
+  background-color: #f3f4f6;
+  padding: 4rpx 8rpx;
+  border-radius: 8rpx;
+}
+
+.agent-radio {
+  margin-left: 16rpx;
+}
+
+.agent-empty {
+  padding: 32rpx 12rpx;
+  text-align: center;
+  color: #9ca3af;
+}

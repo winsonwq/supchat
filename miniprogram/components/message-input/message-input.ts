@@ -2,6 +2,8 @@
 import { WxEvent } from '../../lib/mcp/types'
 import { MCPConfigStorage } from '../../lib/storage/mcp-config-storage'
 import { AIConfigStorage } from '../../lib/storage/ai-config-storage'
+import { AgentConfigStorage } from '../../lib/storage/agent-config-storage'
+import { AgentDefinition } from '../../lib/types/agent'
 import getSafeArea from '../../lib/utils/safe-area'
 import wechatSI, { WechatSIOptions } from '../../lib/mcp/tools/wechat-si'
 
@@ -37,6 +39,12 @@ Component({
     // AI 配置相关状态
     aiConfigSheetVisible: false,
     aiConfigs: [] as any[],
+    // Agent 模式相关状态
+    agentSettingSheetVisible: false,
+    agentSheetVisible: false,
+    agents: [] as AgentDefinition[],
+    currentAgent: null as AgentDefinition | null,
+    isAgentMode: false, // 是否为Agent模式
     // 新增语音输入相关状态
     isVoiceMode: false, // 是否为语音输入模式
     isRecording: false, // 是否正在录音
@@ -69,6 +77,8 @@ Component({
       this.loadMcpConfigs()
       // 载入 AI 配置
       this.loadAiConfigs()
+      // 载入 Agent 配置
+      this.loadAgents()
       // 初始化录音管理器
       this.initRecorderManager()
       // 初始化微信同声传译插件
@@ -227,6 +237,54 @@ Component({
     loadAiConfigs() {
       const configs = AIConfigStorage.getAllConfigs()
       this.setData({ aiConfigs: configs })
+    },
+
+    // Agent 设置面板相关方法
+    onOpenAgentSettingSheet() {
+      this.setData({ agentSettingSheetVisible: true })
+    },
+    onCloseAgentSettingSheet() {
+      this.setData({ agentSettingSheetVisible: false })
+    },
+    loadAgents() {
+      const agents = AgentConfigStorage.getAllConfigs()
+      this.setData({ agents })
+    },
+    onOpenAgentSheet() {
+      this.setData({ agentSheetVisible: true })
+    },
+    onCloseAgentSheet() {
+      this.setData({ agentSheetVisible: false })
+    },
+    onToggleAgentMode(e: WxEvent) {
+      const enabled = (e.detail as any).value as boolean
+      if (enabled) {
+        // 若开启但尚未选择过 Agent，则默认选择第一个
+        const agent = this.data.currentAgent || this.data.agents[0] || null
+        if (!agent) {
+          wx.showToast({ title: '暂无可用的 Agent', icon: 'error' })
+          this.setData({ isAgentMode: false })
+          return
+        }
+        this.setData({ currentAgent: agent, isAgentMode: true })
+        this.triggerEvent('agentchange', { agent, isAgentMode: true })
+        wx.showToast({ title: `已开启 ${agent.name} 模式`, icon: 'success', duration: 1200 })
+      } else {
+        this.setData({ isAgentMode: false })
+        this.triggerEvent('agentchange', { agent: this.data.currentAgent, isAgentMode: false })
+        wx.showToast({ title: '已关闭 Agent 模式', icon: 'success', duration: 1200 })
+      }
+    },
+    onSelectAgent(e: WxEvent) {
+      const id = (e.currentTarget as any).dataset.id as string
+      if (!id) return
+      const agent = this.data.agents.find(a => a.id === id)
+      if (!agent) return
+      this.setData({ currentAgent: agent, agentSheetVisible: false })
+      if (this.data.isAgentMode) {
+        this.triggerEvent('agentchange', { agent, isAgentMode: true })
+      }
+      wx.showToast({ title: `已选择 ${agent.name}`, icon: 'success', duration: 1200 })
     },
     onSelectAiConfig(e: WxEvent) {
       console.log('🎯 onSelectAiConfig 被调用', e)

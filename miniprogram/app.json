@@ -1,7 +1,6 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/storage-test/storage-test",
     "pages/settings/settings",
     "pages/ai-settings/ai-settings",
     "pages/ai-config/ai-config",
@@ -10,6 +9,9 @@
     "pages/mcp-detail/mcp-detail",
     "pages/mcp-edit/mcp-edit",
     "pages/mcp-add/mcp-add",
+    "pages/agent-list/agent-list",
+    "pages/agent-edit/agent-edit",
+    "pages/agent-add/agent-add",
     "pages/state-test/state-test"
   ],
   "window": {

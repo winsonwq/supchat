@@ -63,14 +63,36 @@
       <view wx:if="{{ isVoiceMode }}" style="width:36px"></view>
     </view>
     
-    <!-- AI 配置按钮 + MCP 服务按钮 + 发送/停止按钮 -->
+    <!-- AI 配置按钮 + MCP 服务按钮 + 右侧设置/发送/停止按钮 -->
     <view class="w-full flex align-center justify-between">
       <view class="flex align-center gap-4">
+        <!-- 设置按钮（整行最左侧） -->
+        <button
+          class="btn btn-icon"
+          bindtap="onOpenAgentSettingSheet"
+          aria-label="打开设置"
+        >
+          <svg-icon name="settings" size="40"></svg-icon>
+        </button>
         <button class="btn btn-tiny" catchtap="onOpenAiConfigSheet">
           <svg-icon name="server" size="40"></svg-icon>
           AI 配置
         </button>
-        <button class="btn btn-tiny" catchtap="onOpenMcpSheet">
+        <!-- 仅在 Agent 模式下显示“选择 Agent”按钮 -->
+        <button 
+          wx:if="{{ isAgentMode }}"
+          class="btn btn-tiny" 
+          catchtap="onOpenAgentSheet"
+        >
+          <svg-icon name="chat" size="40"></svg-icon>
+          选择 Agent
+        </button>
+        <!-- 仅在非 Agent 模式下显示 MCP 按钮 -->
+        <button 
+          wx:if="{{ !isAgentMode }}"
+          class="btn btn-tiny" 
+          catchtap="onOpenMcpSheet"
+        >
           <svg-icon name="tool" size="40"></svg-icon>
           MCP
         </button>
@@ -120,6 +142,42 @@
       </block>
       <view class="ai-config-empty" wx:else>
         <text>暂无 AI 配置，可前往设置添加</text>
+      </view>
+    </view>
+  </bottom-sheet>
+
+  <!-- Agent 设置抽屉 -->
+  <bottom-sheet visible="{{ agentSettingSheetVisible }}" title="Agent 设置" bind:close="onCloseAgentSettingSheet">
+    <view class="agent-setting-list">
+      <view class="agent-setting-item flex items-center justify-between py-4">
+        <text class="text-base">开启 Agent 模式</text>
+        <switch checked="{{ isAgentMode }}" bindchange="onToggleAgentMode"></switch>
+      </view>
+    </view>
+  </bottom-sheet>
+
+  <!-- Agent 选择抽屉 -->
+  <bottom-sheet visible="{{ agentSheetVisible }}" title="选择 Agent" bind:close="onCloseAgentSheet">
+    <view class="agent-list">
+      <block wx:if="{{ agents.length > 0 }}">
+        <block wx:for="{{ agents }}" wx:key="id">
+          <view class="agent-item" bindtap="onSelectAgent" data-id="{{ item.id }}">
+            <view class="agent-meta">
+              <text class="agent-name">{{ item.name }}</text>
+              <text class="agent-description">{{ item.description || '暂无描述' }}</text>
+              <view class="agent-tools">
+                <text class="agent-tools-text">工具: {{ item.mcpServers.length }} 个</text>
+              </view>
+            </view>
+            <view class="agent-radio">
+              <radio checked="{{ currentAgent && currentAgent.id === item.id }}"></radio>
+            </view>
+          </view>
+        </block>
+      </block>
+      <view class="agent-empty flex flex-col justify-center min-h-32" wx:else>
+        <text class="block">暂无可用的 Agent</text>
+        <text class="block text-xs text-gray-400 mt-2">可前往设置页面创建 Agent</text>
       </view>
     </view>
   </bottom-sheet>

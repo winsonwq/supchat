@@ -1,0 +1,131 @@
+/* Agent 配置列表页面样式 */
+.page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.content {
+  padding: 32rpx;
+}
+
+.config-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.add-text {
+  font-size: 28rpx;
+  font-weight: 500;
+  margin-left: 8rpx;
+}
+
+.config-item {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.config-header {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.config-header:active {
+  background-color: #f8f9fa;
+}
+
+.config-info {
+  flex: 1;
+}
+
+.config-name {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 8rpx;
+}
+
+.name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.default-badge {
+  background-color: #07c160;
+  color: white;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  line-height: 1;
+}
+
+.config-desc {
+  font-size: 28rpx;
+  color: #666666;
+  margin-bottom: 16rpx;
+  line-height: 1.4;
+}
+
+.config-meta {
+  display: flex;
+  gap: 32rpx;
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.meta-item {
+  line-height: 1.4;
+}
+
+.config-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 40rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  color: #cccccc;
+  margin-bottom: 32rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #666666;
+  margin-bottom: 16rpx;
+}
+
+.empty-desc {
+  font-size: 28rpx;
+  color: #999999;
+}
+

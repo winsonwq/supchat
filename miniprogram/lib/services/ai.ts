@@ -1,4 +1,5 @@
 import { AIConfigStorage } from '../storage/ai-config-storage.js'
+import { AgentConfigStorage } from '../storage/agent-config-storage.js'
 import { ChatHistoryStorageFactory } from '../storage/chat-history-storage-interface.js'
 import { processToolCalls, buildToolCallResponse } from '../mcp/index.js'
 import { ToolManager } from './tool-manager.js'
@@ -117,14 +118,44 @@ export class AIService {
 
   // 获取所有消息（包括系统消息） - 用于 AI 通信
   getMessagesForAI(): AIMessageHistory {
+    // 获取当前Agent配置
+    const currentAgent = this.getCurrentAgent()
+    
+    // 根据Agent模式设置系统提示词
     const systemMessage: AIMessage = {
       role: 'system',
-      content:
-        '你是一个有用的AI助手，请用简洁友好的方式回答用户的问题。你可以使用可用的工具来帮助用户。当需要使用工具时，请直接调用相应的工具。',
+      content: currentAgent 
+        ? currentAgent.systemPrompt 
+        : '你是一个有用的AI助手，请用简洁友好的方式回答用户的问题。你可以使用可用的工具来帮助用户。当需要使用工具时，请直接调用相应的工具。',
     }
 
     const aiMessages = MessageConverter.renderToAIHistory(this.renderMessages)
     return [systemMessage, ...aiMessages]
+  }
+
+  // 获取当前Agent配置
+  getCurrentAgent() {
+    // 优先使用临时Agent（单次请求）
+    return this.getTempAgent()
+  }
+
+  // 设置当前Agent（供外部调用）
+  setCurrentAgent(agent: any) {
+    // 这里可以存储当前Agent信息
+    // 暂时先不实现，后续可以通过参数传递
+  }
+
+  // 临时存储当前Agent（用于单次请求）
+  private currentAgent: any = null
+
+  // 设置临时Agent（用于单次请求）
+  setTempAgent(agent: any) {
+    this.currentAgent = agent
+  }
+
+  // 获取临时Agent
+  getTempAgent() {
+    return this.currentAgent
   }
 
   // 设置当前聊天会话ID
@@ -309,6 +340,7 @@ export class AIService {
   async sendMessageStream(
     userMessage: string,
     onStream: StreamCallback,
+    agent?: any,
   ): Promise<void> {
     // 重置取消标记
     this.isCancelled = false
@@ -319,6 +351,11 @@ export class AIService {
       this.addMessage('assistant', errorMessage)
       onStream(createStreamContent(errorMessage, StreamContentType.ERROR, true))
       return
+    }
+
+    // 设置临时Agent（如果提供）
+    if (agent) {
+      this.setTempAgent(agent)
     }
 
     // 添加用户消息到历史

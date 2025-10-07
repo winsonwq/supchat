@@ -5,20 +5,13 @@
     "compileHotReLoad": true,
     "urlCheck": false
   },
-  "libVersion": "3.9.2",
+  "libVersion": "3.10.2",
   "condition": {
     "miniprogram": {
       "list": [
         {
           "name": "pages/state-test/state-test",
           "pathName": "pages/state-test/state-test",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/storage-test/storage-test",
-          "pathName": "pages/storage-test/storage-test",
           "query": "",
           "launchMode": "default",
           "scene": null

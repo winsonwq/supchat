@@ -16,6 +16,12 @@
       description="配置 AI 服务提供商和参数"
       bindtap="onAISettings"
     />
+    <settings-menu-item
+      icon="server"
+      title="AI 助手配置"
+      description="管理 AI 助手配置和 MCP 服务器"
+      bindtap="onAgentSettings"
+    />
   </settings-group>
 
   <!-- 功能设置分组 -->

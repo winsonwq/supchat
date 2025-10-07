@@ -1,0 +1,51 @@
+<!--agent-list.wxml-->
+<view class="page" style="padding-top: {{contentPaddingTop}}px;">
+  <navigation-bar title="AI 助手配置" show-back="{{true}}"></navigation-bar>
+  
+  <view class="content">
+    <!-- 配置列表 -->
+    <view class="config-list">
+      <view class="section-header">
+        <text class="section-title">AI 助手列表</text>
+        <button class="btn btn-primary btn-small btn-rounded" bindtap="onAddConfig">
+          <svg-icon name="plus" size="32" color="white"></svg-icon>
+          <text class="add-text">创建助手</text>
+        </button>
+      </view>
+      <block wx:for="{{agents}}" wx:key="id">
+        <view class="config-item">
+          <!-- 配置基本信息 -->
+          <view class="config-header">
+            <view class="config-info">
+              <view class="config-name">
+                <text class="name">{{item.name}}</text>
+                <view wx:if="{{item.isDefault}}" class="default-badge">默认</view>
+              </view>
+              <view wx:if="{{item.description}}" class="config-desc">{{item.description}}</view>
+              <view class="config-meta">
+                <text class="meta-item">MCP服务器: {{item.mcpServers.length}}个</text>
+                <text class="meta-item">创建时间: {{item.createdAtText}}</text>
+              </view>
+            </view>
+            <view class="config-actions">
+              <button 
+                class="btn btn-icon" 
+                bindtap="onEditConfig" 
+                data-id="{{item.id}}"
+              >
+                <svg-icon name="edit" size="32" color="gray"></svg-icon>
+              </button>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:if="{{agents.length === 0}}" class="empty-state">
+      <svg-icon name="server" size="48" class="empty-icon"></svg-icon>
+      <view class="empty-text">暂无AI助手配置</view>
+      <view class="empty-desc">点击右上角"创建助手"按钮添加第一个AI助手配置</view>
+    </view>
+  </view>
+</view>

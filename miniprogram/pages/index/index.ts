@@ -15,6 +15,8 @@ import { ChatSession } from '../../lib/types/chat-history'
 import { BaseComponent } from '../../lib/mcp/components/base-component.js'
 import { processMessageContent as processContentWithParser } from '../../lib/utils/content-parser.js'
 import { AIConfigStorage } from '../../lib/storage/ai-config-storage.js'
+import { AgentConfigStorage } from '../../lib/storage/agent-config-storage.js'
+import { AgentDefinition } from '../../lib/types/agent.js'
 
 import { ComponentManager } from '../../lib/mcp/components/component-manager.js'
 import { appDispatch, rootStore } from '../../lib/state/states/root'
@@ -69,6 +71,10 @@ Component({
       avatar: '',
     } as { name: string; avatar: string },
     cloudUserId: '' as string,
+    
+    // Agent 模式相关数据
+    currentAgent: null as AgentDefinition | null,
+    isAgentMode: false, // 是否为Agent模式
   },
 
   lifetimes: {
@@ -412,6 +418,44 @@ Component({
       // MCP 配置变化处理逻辑
     },
 
+    // Agent 模式变化处理
+    onAgentChange(e: WxEvent) {
+      const { agent, isAgentMode } = e.detail
+      console.log('Agent 模式变化:', { agent, isAgentMode })
+      
+      this.setData({
+        currentAgent: agent,
+        isAgentMode: isAgentMode
+      })
+      
+      if (isAgentMode && agent) {
+        console.log('进入Agent模式:', agent.name)
+        // 在Agent模式下，自动配置MCP工具
+        this.configureAgentMcpTools(agent)
+      } else {
+        console.log('退出Agent模式')
+        // 退出Agent模式时，恢复默认MCP配置
+        this.restoreDefaultMcpConfig()
+      }
+    },
+
+    // 配置Agent的MCP工具
+    configureAgentMcpTools(agent: AgentDefinition) {
+      console.log('配置Agent MCP工具:', agent.mcpServers)
+      
+      // 这里可以实现Agent模式下自动启用特定的MCP工具
+      // 目前先记录日志，后续可以扩展
+      agent.mcpServers.forEach(mcpServer => {
+        console.log('Agent MCP工具:', mcpServer.name)
+      })
+    },
+
+    // 恢复默认MCP配置
+    restoreDefaultMcpConfig() {
+      console.log('恢复默认MCP配置')
+      // 这里可以实现退出Agent模式时恢复默认的MCP配置
+    },
+
     // 发送消息（流式模式）
     async sendMessage(message?: string) {
       const messageContent = message || this.data.inputMessage.trim()
@@ -440,7 +484,7 @@ Component({
 
         this.getAIService().setCurrentChatId(this.data.currentSessionId)
 
-        await this.getAIService().sendMessageStream(messageContent, onStream)
+        await this.getAIService().sendMessageStream(messageContent, onStream, this.data.currentAgent)
       } catch (error) {
         console.error('发送消息失败:', error)
         wx.showToast({

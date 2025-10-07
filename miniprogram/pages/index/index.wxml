@@ -53,4 +53,5 @@
   bind:cancel="cancelRequest"
   bind:aiconfigchange="onAiConfigChange"
   bind:mcpchange="onMcpChange"
+  bind:agentchange="onAgentChange"
 ></message-input>

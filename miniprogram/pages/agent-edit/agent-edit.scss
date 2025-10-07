@@ -1,0 +1,190 @@
+/* Agent 编辑页面样式 */
+.page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 32rpx;
+  padding-bottom: 240rpx; /* 为底部按钮留出空间 */
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 48rpx;
+}
+
+.form-section {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 16rpx;
+}
+
+.section-desc {
+  font-size: 28rpx;
+  color: #666666;
+  margin-bottom: 32rpx;
+  line-height: 1.4;
+}
+
+.example-config {
+  margin-bottom: 32rpx;
+  padding: 24rpx;
+  background-color: #f8f9fa;
+  border-radius: 12rpx;
+  border: 1rpx solid #e9ecef;
+}
+
+.example-title {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 16rpx;
+}
+
+.example-content {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 24rpx;
+  color: #212529;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.textarea-container {
+  margin-top: 32rpx;
+}
+
+.textarea-label {
+  font-size: 28rpx;
+  color: #333333;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 240rpx;
+  padding: 24rpx;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  line-height: 1.5;
+  background-color: #fafafa;
+  box-sizing: border-box;
+}
+
+.textarea:focus {
+  border-color: #07c160;
+  background-color: white;
+}
+
+.json-textarea {
+  min-height: 400rpx;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 26rpx;
+}
+
+.textarea-counter {
+  text-align: right;
+  font-size: 24rpx;
+  color: #999999;
+  margin-top: 8rpx;
+}
+
+.error-text {
+  font-size: 24rpx;
+  color: #ff4757;
+  margin-top: 8rpx;
+}
+
+.config-info {
+  margin-top: 32rpx;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  font-size: 28rpx;
+  color: #666666;
+  min-width: 160rpx;
+}
+
+.info-value {
+  font-size: 28rpx;
+  color: #333333;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  flex: 1;
+}
+
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  padding: 32rpx;
+  border-top: 1rpx solid #f0f0f0;
+  z-index: 100;
+  display: flex;
+  gap: 24rpx;
+}
+
+.bottom-actions .btn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.bottom-actions .btn-secondary {
+  background-color: #f5f5f5;
+  color: #666666;
+}
+
+.bottom-actions .btn-secondary:active {
+  background-color: #e8e8e8;
+}
+
+.bottom-actions .btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.bottom-actions .btn-primary:active {
+  background-color: var(--color-primary-dark);
+  transform: scale(0.98);
+}
+
+.bottom-actions .btn-primary:disabled {
+  background-color: #cccccc;
+}
